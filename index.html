@@ -1,96 +1,101 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site en construction</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: #000000;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-        }
-        
-        nav {
-            background-color: #1a1a1a;
-            padding: 15px 30px;
-            border-radius: 15px;
-            margin: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo-placeholder {
-            width: 50px;
-            height: 50px;
-            background-color: #333333;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666666;
-            font-size: 12px;
-        }
-        
-        .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 150px);
-            text-align: center;
-            padding: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-        
-        p {
-            font-size: 1.2em;
-            color: #cccccc;
-            margin-bottom: 30px;
-        }
-        
-        #notify-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 40px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        #notify-button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GEEKSOFT — Site en construction</title>
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --muted:#666;
+      --max-width:1100px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--white); color:#111}
+    /* Barre du haut */
+    .topbar{
+      background:var(--black);
+      color:var(--white);
+      padding:12px 20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    }
+    .topbar .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      height:36px;
+      width:auto;
+      display:block;
+    }
+    .brand .title{
+      font-weight:700;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    /* Contenu centré */
+    .container{
+      min-height:calc(100vh - 60px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:40px 20px;
+    }
+    .card{
+      max-width:var(--max-width);
+      width:100%;
+    }
+    h1{
+      font-size:clamp(28px,4vw,56px);
+      margin:0 0 12px;
+    }
+    p.lead{
+      margin:0 0 18px;color:var(--muted);
+      font-size:18px;
+    }
+    /* Petit style pour bouton contact (non fonctionnel) */
+    .btn{
+      display:inline-block;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid #e8e8e8;
+    }
+    /* Footer discret */
+    footer{padding:18px 20px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Responsive */
+    @media (max-width:480px){
+      .logo{height:30px}
+      .topbar{padding:10px}
+    }
+  </style>
 </head>
 <body>
-    <nav>
-        <img src="GEEKSOFT.png" alt="Logo GeekSoft" class="logo-placeholder" />
-    </nav>
-
-    
-    <div class="content">
-        <h1>Site en construction</h1>
-        <p>Le site est actuellement en cours de développement.</p>
-        <button id="notify-button">Me prévenir de la sortie du site</button>
+  <!-- Remplacez "GEEKSOFT.png" par le fichier logo souhaité dans le même dossier que ce fichier HTML -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+      <div class="title">GEEKSOFT</div>
     </div>
-    
-    <!-- Script pour la gestion des notifications email -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="script.js"></script>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h1>Site en construction</h1>
+      <p class="lead">Nous travaillons sur quelque chose de génial. Revenez bientôt !</p>
+      <a class="btn" href="#">Contactez-nous</a>
+    </div>
+  </main>
+
+  <footer>
+    © <span id="year"></span> GEEKSOFT — Tous droits réservés
+  </footer>
+
+  <script>
+    // met l'année actuelle dans le footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
