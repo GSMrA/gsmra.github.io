@@ -117,4 +117,25 @@
   </footer>
 
   <script>
-    document.getElementById('year').textCont
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    async function sendEmail() {
+      const email = document.getElementById('userEmail').value;
+      if(!email) return alert("Veuillez entrer un email !");
+
+      try {
+        const response = await fetch('http://51.75.118.165:20122/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        document.getElementById('responseMsg').textContent = data.message;
+      } catch (err) {
+        document.getElementById('responseMsg').textContent = "Erreur lors de l'envoi.";
+      }
+    }
+  </script>
+</body>
+</html>
