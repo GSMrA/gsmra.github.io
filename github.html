@@ -4,11 +4,39 @@
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; url=https://github.com/GSMrA/gsmra.github.io">
     <title>Redirection vers GitHub</title>
+    <style>
+        /* HTML: <div class="loader"></div> */
+        .loader {
+            width: 32px;
+            aspect-ratio: 1;
+            --_g: no-repeat radial-gradient(farthest-side,#000 90%,#0000);
+            background: var(--_g), var(--_g), var(--_g), var(--_g);
+            background-size: 40% 40%;
+            animation: l46 1s infinite;
+        }
+        @keyframes l46 {
+            0%  {background-position: 0 0      ,100% 0,100% 100%,0 100%}
+            40%,
+            50% {background-position: 100% 100%,100% 0,0    0   ,0 100%}
+            90%,
+            100%{background-position: 100% 100%,0 100%,0    0   ,100% 0}
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+    </style>
     <script>
         window.location.href = "https://github.com/GSMrA/gsmra.github.io";
     </script>
 </head>
 <body>
+    <div class="loader"></div>
     <p>Redirection vers le dépôt GitHub...</p>
     <p>Si vous n'êtes pas redirigé automatiquement, <a href="https://github.com/GSMrA/gsmra.github.io">cliquez ici</a>.</p>
 </body>
