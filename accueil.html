@@ -2,10 +2,100 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=accueil.html">
-    <title>Redirection - Accueil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - GeekSoft</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+        nav {
+            background-color: #1a1a1a;
+            padding: 1rem;
+            border-bottom: 2px solid #333;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #4CAF50;
+        }
+        main {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        .intro {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #333;
+            margin-bottom: 2rem;
+        }
+        .intro p {
+            color: #ccc;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        .construction {
+            background-color: #1a1a1a;
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #333;
+        }
+        .construction h2 {
+            color: #ff9800;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .construction p {
+            color: #ccc;
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirection vers accueil.html...</p>
+    <nav>
+        <ul>
+            <li><a href="accueil.html">Accueil</a></li>
+            <li><a href="bots.html">Bots</a></li>
+            <li><a href="tournois.html">Tournois</a></li>
+            <li><a href="communaute.html">Communauté</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h1>Bienvenue sur GeekSoft</h1>
+        <div class="intro">
+            <p>GeekSoft est votre plateforme dédiée aux bots Discord, aux tournois gaming et à une communauté passionnée de joueurs. Découvrez nos services et rejoignez une aventure exceptionnelle dans l'univers du gaming.</p>
+        </div>
+        <div class="construction">
+            <h2>🚧 Nouveautés à venir très bientôt 🚧</h2>
+            <p>De nouvelles fonctionnalités et du contenu exclusif arrivent prochainement. Restez connectés !</p>
+        </div>
+    </main>
 </body>
 </html>
