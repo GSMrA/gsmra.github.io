@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <title>GeekSoft</title>
@@ -21,6 +21,43 @@
       background:var(--gray-bg);
       color:#fff;
     }
+    
+    /* === ANIMATIONS D'ENTRÉE === */
+    /* Animation pour la barre du haut : descend depuis le haut */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    
+    /* Animation pour le contenu principal : fade in + légère montée */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Animation pour le footer : fade in */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    /* === FIN ANIMATIONS D'ENTRÉE === */
+    
     .topbar{
       position:fixed;
       top:20px;
@@ -37,6 +74,8 @@
       width:90%;
       max-width:1300px;
       z-index:1000;
+      /* Application de l'animation slideDown */
+      animation: slideDown 0.8s ease-out;
     }
     .logo{
       height:70px;
@@ -60,32 +99,68 @@
       align-items:center;
       justify-content:center;
       text-align:center;
-      flex-direction:column;
-      padding:260px 20px 60px;
-    }
-    h1{
-      font-size:clamp(32px,5vw,56px);
-      margin:40px 0 12px;
-      color:var(--white);
-      text-shadow:0 0 10px var(--glow);
-      font-family:'Segoe UI', sans-serif;
-      font-weight:600;
-    }
-    p.lead{
       margin:0 0 18px;
       color:#ccc;
       font-size:20px;
       font-family:'Segoe UI', sans-serif;
+      /* Application de l'animation fadeInUp avec délai */
+      animation: fadeInUp 1s ease-out 0.3s both;
     }
     footer{
       padding:18px 20px;
       text-align:center;
       color:#888;
       font-size:13px;
+      /* Application de l'animation fadeIn avec délai */
+      animation: fadeIn 1s ease-out 0.6s both;
     }
     .contact-form input, .contact-form button{
       margin-top:10px;
     }
+    
+    /* === LOADER/SPINNER POUR L'ENVOI EMAIL === */
+    /* Overlay sombre qui couvre tout l'écran pendant le chargement */
+    .loading-overlay {
+      display: none; /* Caché par défaut */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .loading-overlay.active {
+      display: flex; /* Affiché quand la classe "active" est ajoutée */
+    }
+    
+    /* Spinner rotatif */
+    .spinner {
+      border: 8px solid rgba(255, 255, 255, 0.2);
+      border-top: 8px solid #fff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 18px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    /* === FIN LOADER === */
+    
     @media (max-width:480px){
       .logo{height:45px}
       .title{font-size:2rem;}
@@ -101,7 +176,6 @@
   <main class="container">
     <h1>Site en construction</h1>
     <p class="lead">Nous travaillons sur quelque chose de génial. Revenez bientôt !</p>
-
     <!-- Formulaire Contact -->
     <div class="contact-form" style="margin-top:40px;">
       <h2>Contactez-nous</h2>
@@ -113,23 +187,42 @@
   <footer>
     © <span id="year"></span> GEEKSOFT — Tous droits réservés - 1.0.1
   </footer>
+  
+  <!-- === OVERLAY DE CHARGEMENT === -->
+  <!-- Cet élément s'affiche pendant l'envoi de l'email -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Envoi en cours...</div>
+  </div>
+  <!-- === FIN OVERLAY === -->
+  
   <script>
+    // Met à jour l'année dans le footer
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Version Replit : remplace ici l'URL par TON endpoint
+    
+    // Fonction d'envoi d'email avec loader
     async function sendEmail() {
       const email = document.getElementById('userEmail').value;
       if(!email) return alert("Veuillez entrer un email !");
+      
+      // === AFFICHAGE DU LOADER === 
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.classList.add('active'); // Affiche le loader
+      
       try {
         const response = await fetch('http://127.0.0.1:20122', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
         });
         const data = await response.json();
         document.getElementById('responseMsg').textContent = data.message;
       } catch (err) {
         document.getElementById('responseMsg').textContent = "Erreur lors de l'envoi.";
+      } finally {
+        // === MASQUAGE DU LOADER === 
+        // On cache le loader après l'envoi (succès ou échec)
+        loadingOverlay.classList.remove('active');
       }
     }
   </script>
