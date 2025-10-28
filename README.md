@@ -32,7 +32,7 @@ Nous proposons des solutions orientées vers votre communauté Discord :
 
 **Site web :** [www.geeksoft.online](https://www.geeksoft.online)
 
-N'hésitez pas à nous [contacter](artemixtsb@gmail.com) pour discuter de votre projet !
+N'hésitez pas à nous [contacter]([artemixtsb@gmail.com](https://github.com/GSMrA/gsmra.github.io/blob/main/contact.md)) pour discuter de votre projet !
 
 ---
 
