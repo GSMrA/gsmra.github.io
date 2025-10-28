@@ -32,8 +32,7 @@ Nous proposons des solutions orientées vers votre communauté Discord :
 
 **Site web :** [www.geeksoft.online](https://www.geeksoft.online)
 
-N'hésitez pas à nous contacter pour discuter de votre projet !
+N'hésitez pas à nous [contacter](artemixtsb@gmail.com) pour discuter de votre projet !
 
 ---
 
-*GeekSoft - Votre partenaire pour une communauté Discord dynamique et engageante*
