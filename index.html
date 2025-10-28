@@ -87,23 +87,26 @@
       margin-left:auto;
       margin-right:auto;
     }
+    /* BTN discret = lien minimaliste */
     .contact-btn {
       display: inline-block;
-      padding: 14px 38px;
-      font-size: 20px;
-      background: #0084ff;
-      color: #fff;
+      font-size: 15px;
+      color: #aaa;
+      background: none;
       border: none;
-      border-radius: 10px;
-      font-weight: bold;
+      border-radius: 0;
+      font-weight: normal;
       cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 2px 14px #0084ff40;
-      margin-top: 8px;
-      transition: background 0.15s;
+      text-decoration: underline;
+      box-shadow: none;
+      margin-top: 4px;
+      padding: 0;
+      transition: color 0.14s;
     }
     .contact-btn:hover {
-      background: #005fcc;
+      color: #47c5ff;
+      background: none;
+      text-decoration: underline;
     }
     footer{
       padding:18px 20px;
@@ -128,7 +131,7 @@
   <main class="container">
     <h1>Site en construction</h1>
     <p class="lead">Nous travaillons sur quelque chose de génial. Revenez bientôt !</p>
-    <!-- BTN POUR PAGE CONTACT -->
+    <!-- BTN vers PAGE CONTACT, discret -->
     <a href="contact.html" class="contact-btn">Page Contact</a>
   </main>
   <footer>
