@@ -121,7 +121,7 @@
       const email = document.getElementById('userEmail').value;
       if(!email) return alert("Veuillez entrer un email !");
       try {
-        const response = await fetch('http://172.19.0.77:20122/api/email', {
+        const response = await fetch('http://10.0.4.200:20122', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })
