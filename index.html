@@ -133,10 +133,17 @@
     <a href="contact.html" class="contact-btn">Page Contact</a>
   </main>
   <footer>
-    © <span id="year"></span> GEEKSOFT — Tous droits réservés - v2.1.0
+    © <span id="year"></span> GEEKSOFT — Tous droits réservés - v2.1.1
   </footer>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+
+  <script>
+  fetch('https://devmra.pythonanywhere.com/visite')
+    .then(res => res.text())
+    .then(message => console.log(message));
+  </script>
+  
 </body>
 </html>
