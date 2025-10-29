@@ -1,149 +1,55 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <title>GeekSoft</title>
-  <link rel="icon" type="image/png" href="GEEKSOFT.png">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GeekSoft</title>
+  <link rel="icon" type="image/png" href="GEEKSOFT.png" />
   <style>
-    :root{
-      --black:#000;
-      --white:#fff;
-      --muted:#666;
-      --glow:#ffffff;
-      --gray-bg:#1e1e1e;
-      --max-width:1100px;
-    }
-    html,body{
-      height:100%;
-      margin:0;
-      font-family:'Arial Black', Impact, sans-serif;
-      background:var(--gray-bg);
-      color:#fff;
-    }
-    @keyframes slideDown {
-      from { opacity:0; transform:translateX(-50%) translateY(-100px);}
-      to   { opacity:1; transform:translateX(-50%) translateY(0);}
-    }
-    @keyframes fadeInUp {
-      from { opacity:0; transform:translateY(30px);}
-      to   { opacity:1; transform:translateY(0);}
-    }
-    @keyframes fadeIn {
-      from { opacity:0; }
-      to   { opacity:1; }
-    }
-    .topbar{
-      position:fixed;
-      top:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:var(--black);
-      color:var(--white);
-      padding:28px 40px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      border-radius:24px;
-      width:90%;
-      max-width:1300px;
-      z-index:1000;
-      animation: slideDown 0.8s ease-out;
-    }
-    .logo{
-      height:70px;
-      width:auto;
-      display:block;
-      filter:drop-shadow(0 0 15px var(--glow));
-    }
-    .title{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      font-weight:900;
-      font-size:3.5rem;
-      letter-spacing:3px;
-      text-transform:uppercase;
-      color:var(--white);
-      text-shadow:0 0 15px var(--glow), 0 0 30px var(--glow);
-    }
-    .container{
-      width:100%;
-      box-sizing:border-box;
-      padding-top: 140px;
-      margin:0 auto 18px;
-      color:#ccc;
-      font-size:20px;
-      font-family:'Segoe UI', sans-serif;
-      text-align:center;
-      animation: fadeInUp 1s ease-out 0.3s both;
-    }
-    .container > * {
-      margin-bottom:40px;
-      display:block;
-      width:100%;
-      max-width:650px;
-      margin-left:auto;
-      margin-right:auto;
-    }
-    .contact-btn {
-      display: inline-block;
-      font-size: 15px;
-      color: #aaa;
-      background: none;
-      border: none;
-      border-radius: 0;
-      font-weight: normal;
-      cursor: pointer;
-      text-decoration: underline;
-      box-shadow: none;
-      margin-top: 4px;
-      padding: 0;
-      transition: color 0.14s;
-    }
-    .contact-btn:hover {
-      color: #47c5ff;
-      background: none;
-      text-decoration: underline;
-    }
-    footer{
-      padding:18px 20px;
-      text-align:center;
-      color:#888;
-      font-size:13px;
-      animation: fadeIn 1s ease-out 0.6s both;
-    }
-    @media (max-width:480px){
-      .logo{height:45px}
-      .title{font-size:2rem;}
-      .topbar{padding:16px;width:95%;border-radius:16px;}
-      .container > * {max-width:98vw;}
-    }
+    :root{--black:#000;--white:#fff;--muted:#666;--glow:#ffffff;--gray-bg:#1e1e1e;--max-width:1100px}
+    html,body{height:100%;margin:0;font-family:'Arial Black', Impact, sans-serif;background:var(--gray-bg);color:#fff}
+    @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-100px)} to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    @keyframes fadeIn{from{opacity:0} to{opacity:1}}
+    .topbar{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--black);color:var(--white);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 0 30px var(--glow),0 8px 20px rgba(255,255,255,.2);border-radius:16px;width:90%;max-width:1300px;z-index:1000;animation:slideDown .8s ease-out;gap:16px}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .logo{height:48px;width:auto;display:block;filter:drop-shadow(0 0 15px var(--glow))}
+    .title{font-size:1.25rem;letter-spacing:.5px}
+    .spacer{flex:1}
+    .btn{display:inline-flex;align-items:center;text-decoration:none;border:1px solid #444;padding:8px 14px;border-radius:10px;font-weight:600;transition:all .2s ease}
+    .btn:focus{outline:2px solid #888;outline-offset:2px}
+    .btn-gray{background:#2b2b2b;color:#ddd}
+    .btn-gray:hover{background:#333;color:#fff;border-color:#555}
+    main{max-width:var(--max-width);margin:140px auto 80px;padding:0 20px}
+    .lead{color:#aaa}
+    footer{padding:18px 20px;text-align:center;color:#888;font-size:13px;animation:fadeIn 1s ease-out .6s both}
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
-    <div class="title">GEEKSOFT</div>
+  <header class="topbar" role="banner">
+    <div class="topbar-left">
+      <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+      <div class="title">GEEKSOFT</div>
+    </div>
+    <div class="spacer"></div>
+    <nav aria-label="Navigation principale">
+      <a class="btn btn-gray" href="sign-in.html">S'inscrire</a>
+    </nav>
   </header>
-  <main class="container">
+
+  <main class="container" role="main">
     <h1>Site en construction</h1>
     <p class="lead">Nous travaillons sur quelque chose de génial. Revenez bientôt !</p>
-    <a href="contact.html" class="contact-btn">Page Contact</a>
+    <a class="contact-btn" href="contact.html">Page Contact</a>
   </main>
+
   <footer>
     © <span id="year"></span> GeekSoft — Tous droits réservés - v2.1.2
   </footer>
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
 
   <script>
-  fetch('https://devmra.pythonanywhere.com/visite')
-    .then(res => res.text())
-    .then(message => console.log(message));
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Ping de visite (existant)
+    fetch('https://devmra.pythonanywhere.com/visite').then(res => res.text()).then(message => console.log(message));
   </script>
-  
 </body>
 </html>
