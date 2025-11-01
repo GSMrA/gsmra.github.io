@@ -29,9 +29,9 @@
         return;
       }
       fetch(`https://devmra.pythonanywhere.com/code?user=${encodeURIComponent(username)}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('result').textContent = `Un code a été envoyé pour ${username}.`;
+        .then(response => response.text())  // Récupérer la réponse en texte brut
+        .then(text => {
+          document.getElementById('result').textContent = text; // Affiche "Code généré: ..."
           document.getElementById('step1').style.display = 'none';
           document.getElementById('step2').style.display = 'block';
         })
