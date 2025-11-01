@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Discord</title>
+</head>
+<body>
+  <h2>Connexion Discord</h2>
+  
+  <div id="step1">
+    <label for="username">Nom d'utilisateur Discord :</label>
+    <input type="text" id="username" placeholder="Nom d'utilisateur#1234" />
+    <button onclick="requestCode()">Demander le code</button>
+  </div>
+  
+  <div id="step2" style="display:none;">
+    <label for="code">Entrez le code reçu :</label>
+    <input type="text" id="code" placeholder="Code" />
+    <button onclick="verifyCode()">Vérifier le code</button>
+  </div>
+  
+  <div id="result"></div>
+  
+  <script>
+    function requestCode() {
+      const username = document.getElementById('username').value.trim();
+      if (!username) {
+        alert('Veuillez entrer votre nom d\'utilisateur Discord');
+        return;
+      }
+      fetch(`https://devmra.pythonanywhere.com/code?user=${encodeURIComponent(username)}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('result').textContent = `Un code a été envoyé pour ${username}.`;
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Erreur lors de la demande du code.');
+        });
+    }
+    
+    function verifyCode() {
+      const username = document.getElementById('username').value.trim();
+      const code = document.getElementById('code').value.trim();
+      if (!code) {
+        alert('Veuillez entrer le code');
+        return;
+      }
+      fetch(`https://devmra.pythonanywhere.com/codeverif?code=${encodeURIComponent(code)}&user=${encodeURIComponent(username)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data === true || data === 'true') {
+            document.getElementById('result').textContent = 'Code vérifié avec succès. Connexion acceptée.';
+          } else {
+            document.getElementById('result').textContent = 'Code invalide. Veuillez réessayer.';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Erreur lors de la vérification du code.');
+        });
+    }
+  </script>
+</body>
+</html>
