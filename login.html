@@ -9,7 +9,7 @@
   
   <div id="step1">
     <label for="username">Nom d'utilisateur Discord :</label>
-    <input type="text" id="username" placeholder="Nom d'utilisateur" />
+    <input type="text" id="username" placeholder="Nom d'utilisateur#1234" />
     <button onclick="requestCode()">Demander le code</button>
   </div>
   
@@ -31,13 +31,12 @@
       fetch(`https://devmra.pythonanywhere.com/code?user=${encodeURIComponent(username)}`)
         .then(response => response.text())
         .then(text => {
-          document.getElementById('result').textContent = text; // Affiche "Code généré: ..."
+          document.getElementById('result').textContent = text;
           document.getElementById('step1').style.display = 'none';
           document.getElementById('step2').style.display = 'block';
         })
         .catch(err => {
           console.error(err);
-          // Afficher un avertissement mais continuer
           document.getElementById('result').textContent = "Attention : si vous entrez un NA incorrect ou si vous n'êtes pas dans le Discord GeekSoft, la validation du code échouera.";
           document.getElementById('step1').style.display = 'none';
           document.getElementById('step2').style.display = 'block';
@@ -52,12 +51,15 @@
         return;
       }
       fetch(`https://devmra.pythonanywhere.com/codeverif?code=${encodeURIComponent(code)}&user=${encodeURIComponent(username)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data === true || data === 'true') {
+        .then(response => response.text())
+        .then(text => {
+          if (text.toLowerCase() === 'true') {
             document.getElementById('result').textContent = 'Code vérifié avec succès. Connexion acceptée.';
-          } else {
+          } else if (text.toLowerCase() === 'false') {
             document.getElementById('result').textContent = 'Code invalide. Veuillez réessayer.';
+          } else {
+            document.getElementById('result').textContent = 'Erreur : réponse inattendue du serveur.';
+            console.error('Réponse inattendue:', text);
           }
         })
         .catch(err => {
