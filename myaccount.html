@@ -170,26 +170,47 @@
     <a class="back-link" href="index.html">Retour à l'accueil</a>
   </div>
   <script>
-    // Remplace dynamiquement les infos utilisateur ici !
-    // Par exemple (fake) : après login, récupérer l'ID, pseudo, avatar, infos concernant le serveur.
-    // Tu pourras par la suite remplacer ces affectations JS par des requêtes API ou login dynamique.
-    const discordExample = {
-      username: "Artemix_89#5678",
-      id: "85395723984753232",
-      avatar: "https://cdn.discordapp.com/avatars/85395723984753232/a_32bb21c3f5ceab7fd1fac9a582e691b3.png",
-      creation: "12/07/2020",
-      role: "Admin",
-      guildJoin: "11/01/2023",
-      activity: "32 messages ce mois-ci"
-    };
-    document.getElementById('username').textContent = discordExample.username;
-    document.getElementById('discordid').textContent = discordExample.id;
-    document.getElementById('avatar').src = discordExample.avatar;
-    document.getElementById('creationdate').textContent = discordExample.creation;
-    document.getElementById('role').textContent = discordExample.role;
-    document.getElementById('joindate').textContent = discordExample.guildJoin;
-    document.getElementById('activity').textContent = discordExample.activity;
-    // Ajoute ici d'autres infos selon besoin et API
+    // Fonction utilitaire pour extraire les paramètres URL
+    function getParameterByName(name) {
+      name = name.replace(/[\\[\\]]/g, "\\\\$&");
+      const url = window.location.href;
+      const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\\+/g, " "));
+    }
+
+    const usernameToQuery = getParameterByName('user');
+    if (!usernameToQuery) {
+      alert("Aucun nom d'utilisateur fourni en paramètre.");
+    } else {
+      // Construire l'URL de l'API Flask (adaptée à ton URL Replit publique)
+      const apiURL = `https://84d0c0cc-e56b-43d5-b6ad-7a550cf6d811-00-yuo4uk60khmn.picard.replit.dev/api/userinfo?user=${encodeURIComponent(usernameToQuery)}`;
+
+      fetch(apiURL)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert("Erreur API: " + data.error);
+            return;
+          }
+          // Mettre à jour les éléments du DOM
+          document.getElementById('username').textContent = data.username;
+          document.getElementById('discordid').textContent = data.id;
+          document.getElementById('avatar').src = data.avatar_url || "https://cdn.discordapp.com/embed/avatars/1.png";
+          // Exemple, la date de création n'est pas dans la réponse, donc texte fixe
+          document.getElementById('creationdate').textContent = "(Date non disponible)";
+          document.getElementById('role').textContent = data.roles.length > 0 ? data.roles.join(", ") : "Membre";
+          document.getElementById('joindate').textContent = data.joined_at ? new Date(data.joined_at).toLocaleDateString() : "Non disponible";
+          document.getElementById('activity').textContent = "(À implémenter)";
+          document.getElementById('other').textContent = "(Autres stats à venir)";
+        })
+        .catch(err => {
+          alert("Erreur lors de la récupération des données.");
+          console.error(err);
+        });
+    }
   </script>
 </body>
 </html>
