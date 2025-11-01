@@ -186,7 +186,7 @@
       alert("Aucun nom d'utilisateur fourni en paramètre.");
     } else {
       // Construire l'URL de l'API Flask (adaptée à ton URL Replit publique)
-      const apiURL = `https://84d0c0cc-e56b-43d5-b6ad-7a550cf6d811-00-yuo4uk60khmn.picard.replit.dev/api/userinfo?user=${encodeURIComponent(usernameToQuery)}`;
+      const apiURL = `https://84d0c0cc-e56b-43d5-b6ad-7a550cf6d811-00-yuo4uk60khmn.picard.replit.dev:8080/ueserinfo?user=${encodeURIComponent(usernameToQuery)}`;
 
       fetch(apiURL)
         .then(response => response.json())
