@@ -194,7 +194,7 @@
       fetch(`https://devmra.pythonanywhere.com/code?user=${encodeURIComponent(username)}`)
         .then(response => response.text())
         .then(() => {
-          document.getElementById('result').textContent = "Un code vient d'être généré et envoyé dans vos DMs Discord. Vérifiez vos messages privés.";
+          document.getElementById('result').textContent = "Un code vient d'être généré et envoyé dans vos DMs Discord. Vérifiez vos messages privés. Il ce peut qu'il y ait des erreurs, réesayez si cela ne marche pas.";
           document.getElementById('step1').style.display = 'none';
           document.getElementById('step2').style.display = 'block';
         })
