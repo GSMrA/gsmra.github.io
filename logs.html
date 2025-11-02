@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Logs - GeekSoft</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="GEEKSOFT.png" />
+  <style>
+    :root {
+      --black: #000;
+      --white: #fff;
+      --muted: #666;
+      --glow: #ffffff;
+      --gray-bg: #1e1e1e;
+      --max-width: 1100px;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Arial Black', Impact, sans-serif;
+      background: var(--gray-bg);
+      color: var(--white);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-100px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--black);
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      width: 90%;
+      max-width: 1300px;
+      z-index: 1000;
+      animation: slideDown 0.8s cubic-bezier(.44, 1.3, .44, 1) forwards;
+    }
+    .logo {
+      height: 70px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 0 15px var(--glow));
+    }
+    .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 3.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+    }
+    main {
+      margin-top: 150px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #242424;
+      border-radius: 16px;
+      box-shadow: 0 6px 30px #000a;
+      padding: 24px;
+      animation: fadeInUp 1s cubic-bezier(.44, 1.3, .44, 1) both;
+      font-size: 1rem;
+      line-height: 1.4em;
+      white-space: pre-wrap;
+      font-family: monospace, monospace;
+      color: #47c5ff;
+      overflow-x: auto;
+      max-height: 80vh;
+    }
+    a.back-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: #888;
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+    a.back-link:hover {
+      color: #47c5ff;
+      text-decoration: underline;
+    }
+    @media (max-width: 480px) {
+      .logo { height: 45px; }
+      .title { font-size: 2rem; }
+      .topbar { padding: 16px; width: 95%; border-radius: 16px; }
+      main { max-width: 95vw; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+    <div class="title">GEEKSOFT - Logs</div>
+  </header>
+  <main id="logs-content">Chargement des logs...</main>
+  <a href="panel.html" class="back-link">← Retour au panel</a>
+
+  <script>
+    async function loadLogs() {
+      try {
+        const mdp = "123456789"; // mot de passe pour la requête
+        const response = await fetch(`https://devmra.pythonanywhere.com/readfile?filename=LOGS.txt&mdp=${encodeURIComponent(mdp)}`);
+        if (!response.ok) throw new Error("Erreur lors de la récupération des logs");
+        const text = await response.text();
+        document.getElementById("logs-content").textContent = text || "[Fichier vide]";
+      } catch (e) {
+        document.getElementById("logs-content").textContent = "❌ " + e.message;
+      }
+    }
+
+    loadLogs();
+  </script>
+</body>
+</html>
