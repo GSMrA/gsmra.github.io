@@ -54,10 +54,10 @@
     label {font-size:1.05rem;display:block;text-align:left;margin:16px 0 7px 0;}
     input, textarea {width:100%;font-size:1rem;padding:7px 10px;margin-bottom:12px;
       border-radius:7px;border:1px solid #454545;background:#151515;color:#fff;}
-    button {background:#47c5ff;color:#fff;font-weight:bold;padding:12px 30px;
+    button, .error-button {background:#47c5ff;color:#fff;font-weight:bold;padding:12px 30px;
       border:none;border-radius:10px;cursor:pointer;font-size:1.2rem;margin-top:4px;
       box-shadow:0 2px 8px #113d5e;}
-    button:hover {background:#0084ff;}
+    button:hover, .error-button:hover {background:#0084ff;}
     .loader {
       width:32px;aspect-ratio:1;
       --_g:no-repeat radial-gradient(farthest-side,#000 90%,#0000);
@@ -87,7 +87,7 @@
   <div class="title">GEEKSOFT</div>
 </header>
 <div class="bot-panel">
-  <h1>Panel Discord Bot</h1>
+  <h1>Envoyer un message depuis le bot</h1>
   <form id="panel-form">
     <label for="idserveur">ID Serveur Discord</label>
     <input type="text" id="idserveur" required>
@@ -117,7 +117,7 @@ document.getElementById('panel-form').onsubmit = async function(e){
   const nomdufichier = 'file_' + Math.random().toString(36).substring(2, 10) + '.txt';
 
   try {
-    // 1. Écrit les infos nécessaires dans commands.txt
+    // 1. Écrire dans commands.txt
     const writeRes = await fetch('https://devmra.pythonanywhere.com/writefile', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -129,7 +129,7 @@ document.getElementById('panel-form').onsubmit = async function(e){
     });
     if (!writeRes.ok) throw new Error('Erreur écriture commande.');
 
-    // 2. Crée le fichier aléatoire
+    // 2. Créer fichier
     const createRes = await fetch('https://devmra.pythonanywhere.com/createfile', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -137,7 +137,7 @@ document.getElementById('panel-form').onsubmit = async function(e){
     });
     if (!createRes.ok) throw new Error('Erreur création fichier.');
     
-    // 3. Écrit le message dedans
+    // 3. Écrire message
     const msgRes = await fetch('https://devmra.pythonanywhere.com/writefile', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -149,29 +149,31 @@ document.getElementById('panel-form').onsubmit = async function(e){
     });
     if (!msgRes.ok) throw new Error('Erreur écriture message bot.');
 
-    // 4. Attendre (poll) que commands.txt soit vidé (confirmation serveur)
-    let isCleared = false, maxTry=20, i=0;
-    while(!isCleared && i<maxTry){
-      await new Promise(r=>setTimeout(r, 900));
-      i++;
-      const readRes = await fetch(`https://devmra.pythonanywhere.com/readfile?filename=commands.txt&mdp=${encodeURIComponent(mdp)}`);
-      if (!readRes.ok) throw new Error('Problème check commande (read).');
-      const txt = await readRes.text();
-      if(!txt.trim()) isCleared=true;
-    }
+    // 4. Attendre 11 secondes
+    await new Promise(r => setTimeout(r, 11000));
+
+    // 5. Vérifier si commands.txt est vide
+    const readRes = await fetch(`https://devmra.pythonanywhere.com/readfile?filename=commands.txt&mdp=${encodeURIComponent(mdp)}`);
+    if (!readRes.ok) throw new Error('Erreur lecture commande.');
+
+    const txt = await readRes.text();
 
     loader.style.display = 'none';
-    if(isCleared)
-      result.textContent = '✅ Message envoyé avec succès et commande traitée !';
-    else
-      result.textContent = '⚠️ Commande non confirmée côté serveur (timeout)';
-    result.style.color = isCleared ? '#47c5ff' : '#ff7b00';
-  } catch (err){
+
+    if(!txt.trim()){
+      result.style.color = '#47c5ff';
+      result.innerHTML = '✅ Message envoyé avec succès, tout est OK.';
+    } else {
+      result.style.color = '#ff5847';
+      result.innerHTML = `❌ Erreur : commande non traitée.<br><button class="error-button" onclick="window.location.href='logs.html'">Voir les logs</button>`;
+    }
+
+  } catch (err) {
     loader.style.display = 'none';
-    result.textContent = '❌ ' + err.message;
     result.style.color = '#ff5847';
+    result.textContent = '❌ ' + err.message;
   }
-};
+}
 </script>
 </body>
 </html>
