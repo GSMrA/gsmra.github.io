@@ -87,7 +87,7 @@
   <div class="title">GEEKSOFT</div>
 </header>
 <div class="bot-panel">
-  <h1>Envoyer un message depuis le bot</h1>
+  <h1>Panel Discord Bot</h1>
   <form id="panel-form">
     <label for="idserveur">ID Serveur Discord</label>
     <input type="text" id="idserveur" required>
@@ -160,7 +160,7 @@ document.getElementById('panel-form').onsubmit = async function(e){
 
     loader.style.display = 'none';
 
-    if(!txt.trim()){
+    if (txt.trim() === "") {
       result.style.color = '#47c5ff';
       result.innerHTML = '✅ Message envoyé avec succès, tout est OK.';
     } else {
