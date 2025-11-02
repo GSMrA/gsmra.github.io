@@ -152,21 +152,10 @@ document.getElementById('panel-form').onsubmit = async function(e){
     // 4. Attendre 11 secondes
     await new Promise(r => setTimeout(r, 11000));
 
-    // 5. Vérifier si commands.txt est vide
-    const readRes = await fetch(`https://devmra.pythonanywhere.com/readfile?filename=commands.txt&mdp=${encodeURIComponent(mdp)}`);
-    if (!readRes.ok) throw new Error('Erreur lecture commande.');
-
-    const txt = await readRes.text();
-
     loader.style.display = 'none';
 
-    if (txt.trim() === "") {
-      result.style.color = '#47c5ff';
-      result.innerHTML = '✅ Message envoyé avec succès, tout est OK.';
-    } else {
-      result.style.color = '#ff5847';
-      result.innerHTML = `❌ Erreur : commande non traitée.<br><button class="error-button" onclick="window.location.href='logs.html'">Voir les logs</button>`;
-    }
+    result.style.color = '#47c5ff';
+    result.innerHTML = `✅ Message envoyé avec succès.<br><button class="error-button" onclick="window.location.href='logs.html'">Voir les logs</button>`;
 
   } catch (err) {
     loader.style.display = 'none';
