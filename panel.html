@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <title>Panel Bot Discord - GeekSoft</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --muted:#666;
+      --glow:#ffffff;
+      --gray-bg:#1e1e1e;
+      --max-width:1100px;
+    }
+    html,body{
+      height:100%; margin:0;
+      font-family:'Arial Black', Impact, sans-serif;
+      background:var(--gray-bg); color:#fff;
+    }
+    @keyframes slideDown {
+      from { opacity:0; transform:translateX(-50%) translateY(-100px);}
+      to   { opacity:1; transform:translateX(-50%) translateY(0);}
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(30px);}
+      to   { opacity:1; transform:translateY(0);}
+    }
+    @keyframes fadeIn {
+      from { opacity:0; }
+      to   { opacity:1; }
+    }
+    .topbar{position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:var(--black); color:var(--white);
+      padding:28px 40px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 0 30px var(--glow),0 8px 20px rgba(255,255,255,0.2);
+      border-radius:24px; width:90%;max-width:1300px;z-index:1000;
+      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
+    }
+    .logo{height:70px;width:auto;display:block;
+      filter:drop-shadow(0 0 15px var(--glow));
+    }
+    .title{position:absolute;left:50%;transform:translateX(-50%);
+      font-weight:900;font-size:3.5rem;letter-spacing:3px;
+      text-transform:uppercase;color:var(--white);
+      text-shadow:0 0 15px var(--glow),0 0 30px var(--glow);
+    }
+    .bot-panel{margin-top:170px;max-width:470px;padding:38px 26px 32px 26px;
+      background:#242424;border-radius:16px;
+      box-shadow:0 6px 30px #000a;text-align:center;margin-left:auto;margin-right:auto;
+      animation:fadeInUp 1s cubic-bezier(.44,1.3,.44,1) 0.2s both;
+    }
+    label {font-size:1.05rem;display:block;text-align:left;margin:16px 0 7px 0;}
+    input, textarea {width:100%;font-size:1rem;padding:7px 10px;margin-bottom:12px;
+      border-radius:7px;border:1px solid #454545;background:#151515;color:#fff;}
+    button {background:#47c5ff;color:#fff;font-weight:bold;padding:12px 30px;
+      border:none;border-radius:10px;cursor:pointer;font-size:1.2rem;margin-top:4px;
+      box-shadow:0 2px 8px #113d5e;}
+    button:hover {background:#0084ff;}
+    .loader {
+      width:32px;aspect-ratio:1;
+      --_g:no-repeat radial-gradient(farthest-side,#000 90%,#0000);
+      background:var(--_g),var(--_g),var(--_g),var(--_g);
+      background-size:40% 40%;
+      animation:l46 1s infinite;
+      margin:18px auto;
+      display:none;
+    }
+    @keyframes l46 {
+      0%{background-position:0 0,100% 0,100% 100%,0 100%}
+      40%,50%{background-position:100% 100%,100% 0,0 0,0 100%}
+      90%,100%{background-position:100% 100%,0 100%,0 0,100% 0}
+    }
+    .msg_result{margin-top:16px;}
+    @media (max-width:480px){
+      .logo{height:45px}
+      .title{font-size:2rem;}
+      .topbar{padding:16px;width:95%;border-radius:16px;}
+      .bot-panel{max-width:98vw;}
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+  <div class="title">GEEKSOFT</div>
+</header>
+<div class="bot-panel">
+  <h1>Panel Discord Bot</h1>
+  <form id="panel-form">
+    <label for="idserveur">ID Serveur Discord</label>
+    <input type="text" id="idserveur" required>
+    <label for="idsalon">ID Salon Discord</label>
+    <input type="text" id="idsalon" required>
+    <label for="mdp">Mot de passe</label>
+    <input type="password" id="mdp" required>
+    <label for="msgbot">Message à envoyer</label>
+    <textarea id="msgbot" rows="2" required></textarea>
+    <button type="submit">Envoyer le message</button>
+  </form>
+  <div class="loader" id="wait-loader"></div>
+  <div class="msg_result" id="messageResult"></div>
+</div>
+<script>
+document.getElementById('panel-form').onsubmit = async function(e){
+  e.preventDefault();
+  const idserveur = document.getElementById('idserveur').value;
+  const idsalon = document.getElementById('idsalon').value;
+  const mdp = document.getElementById('mdp').value;
+  const msgbot = document.getElementById('msgbot').value;
+  const loader = document.getElementById('wait-loader');
+  const result = document.getElementById('messageResult');
+  loader.style.display = 'block';
+  result.textContent = '';
 
+  const nomdufichier = 'file_' + Math.random().toString(36).substring(2, 10) + '.txt';
+
+  try {
+    // 1. Écrit les infos nécessaires dans commands.txt
+    const writeRes = await fetch('https://devmra.pythonanywhere.com/writefile', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        filename:'commands.txt',
+        mdp:mdp,
+        content:`${nomdufichier.replace('.txt','')},${idserveur},${idsalon}`
+      })
+    });
+    if (!writeRes.ok) throw new Error('Erreur écriture commande.');
+
+    // 2. Crée le fichier aléatoire
+    const createRes = await fetch('https://devmra.pythonanywhere.com/createfile', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filename:nomdufichier, mdp:mdp})
+    });
+    if (!createRes.ok) throw new Error('Erreur création fichier.');
+    
+    // 3. Écrit le message dedans
+    const msgRes = await fetch('https://devmra.pythonanywhere.com/writefile', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        filename:nomdufichier,
+        mdp:mdp,
+        content:msgbot
+      })
+    });
+    if (!msgRes.ok) throw new Error('Erreur écriture message bot.');
+
+    // 4. Attendre (poll) que commands.txt soit vidé (confirmation serveur)
+    let isCleared = false, maxTry=20, i=0;
+    while(!isCleared && i<maxTry){
+      await new Promise(r=>setTimeout(r, 900));
+      i++;
+      const readRes = await fetch(`https://devmra.pythonanywhere.com/readfile?filename=commands.txt&mdp=${encodeURIComponent(mdp)}`);
+      if (!readRes.ok) throw new Error('Problème check commande (read).');
+      const txt = await readRes.text();
+      if(!txt.trim()) isCleared=true;
+    }
+
+    loader.style.display = 'none';
+    if(isCleared)
+      result.textContent = '✅ Message envoyé avec succès et commande traitée !';
+    else
+      result.textContent = '⚠️ Commande non confirmée côté serveur (timeout)';
+    result.style.color = isCleared ? '#47c5ff' : '#ff7b00';
+  } catch (err){
+    loader.style.display = 'none';
+    result.textContent = '❌ ' + err.message;
+    result.style.color = '#ff5847';
+  }
+};
+</script>
+</body>
+</html>
