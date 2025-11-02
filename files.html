@@ -12,11 +12,12 @@
       --muted: #666;
       --glow: #ffffff;
       --gray-bg: #1e1e1e;
-      --max-width: 1100px;
+      --max-width: 2000px;
     }
     html, body {
-      margin: 0; padding: 20px;
-      height: 100%;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
       font-family: 'Arial Black', Impact, sans-serif;
       background: var(--gray-bg);
       color: var(--white);
@@ -38,11 +39,11 @@
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255, 255, 255, 0.2);
-      border-radius: 24px;
-      width: 90%;
-      max-width: 1300px;
+      border-radius: 26px;
+      width: 98vw;
+      max-width: var(--max-width);
       z-index: 1000;
-      animation: slideDown 0.8s cubic-bezier(.44, 1.3, .44, 1) forwards;
+      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
     }
     .logo {
       height: 70px;
@@ -62,26 +63,28 @@
       text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
     }
     main {
-      margin-top: 170px;
-      max-width: 1000px;
+      margin-top: 120px;
+      width: 98vw;
+      max-width: var(--max-width);
       margin-left: auto;
       margin-right: auto;
       background: #242424;
-      border-radius: 16px;
+      border-radius: 22px;
       box-shadow: 0 6px 30px #000a;
-      padding: 24px;
+      padding: 2.5vw 2vw;
       font-size: 1rem;
       line-height: 1.4em;
       color: #47c5ff;
-      max-height: 75vh;
+      min-height: 65vh;
+      max-height: 78vh;
       overflow-y: auto;
       display: flex;
-      gap: 20px;
+      gap: 2vw;
       flex-wrap: wrap;
-      animation: fadeInUp 1s cubic-bezier(.44, 1.3, .44, 1) both;
+      animation: fadeInUp 1s cubic-bezier(.44,1.3,.44,1) both;
     }
     #file-list {
-      flex-basis: 200px;
+      flex-basis: 220px;
       border-right: 2px solid #3a3a3a;
       padding-right: 10px;
     }
@@ -106,12 +109,14 @@
     #file-content {
       flex-grow: 1;
       background: #1b1b1b;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 18px;
       overflow-x: auto;
       white-space: pre-wrap;
       font-family: monospace, monospace;
-      max-height: 75vh;
+      color: #47c5ff;
+      min-width: 320px;
+      max-height: 68vh;
       box-shadow: inset 0 0 8px #000a;
     }
     a.back-link {
@@ -143,8 +148,19 @@
       background: #0084ff;
     }
     @media (max-width: 900px) {
+      .topbar {
+        width: 100vw;
+        border-radius: 16px;
+        left: 0;
+        transform: none;
+        max-width: 100vw;
+      }
       main {
+        max-width: 99vw;
+        width: 99vw;
+        padding: 10px 4vw;
         flex-direction: column;
+        min-height: 60vh;
         max-height: none;
       }
       #file-list {
@@ -152,10 +168,13 @@
         border-bottom: 2px solid #3a3a3a;
         padding-right: 0;
         padding-bottom: 10px;
-        max-height: 150px;
+        max-height: 195px;
       }
       #file-content {
-        max-height: 400px;
+        max-height: 40vh;
+        min-width: 140px;
+        padding: 10px;
+        font-size: 95%;
       }
     }
   </style>
@@ -250,7 +269,6 @@
     }
 
     async function selectFile(filename, liElem) {
-      // Deselect all
       Array.from(filesUl.children).forEach(li => li.classList.remove("selected"));
       liElem.classList.add("selected");
       fileContent.textContent = "Chargement du fichier...";
