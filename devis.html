@@ -23,29 +23,25 @@
     .title{font-weight:700;font-size:2rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-main);text-shadow:0 0 15px rgba(255,255,255,0.6);margin:0}
     .spacer{height:120px;}
 
-    /* conteneur principal */
     .card { background:var(--card-bg); border-radius:20px; padding:30px; width:90%; max-width:900px; box-shadow:var(--shadow); margin-bottom:60px; overflow:hidden; position:relative; }
 
-    /* Stage avec 2 panels */
     .stage { display:flex; width:200%; transition:transform .6s cubic-bezier(.22,.9,.3,1); }
     .panel { width:50%; box-sizing:border-box; padding:20px 30px; }
 
-    /* Formulaire */
     form .row{display:flex;gap:12px;margin-bottom:12px}
     label{display:block;font-size:0.9rem;margin-bottom:6px;color:var(--muted)}
     input[type="text"],input[type="email"],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:#0f0f0f;color:var(--text-main)}
     textarea{min-height:90px;resize:vertical}
     .btn{display:inline-block;padding:12px 18px;border-radius:12px;background:var(--accent);color:#000;font-weight:600;border:none;cursor:pointer}
+    .btn-secondary{background:#555;color:#fff;}
     .muted{color:var(--muted);font-size:0.9rem;margin-top:8px}
 
-    /* Paiement */
     .price{font-size:1.6rem;font-weight:500;margin:10px 0 25px 0;color:var(--text-main)}
     .paypal-area{max-width:360px;margin:0 auto}
 
-    /* Confirmation */
     .confirm{padding:20px;text-align:center}
 
-    /* Loader animé */
+    /* Loader */
     .loader {
       width: 35px;
       aspect-ratio: 1;
@@ -60,7 +56,6 @@
       margin: auto;
     }
     @keyframes l38 { 100% {background-position: 100% 0,100% 100%,0 100%,0 0} }
-
     .loader-overlay {
       position: absolute;
       inset: 0;
@@ -73,13 +68,15 @@
       display:none;
     }
 
+    /* Récap aligné à gauche */
+    #recap{margin-left:0;text-align:left;white-space:pre-wrap;}
+
     @media (max-width:900px){
       .stage{flex-direction:column;width:100%}
       .panel{width:100%}
     }
   </style>
 
-  <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=BAARVD2jx5IiVnvntDbXIr373cCT40elk40sjDGIB8MzbSwEYIDvUcA8IlghJCrfGjhCp37MbcEIB3CKto&currency=EUR&components=buttons"></script>
 </head>
 <body>
@@ -91,17 +88,15 @@
   <div class="spacer"></div>
 
   <div class="card" id="card">
-    <!-- Loader overlay -->
     <div class="loader-overlay" id="loader-overlay">
       <div class="loader"></div>
     </div>
 
-    <!-- Stage panels -->
     <div class="stage" id="stage">
-      <!-- PANEL 1 : FORMULAIRE DE DEVIS -->
+      <!-- PANEL 1 : FORMULAIRE -->
       <div class="panel" id="panel-form">
         <h2>Paiement du devis</h2>
-        <p class="muted">Remplissez vos informations et décrivez ce que le bot doit faire (tranches selon nombre de membres).</p>
+        <p class="muted">Remplissez vos informations et décrivez ce que le bot doit faire.</p>
 
         <form id="quote-form">
           <div class="row">
@@ -121,7 +116,14 @@
               <input id="email" name="email" type="email" required />
             </div>
             <div style="flex:1">
-              <label for="members">Nombre de membres (estimation)</label>
+              <label for="botname">Nom du bot</label>
+              <input id="botname" name="botname" type="text" placeholder="Ex : MonSuperBot" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label for="members">Nombre de membres</label>
               <select id="members" name="members">
                 <option value="0-100">0 - 100</option>
                 <option value="101-500">101 - 500</option>
@@ -132,7 +134,7 @@
           </div>
 
           <label for="features">Fonctionnalités demandées</label>
-          <textarea id="features" name="features" placeholder="Ex : commandes modération, système d'XP, ticket, accueil, logs..."></textarea>
+          <textarea id="features" name="features" placeholder="Ex : commandes modération, XP, tickets..."></textarea>
 
           <div style="display:flex;gap:12px;margin-top:18px;align-items:center">
             <button type="submit" class="btn" id="send-quote">Envoyer mon devis</button>
@@ -144,17 +146,16 @@
       <!-- PANEL 2 : PAIEMENT -->
       <div class="panel" id="panel-pay" aria-hidden="true">
         <h2>Récapitulatif & Paiement</h2>
-        <div id="recap" style="text-align:left;margin-bottom:16px"></div>
+        <div id="recap"></div>
+        <button class="btn btn-secondary" id="edit-info" style="margin-bottom:12px;">Modifier mes infos</button>
 
         <div class="price">Montant : <strong id="amount-display">0,50 €</strong></div>
-
         <div class="paypal-area" id="paypal-area"></div>
-
         <p class="muted">Paiement sécurisé via PayPal. Une fois le paiement effectué, vous recevrez le devis complet par e‑mail.</p>
       </div>
     </div>
 
-    <!-- zone confirmation visible après paiement -->
+    <!-- CONFIRMATION -->
     <div id="confirmation" style="display:none" class="confirm">
       <h2>Devis payé ✅</h2>
       <p>Merci — votre paiement a été reçu. Vous allez recevoir le devis complet par e‑mail dans quelques minutes.</p>
@@ -173,17 +174,12 @@
     const confirmation = document.getElementById('confirmation');
     const panelPay = document.getElementById('panel-pay');
     const loader = document.getElementById('loader-overlay');
+    const editBtn = document.getElementById('edit-info');
 
-    function showLoader() { loader.style.display='flex'; }
-    function hideLoader() { loader.style.display='none'; }
-    function showPaymentPanel() {
-      stage.style.transform = window.innerWidth > 900 ? 'translateX(-50%)' : 'translateX(0)';
-      panelPay.setAttribute('aria-hidden','false');
-    }
-    function showConfirmation() {
-      document.getElementById('card').querySelector('.stage').style.display='none';
-      confirmation.style.display='block';
-    }
+    function showLoader(){ loader.style.display='flex'; }
+    function hideLoader(){ loader.style.display='none'; }
+    function showPaymentPanel(){ stage.style.transform = window.innerWidth > 900 ? 'translateX(-50%)' : 'translateX(0)'; panelPay.setAttribute('aria-hidden','false'); }
+    function showConfirmation(){ document.getElementById('card').querySelector('.stage').style.display='none'; confirmation.style.display='block'; }
 
     async function saveQuoteServer(payload){
       const url='/api/quotes';
@@ -200,14 +196,8 @@
     function mountPaypalButtons(quote_id){
       paypalArea.innerHTML='';
       paypal.Buttons({
-        createOrder:function(data,actions){
-          return actions.order.create({purchase_units:[{amount:{value:PRICE_EUR},custom_id:quote_id}]});
-        },
-        onApprove:function(data,actions){
-          return actions.order.capture().then(function(details){
-            confirmToServer(data.orderID,quote_id,details);
-          });
-        },
+        createOrder:function(data,actions){return actions.order.create({purchase_units:[{amount:{value:PRICE_EUR},custom_id:quote_id}]});},
+        onApprove:function(data,actions){return actions.order.capture().then(details=>{confirmToServer(data.orderID,quote_id,details);});},
         onError:function(err){console.error('PayPal error',err); alert('Erreur lors du paiement PayPal.');}
       }).render('#paypal-area');
     }
@@ -221,8 +211,7 @@
         if(!res.ok)throw new Error('Confirmation serveur échouée');
         const data=await res.json();
         hideLoader();
-        if(data.verified){showConfirmation();}
-        else{alert('Paiement reçu mais vérification serveur a échoué.');}
+        if(data.verified){showConfirmation();} else {alert('Paiement reçu mais vérification serveur a échoué.');}
       }catch(err){hideLoader();console.error(err);alert('Erreur lors de la confirmation serveur.');}
     }
 
@@ -234,6 +223,7 @@
         firstname:formData.get('firstname'),
         lastname:formData.get('lastname'),
         email:formData.get('email'),
+        botname:formData.get('botname'),
         members_range:formData.get('members'),
         features:formData.get('features'),
         amount:PRICE_EUR,
@@ -243,16 +233,16 @@
       const quote_id=serverResp.quote_id||('temp-'+Date.now());
       CLIENT_QUOTE={...payload,quote_id};
 
-      recap.innerHTML=`
-        <strong>Devis pour :</strong> ${payload.firstname} ${payload.lastname} <br>
-        <strong>Email :</strong> ${payload.email} <br>
-        <strong>Membres :</strong> ${payload.members_range} <br>
-        <strong>Fonctionnalités :</strong> <pre style="white-space:pre-wrap">${payload.features||'(non précisé)'}</pre>
-      `;
+      recap.innerHTML=
+        `Nom du bot : ${payload.botname}\nPrénom/Nom : ${payload.firstname} ${payload.lastname}\nEmail : ${payload.email}\nMembres : ${payload.members_range}\nFonctionnalités : ${payload.features||'(non précisé)'}`;
 
       showPaymentPanel();
       mountPaypalButtons(quote_id);
       hideLoader();
+    });
+
+    editBtn.addEventListener('click',()=>{
+      stage.style.transform='translateX(0)';
     });
   </script>
 </body>
