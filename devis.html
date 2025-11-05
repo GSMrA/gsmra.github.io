@@ -14,9 +14,9 @@
       --background: #0b0b0b;
       --text-main: #ffffff;
       --muted: #cccccc;
-      --accent: #ffd54a;
+      --accent: #ffffff; /* Néons blancs */
       --card-bg: #141414;
-      --shadow: 0 0 25px rgba(255, 213, 74, 0.2);
+      --shadow: 0 0 25px rgba(255, 255, 255, 0.2); /* Halo blanc */
     }
 
     html, body {
@@ -42,20 +42,21 @@
       padding: 20px 30px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* logo à gauche */
       border-radius: 18px;
       width: 90%;
       max-width: 900px;
-      box-shadow: 0 0 20px rgba(255, 213, 74, 0.35);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); /* Néon blanc */
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
       z-index: 100;
+      gap: 20px;
     }
 
     .logo {
       height: 55px;
       width: auto;
       margin-right: 15px;
-      filter: drop-shadow(0 0 8px var(--accent));
+      filter: drop-shadow(0 0 8px var(--accent)); /* Néon blanc */
     }
 
     .title {
@@ -63,8 +64,8 @@
       font-size: 2rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--text-main); /* <-- Titre en blanc */
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4); /* halo blanc léger */
+      color: var(--text-main);
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* halo blanc plus visible */
       margin: 0;
     }
 
@@ -75,7 +76,7 @@
 
     .spacer { height: 120px; }
 
-    /* Bloc PayPal élargi et modernisé */
+    /* Bloc PayPal modernisé */
     .paypal-card {
       background: var(--card-bg);
       border-radius: 24px;
@@ -94,7 +95,7 @@
     }
 
     .paypal-card:hover {
-      box-shadow: 0 0 35px rgba(255, 213, 74, 0.4);
+      box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
       transform: translateY(-3px);
     }
 
@@ -104,6 +105,7 @@
       font-size: 2rem;
       margin-bottom: 10px;
       text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
     }
 
     .price {
@@ -111,6 +113,7 @@
       font-weight: 500;
       margin: 10px 0 25px 0;
       color: var(--text-main);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
     }
 
     #paypal-container-9EPBY76H9Z6DW {
