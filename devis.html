@@ -8,15 +8,14 @@
   <style>
     :root {
       --background: #e9ecf1;
-      --text-main: #202020;
-      --muted: #5d5d5d;
-      --glow: #ffe684;
+      --text-main: #21242A;
+      --muted: #666;
+      --neon: #c9ccd6;
       --accent: #ffe684;
-      --topbar-bg: #fff;
-      --topbar-shadow: 0 0 18px var(--glow), 0 4px 8px rgba(255, 230, 132, 0.18);
+      --topbar-bg: #000;
+      --topbar-shadow: 0 0 18px var(--accent), 0 4px 8px rgba(255, 230, 132, 0.18);
     }
     html, body {
-      height: 100%;
       margin: 0;
       font-family: Arial, sans-serif;
       background: var(--background);
@@ -28,15 +27,16 @@
       left: 50%;
       transform: translateX(-50%);
       background: var(--topbar-bg);
-      color: var(--text-main);
+      color: #fff;
       padding: 24px 36px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       box-shadow: var(--topbar-shadow);
       border-radius: 18px;
       width: 90%;
       max-width: 1300px;
+      min-width: 250px;
       z-index: 1000;
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
     }
@@ -44,54 +44,109 @@
       height: 66px;
       width: auto;
       display: block;
-      filter: drop-shadow(0 0 10px var(--glow));
+      filter: drop-shadow(0 0 10px var(--accent));
+      margin-right: 18px;
     }
     .title {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
       font-weight: 900;
       font-size: 3.2rem;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--text-main);
+      color: #fff;
       font-family: 'Arial Black', Arial, sans-serif;
       text-shadow: 0 0 7px var(--accent);
+      white-space: nowrap;
+      margin: 0;
     }
-    @media (max-width: 480px) {
-      .logo { height: 40px }
-      .title { font-size: 1.8rem; }
-      .topbar { padding: 12px; width: 97%; border-radius: 11px; }
+    @media (max-width: 700px) {
+      .logo { height: 38px }
+      .title { font-size: 1.5rem; }
+      .topbar { padding: 10px; }
     }
     @keyframes slideDown {
       from { opacity: 0; transform: translateX(-50%) translateY(-90px);}
       to   { opacity: 1; transform: translateX(-50%) translateY(0);}
     }
-    .spacer { height: 115px; }
-    .main-box {
-      max-width: 650px;
-      margin: 0 auto;
-      text-align: center;
-      padding: 6px 0 0 0;
+    .spacer { height: 120px; }
+
+    .main-row {
+      width: 90vw;
+      max-width: 1000px;
+      margin: 38px auto 0 auto;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 28px;
     }
-    .price {
-      font-size: 2.1rem;
-      font-family: Arial, sans-serif;
-      margin: 22px 0 30px 0;
-      font-weight: 600;
-      color: #222;
-    }
-    .paypal-btn {
-      margin-top: 30px;
+    .main-box, .paypal-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow:
+        0 8px 40px 2px rgba(25,28,62,0.13),
+        -9px 0 35px -13px var(--neon),
+        9px 0 35px -13px var(--neon);
+      width: 48%;
+      min-width: 320px;
+      max-width: 480px;
+      padding: 38px 23px 22px 23px;
+      box-sizing: border-box;
+      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
     }
-    .paypal-btn p {
-      color: var(--muted);
-      font-size: 1.01rem;
+    .main-box h1 {
+      font-family:'Arial Black',Arial,sans-serif;
+      font-size: 2.1rem;
+      margin-bottom: 12px;
+      color: #232323;
+    }
+    .main-box p {
+      color: var(--text-main);
+      font-size: 1.09rem;
+      margin-top: 19px;
+      margin-bottom: 0;
+      text-align:center;
+      max-width: 260px;
+    }
+    .price {
+      font-size: 1.8rem;
       font-family: Arial, sans-serif;
+      margin: 15px 0 5px 0;
+      font-weight: 600;
+      color: #232323;
+    }
+    .paypal-card {
+      padding: 32px 15px 26px 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+    }
+    .paypal-card p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-top: 6px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      max-width: 250px;
+    }
+    @media (max-width: 950px) {
+      .main-row {
+        flex-direction: column;
+        gap: 32px;
+        width: 98vw;
+        max-width: 540px;
+      }
+      .main-box, .paypal-card {
+        width: 100%;
+        min-width: auto;
+        max-width: 510px;
+        margin: 0 auto;
+      }
     }
   </style>
   <script 
@@ -104,19 +159,20 @@
 <body>
   <header class="topbar">
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
-    <div class="title">GEEKSOFT - DEVIS</div>
+    <span class="title">GEEKSOFT - DEVIS</span>
   </header>
   <div class="spacer"></div>
-
-  <div class="main-box">
-    <h1 style="font-family:'Arial Black',Arial,sans-serif;font-size:2.3rem;margin-bottom:5px;color:#232323;">Devis GeekSoft</h1>
-    <div class="price">À payer : 0,50 €</div>
-    <div class="paypal-btn">
+  <div class="main-row">
+    <div class="main-box">
+      <h1>Devis GeekSoft</h1>
+      <div class="price">À payer : 0,50 €</div>
+      <p>Devis pour la création d’un bot Discord personnalisé.<br>Un dev</p>
+    </div>
+    <div class="paypal-card">
       <div id="paypal-container-9EPBY76H9Z6DW"></div>
       <p>Paiement sécurisé via PayPal</p>
     </div>
   </div>
-
   <script>
     paypal.HostedButtons({
       hostedButtonId: "9EPBY76H9Z6DW",
