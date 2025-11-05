@@ -1,159 +1,139 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <title>Devis - GeekSoft</title>
+  <title>GeekSoft - Paiement Devis</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" type="image/png" href="GEEKSOFT.png">
+
+  <!-- Police pro et lisible -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --background: #e9ecf1;
-      --text-main: #21242A;
-      --muted: #666;
-      --neon: #c9ccd6;
-      --accent: #ffe684;
-      --topbar-bg: #000;
-      --topbar-shadow: 0 0 18px var(--accent), 0 4px 8px rgba(255, 230, 132, 0.18);
+      --background: #0b0b0b;
+      --text-main: #ffffff;
+      --muted: #cccccc;
+      --accent: #ffd54a;
+      --card-bg: #141414;
+      --shadow: 0 0 25px rgba(255, 213, 74, 0.2);
     }
+
     html, body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: var(--background);
       color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
+
+    /* Barre du haut */
     .topbar {
       position: fixed;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--topbar-bg);
-      color: #fff;
-      padding: 24px 36px;
+      background: #000;
+      color: var(--text-main);
+      padding: 20px 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--topbar-shadow);
       border-radius: 18px;
       width: 90%;
-      max-width: 1300px;
-      min-width: 250px;
-      z-index: 1000;
+      max-width: 900px;
+      box-shadow: 0 0 20px rgba(255, 213, 74, 0.35);
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
+      z-index: 100;
     }
+
     .logo {
-      height: 66px;
+      height: 55px;
       width: auto;
-      display: block;
-      filter: drop-shadow(0 0 10px var(--accent));
-      margin-right: 18px;
+      margin-right: 15px;
+      filter: drop-shadow(0 0 8px var(--accent));
     }
+
     .title {
-      font-weight: 900;
-      font-size: 3.2rem;
-      letter-spacing: 2px;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #fff;
-      font-family: 'Arial Black', Arial, sans-serif;
-      text-shadow: 0 0 7px var(--accent);
-      white-space: nowrap;
+      color: var(--text-main); /* <-- Titre en blanc */
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4); /* halo blanc léger */
       margin: 0;
     }
-    @media (max-width: 700px) {
-      .logo { height: 38px }
-      .title { font-size: 1.5rem; }
-      .topbar { padding: 10px; }
-    }
+
     @keyframes slideDown {
       from { opacity: 0; transform: translateX(-50%) translateY(-90px);}
       to   { opacity: 1; transform: translateX(-50%) translateY(0);}
     }
+
     .spacer { height: 120px; }
 
-    .main-row {
-      width: 90vw;
-      max-width: 1000px;
-      margin: 38px auto 0 auto;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: stretch;
-      gap: 28px;
-    }
-    .main-box, .paypal-card {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow:
-        0 8px 40px 2px rgba(25,28,62,0.13),
-        -9px 0 35px -13px var(--neon),
-        9px 0 35px -13px var(--neon);
-      width: 48%;
-      min-width: 320px;
-      max-width: 480px;
-      padding: 38px 23px 22px 23px;
-      box-sizing: border-box;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .main-box h1 {
-      font-family:'Arial Black',Arial,sans-serif;
-      font-size: 2.1rem;
-      margin-bottom: 12px;
-      color: #232323;
-    }
-    .main-box p {
-      color: var(--text-main);
-      font-size: 1.09rem;
-      margin-top: 19px;
-      margin-bottom: 0;
-      text-align:center;
-      max-width: 260px;
-    }
-    .price {
-      font-size: 1.8rem;
-      font-family: Arial, sans-serif;
-      margin: 15px 0 5px 0;
-      font-weight: 600;
-      color: #232323;
-    }
+    /* Bloc PayPal élargi et modernisé */
     .paypal-card {
-      padding: 32px 15px 26px 15px;
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      width: 90%;
+      max-width: 700px;
+      padding: 70px 50px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 11px;
+      text-align: center;
+      margin-bottom: 60px;
+      transition: all 0.3s ease;
     }
+
+    .paypal-card:hover {
+      box-shadow: 0 0 35px rgba(255, 213, 74, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .paypal-card h1 {
+      font-weight: 600;
+      color: var(--text-main);
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .price {
+      font-size: 1.6rem;
+      font-weight: 500;
+      margin: 10px 0 25px 0;
+      color: var(--text-main);
+    }
+
+    #paypal-container-9EPBY76H9Z6DW {
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+
     .paypal-card p {
       color: var(--muted);
       font-size: 1rem;
-      margin-top: 6px;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      max-width: 250px;
+      margin-top: 25px;
     }
-    @media (max-width: 950px) {
-      .main-row {
-        flex-direction: column;
-        gap: 32px;
-        width: 98vw;
-        max-width: 540px;
-      }
-      .main-box, .paypal-card {
-        width: 100%;
-        min-width: auto;
-        max-width: 510px;
-        margin: 0 auto;
-      }
+
+    @media (max-width: 600px) {
+      .title { font-size: 1.4rem; }
+      .logo { height: 38px; }
+      .paypal-card { padding: 45px 25px; max-width: 95%; }
     }
   </style>
+
   <script 
     src="https://www.paypal.com/sdk/js?client-id=BAARVD2jx5IiVnvntDbXIr373cCT40elk40sjDGIB8MzbSwEYIDvUcA8IlghJCrfGjhCp37MbcEIB3CKto&components=hosted-buttons&disable-funding=venmo&currency=EUR">
-  </script>
-  <script>
-    const API_KEY = 'AfQ45eH2NYq_MuuxOJB7qJmy5bInsP1M9OAmCaF8ipTS8HAySBTqG1f4xMHMLiop0OtjXcDY3lu7PHQc';
   </script>
 </head>
 <body>
@@ -161,22 +141,21 @@
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
     <span class="title">GEEKSOFT - DEVIS</span>
   </header>
+
   <div class="spacer"></div>
-  <div class="main-row">
-    <div class="main-box">
-      <h1>Devis GeekSoft</h1>
-      <div class="price">À payer : 0,50 €</div>
-      <p>Devis pour la création d’un bot Discord personnalisé.<br>Un dev</p>
-    </div>
-    <div class="paypal-card">
-      <div id="paypal-container-9EPBY76H9Z6DW"></div>
-      <p>Paiement sécurisé via PayPal</p>
-    </div>
+
+  <div class="paypal-card">
+    <h1>Paiement du devis</h1>
+    <div class="price">Montant : 0,50 €</div>
+
+    <div id="paypal-container-9EPBY76H9Z6DW"></div>
+    <p>Paiement sécurisé via PayPal</p>
   </div>
+
   <script>
     paypal.HostedButtons({
       hostedButtonId: "9EPBY76H9Z6DW",
-    }).render("#paypal-container-9EPBY76H9Z6DW")
+    }).render("#paypal-container-9EPBY76H9Z6DW");
   </script>
 </body>
 </html>
