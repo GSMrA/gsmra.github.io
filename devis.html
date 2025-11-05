@@ -77,8 +77,12 @@
     }
   </style>
 
-  <script src="https://www.paypal.com/sdk/js?client-id=BAARVD2jx5IiVnvntDbXIr373cCT40elk40sjDGIB8MzbSwEYIDvUcA8IlghJCrfGjhCp37MbcEIB3CKto&currency=EUR&components=buttons"></script>
+  <!-- PayPal SDK avec hosted buttons -->
+  <script 
+    src="https://www.paypal.com/sdk/js?client-id=BAARVD2jx5IiVnvntDbXIr373cCT40elk40sjDGIB8MzbSwEYIDvUcA8IlghJCrfGjhCp37MbcEIB3CKto&components=hosted-buttons&disable-funding=venmo&currency=EUR">
+  </script>
 </head>
+
 <body>
   <header class="topbar">
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
@@ -150,94 +154,76 @@
         <button class="btn btn-secondary" id="edit-info" style="margin-bottom:12px;">Modifier mes infos</button>
 
         <div class="price">Montant : <strong id="amount-display">0,50 €</strong></div>
-        <div class="paypal-area" id="paypal-area"></div>
-        <p class="muted">Paiement sécurisé via PayPal. Une fois le paiement effectué, vous recevrez le devis complet par e‑mail.</p>
+        <div class="paypal-area" id="paypal-area">
+          <!-- Ici on insère ton bouton hébergé -->
+          <div id="paypal-container-9EPBY76H9Z6DW"></div>
+        </div>
+        <p class="muted">Paiement sécurisé via PayPal. Une fois le paiement effectué, vous recevrez le devis complet par e-mail.</p>
       </div>
     </div>
 
     <!-- CONFIRMATION -->
     <div id="confirmation" style="display:none" class="confirm">
       <h2>Devis payé ✅</h2>
-      <p>Merci — votre paiement a été reçu. Vous allez recevoir le devis complet par e‑mail dans quelques minutes.</p>
+      <p>Merci — votre paiement a été reçu. Vous allez recevoir le devis complet par e-mail dans quelques minutes.</p>
       <p class="muted">Si problème, contactez-nous.</p>
     </div>
   </div>
 
   <script>
-    let CLIENT_QUOTE = null;
     const PRICE_EUR = "0.50";
-
     const stage = document.getElementById('stage');
     const form = document.getElementById('quote-form');
-    const paypalArea = document.getElementById('paypal-area');
     const recap = document.getElementById('recap');
-    const confirmation = document.getElementById('confirmation');
-    const panelPay = document.getElementById('panel-pay');
     const loader = document.getElementById('loader-overlay');
     const editBtn = document.getElementById('edit-info');
+    const confirmation = document.getElementById('confirmation');
 
     function showLoader(){ loader.style.display='flex'; }
     function hideLoader(){ loader.style.display='none'; }
-    function showPaymentPanel(){ stage.style.transform = window.innerWidth > 900 ? 'translateX(-50%)' : 'translateX(0)'; panelPay.setAttribute('aria-hidden','false'); }
-    function showConfirmation(){ document.getElementById('card').querySelector('.stage').style.display='none'; confirmation.style.display='block'; }
-
-    async function saveQuoteServer(payload){
-      const url='/api/quotes';
-      try{
-        const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        if(!res.ok)throw new Error('Erreur serveur');
-        return await res.json();
-      }catch(err){
-        console.warn('Serveur absent ou erreur.',err);
-        return {quote_id:'temp-'+Date.now(),secret_token:null};
-      }
+    function showPaymentPanel(){
+      stage.style.transform = window.innerWidth > 900 ? 'translateX(-50%)' : 'translateX(0)';
+      document.getElementById('panel-pay').setAttribute('aria-hidden','false');
+    }
+    function showConfirmation(){
+      stage.style.display='none';
+      confirmation.style.display='block';
     }
 
-    function mountPaypalButtons(quote_id){
-      paypalArea.innerHTML='';
-      paypal.Buttons({
-        createOrder:function(data,actions){return actions.order.create({purchase_units:[{amount:{value:PRICE_EUR},custom_id:quote_id}]});},
-        onApprove:function(data,actions){return actions.order.capture().then(details=>{confirmToServer(data.orderID,quote_id,details);});},
-        onError:function(err){console.error('PayPal error',err); alert('Erreur lors du paiement PayPal.');}
-      }).render('#paypal-area');
-    }
-
-    async function confirmToServer(orderID,quote_id,clientCaptureDetails){
-      showLoader();
-      const url='/api/confirm-payment';
-      const payload={orderID,quote_id};
-      try{
-        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        if(!res.ok)throw new Error('Confirmation serveur échouée');
-        const data=await res.json();
-        hideLoader();
-        if(data.verified){showConfirmation();} else {alert('Paiement reçu mais vérification serveur a échoué.');}
-      }catch(err){hideLoader();console.error(err);alert('Erreur lors de la confirmation serveur.');}
-    }
-
-    form.addEventListener('submit',async function(e){
+    form.addEventListener('submit', async function(e){
       e.preventDefault();
       showLoader();
-      const formData=new FormData(form);
-      const payload={
-        firstname:formData.get('firstname'),
-        lastname:formData.get('lastname'),
-        email:formData.get('email'),
-        botname:formData.get('botname'),
-        members_range:formData.get('members'),
-        features:formData.get('features'),
-        amount:PRICE_EUR,
-        created_at:new Date().toISOString()
-      };
-      const serverResp=await saveQuoteServer(payload);
-      const quote_id=serverResp.quote_id||('temp-'+Date.now());
-      CLIENT_QUOTE={...payload,quote_id};
 
-      recap.innerHTML=
-        `Nom du bot : ${payload.botname}\nPrénom/Nom : ${payload.firstname} ${payload.lastname}\nEmail : ${payload.email}\nMembres : ${payload.members_range}\nFonctionnalités : ${payload.features||'(non précisé)'}`;
+      const data = new FormData(form);
+      const payload = {
+        firstname: data.get('firstname'),
+        lastname: data.get('lastname'),
+        email: data.get('email'),
+        botname: data.get('botname'),
+        members_range: data.get('members'),
+        features: data.get('features') || '(non précisé)',
+        amount: PRICE_EUR
+      };
+
+      recap.innerHTML =
+        `Nom du bot : ${payload.botname}\nPrénom/Nom : ${payload.firstname} ${payload.lastname}\nEmail : ${payload.email}\nMembres : ${payload.members_range}\nFonctionnalités : ${payload.features}`;
 
       showPaymentPanel();
-      mountPaypalButtons(quote_id);
+
+      // on monte le bouton PayPal hébergé
+      setTimeout(() => {
+        paypal.HostedButtons({
+          hostedButtonId: "9EPBY76H9Z6DW",
+          onApprove: function(){
+            showConfirmation();
+          },
+          onError: function(err){
+            console.error("Erreur PayPal", err);
+            alert("Erreur lors du paiement PayPal. Réessaie dans quelques instants.");
+          }
+        }).render("#paypal-container-9EPBY76H9Z6DW");
+      }, 300);
+
       hideLoader();
     });
 
