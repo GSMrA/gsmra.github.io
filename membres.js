@@ -21,9 +21,10 @@ membres.forEach(m => {
   
   // Badge rang blanc/gris
   const badgeHtml = `<img src="https://github.com/GSMrA/gsmra.github.io/raw/main/66649-legendary-ranked.jpg" class="badge-rang" alt="Rang"/>`;
-  
+
+  //<div class="badge-rang-wrap">${badgeHtml}</div>
   carte.innerHTML = `
-    <div class="badge-rang-wrap">${badgeHtml}</div>
+    
     <img src="${m.image}" alt="Photo Profil" class="avatar"/>
     <div class="pseudo">${m.pseudo}</div>
     <div class="desc">${m.desc}</div>
