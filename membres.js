@@ -1,10 +1,10 @@
 const membres = [
-  { image: "image1.png", pseudo: "Admin GeekSoft", desc: "Développeur principal du projet GeekSoft et organisateur des tournois Discord.", contact: "admin@geeksoft.online" },
-  { image: "image2.png", pseudo: "Lucas", desc: "Responsable bots personnalisés et aide à la configuration Discord.", contact: "lucas@geeksoft.online" },
-  { image: "image3.png", pseudo: "Emma", desc: "Designer graphique et gestion des annonces GeekSoft.", contact: "emma@geeksoft.online" },
-  { image: "image4.png", pseudo: "Maxime", desc: "Support technique et contact pour les bots marchands.", contact: "maxime@geeksoft.online" },
-  { image: "image5.png", pseudo: "Amandine", desc: "Rédactrice et gestion des annonces sur le site GeekSoft.", contact: "amandine@geeksoft.online" },
-  { image: "image6.png", pseudo: "Ethan", desc: "Assistant technique et modérateur Discord.", contact: "ethan@geeksoft.online" }
+  { image: "image1.png", pseudo: "Artemix89", desc: "Créateur de GeekSoft", contact: "artemixtsb@gmail.com" },
+  { image: "image2.png", pseudo: "Mix260", desc: "Assistant HTML et CSS", contact: "mixpro2taff@gmail.com" },
+  { image: "image3.png", pseudo: "Somebody", desc: "Gérant de la communication a temp partiel", contact: "Aucun Contact" },
+  { image: "image4.png", pseudo: "Stor", desc: "Tout premier client pour son serveur. Également Testeur a temp partiel et Youtuber", contact: "Son discord : https://discord.gg/cd7YWe8pqV <br>Youtube : https://www.youtube.com/@levraistor" },
+  { image: "image5.png", pseudo: "Jess_le_vadrouilleur", desc: "Deusième CLient et également amis de longue date", contact: "Son discord : https://discord.gg/hyqEucjydR" },
+  //{ image: "image6.png", pseudo: "Ethan", desc: "Assistant technique et modérateur Discord.", contact: "ethan@geeksoft.online" }
 ];
 
 const cartesDiv = document.getElementById('cartes');
