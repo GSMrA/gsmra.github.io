@@ -6,180 +6,137 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" type="image/png" href="GEEKSOFT.png">
   <style>
-    :root{
-      --black:#000;
-      --white:#fff;
-      --muted:#666;
-      --glow:#ffffff;
-      --gray-bg:#1e1e1e;
-      --max-width:1100px;
+    :root {
+      --black: #1e1e1e;
+      --white: #fff;
+      --muted: #b2b2b2;
+      --card-bg: #28292d;
+      --card-border: #333;
+      --glow: #686868;
+      --gray-bg: #191919;
+      --max-width: 1100px;
+      --shadow: 0 4px 24px rgba(40, 40, 50, 0.16), 0 1.5px 8px #4446;
     }
-    html,body{
-      height:100%;
-      margin:0;
-      font-family:'Arial Black', Impact, sans-serif;
-      background:var(--gray-bg);
-      color:#fff;
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial Black', Impact, sans-serif;
+      background: var(--gray-bg);
+      color: var(--white);
     }
-    @keyframes slideDown {
-      from { opacity:0; transform:translateX(-50%) translateY(-100px);}
-      to   { opacity:1; transform:translateX(-50%) translateY(0);}
-    }
-    @keyframes fadeInUp {
-      from { opacity:0; transform:translateY(30px);}
-      to   { opacity:1; transform:translateY(0);}
-    }
-    @keyframes fadeIn {
-      from { opacity:0; }
-      to   { opacity:1; }
-    }
-    .topbar{
-      position:fixed;
+    .topbar {
+      position: fixed;
       top: 20px;
-      left:50vw;
-      transform:translateX(-50%);
-      background:var(--black);
-      color:var(--white);
-      padding:28px 40px;
-      display:flex;
-      justify-content:space-between;
-      white-space: nowrap; 
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      border-radius:24px;
-      width:93vw;
-      max-width:1300px;
-      z-index:1000;
+      left: 50vw;
+      transform: translateX(-50%);
+      background: var(--black);
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
+      border-radius: 24px;
+      width: 93vw;
+      max-width: 1300px;
+      z-index: 1000;
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
     }
-    .logo{
-      height:70px;
-      width:auto;
-      display:block;
-      filter:drop-shadow(0 0 15px var(--glow));
+    .logo {
+      height: 70px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 0 15px var(--glow));
     }
-    .title{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      font-weight:900;
-      font-size:3.5rem;
-      letter-spacing:3px;
-      text-transform:uppercase;
-      color:var(--white);
-      text-shadow:0 0 15px var(--glow), 0 0 30px var(--glow);
-      white-space: nowrap;      
-      overflow: hidden;         
-      text-overflow: ellipsis;  
+    .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 3.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       max-width: 90vw;
     }
-    .ul1 {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;  
-      justify-content: center; 
-    }
-
-    .personne1 {
-      background: var(--black, #222);
-      color: var(--white, #fff);
+    .cartes {
       display: flex;
-      align-items: center;
-      position: absolute;
-      top: 13vw;
-      height: 8vw;
-      width: 88vw;
-      left: 50vw;
-      border-radius:24px;
-      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      align-items: center;
-      padding: 20px;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 160px;
+      padding-bottom: 60px;
     }
-
-    .ul2{
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;  
-      justify-content: center; 
-    }
-    .personne2 {
-      background: var(--black, #222);
-      color: var(--white, #fff);
+    .carte-profil {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      min-width: 270px;
+      max-width: 320px;
+      width: 29vw;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      position: absolute;
-      top: 27vw;
-      height: 5vw;
-      width: 40vw;
-      left: 26vw;
-      border-radius:24px;
-      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      align-items: center;
-      padding: 20px;
+      padding: 36px 22px 30px 22px;
+      animation: profileFloatIn 1s cubic-bezier(.46,.85,.58,1) forwards;
+      opacity: 0;
+      transform: translateY(90px) scale(0.99);
+      transition: box-shadow 0.26s, transform 0.22s;
+      position: relative;
     }
-    .personne3 {
-      background: var(--black, #222);
-      color: var(--white, #fff);
-      display: flex;
-      align-items: center;
-      position: absolute;
-      top: 38vw;
-      height: 5vw;
-      width: 40vw;
-      left: 26vw;
-      border-radius:24px;
-      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      align-items: center;
-      padding: 20px;
+    .carte-profil:nth-child(1) { animation-delay: 0.2s; }
+    .carte-profil:nth-child(2) { animation-delay: 0.4s; }
+    .carte-profil:nth-child(3) { animation-delay: 0.6s; }
+    .carte-profil:nth-child(4) { animation-delay: 0.8s; }
+    .carte-profil:hover {
+      box-shadow: 0 12px 38px #2226, 0 2.5px 20px #ddd4;
+      transform: scale(1.03) translateY(-6px);
     }
-    .ul3{
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;  
-      justify-content: center; 
+    @keyframes profileFloatIn {
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .personne4 {
-      background: var(--black, #222);
-      color: var(--white, #fff);
-      display: flex;
-      align-items: center;
-      position: absolute;
-      top: 27vw;
-      height: 5vw;
-      width: 40vw;
-      left: 74vw;
-      border-radius:24px;
-      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      align-items: center;
-      padding: 20px;
+    .avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--glow);
+      object-fit: cover;
+      box-shadow: 0 0 0 4px #222, 0 2px 15px #aaa8;
+      margin-bottom: 22px;
+      animation: fadeInUp 0.7s;
     }
-    .personne5 {
-      background: var(--black, #222);
-      color: var(--white, #fff);
-      display: flex;
-      align-items: center;
-      position: absolute;
-      top: 38vw;
-      height: 5vw;
-      width: 40vw;
-      left: 74vw;
-      border-radius:24px;
-      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
-      box-shadow:0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
-      align-items: center;
-      padding: 20px;
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px);}
+      to { opacity: 1; transform: translateY(0);}
     }
-    
+    .pseudo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .desc {
+      font-size: 1rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 769px) {
+      .cartes {flex-direction: column; gap: 40px; align-items: center;}
+      .topbar {padding: 16px;}
+      .title {font-size: 2.2rem;}
+    }
     @media (max-width:480px){
       .logo{height:45px}
-      .title{font-size:2rem;}
-      .topbar{padding:16px;width:95%;border-radius:16px;}
+      .cartes {margin-top: 126px;}
+      .carte-profil {padding: 24px 10px; min-width: 90vw; max-width:98vw;}
+      .title{font-size:1.25rem;}
     }
   </style>
 </head>
@@ -188,16 +145,27 @@
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
     <div class="title">GEEKSOFT - CONTACT</div>
   </header>
-    <ul class="ul1">
-      <li class="personne1"><img src="" class=""/>   une personne impotante mdr</li>
-    </ul>
-    <ul class="ul2">
-      <li class="personne2"><img src="" class=""/>   une personne mdr</li>
-      <li class="personne3"><img src="" class=""/>   une personne mdr</li>
-    </ul>
-    <ul class="ul3">
-      <li class="personne4"><img src="" class=""/>   une personne mdr</li>
-      <li class="personne5"><img src="" class=""/>   une personne mdr</li>
-    </ul>
+  <div class="cartes">
+    <div class="carte-profil">
+      <img src="https://avatars.githubusercontent.com/u/1?v=4" alt="Photo Profil" class="avatar"/>
+      <div class="pseudo">Admin GeekSoft</div>
+      <div class="desc">Développeur principal du projet GeekSoft et organisateur des tournois Discord.</div>
+    </div>
+    <div class="carte-profil">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo Profil" class="avatar"/>
+      <div class="pseudo">Lucas</div>
+      <div class="desc">Responsable bots personnalisés et aide à la configuration Discord.</div>
+    </div>
+    <div class="carte-profil">
+      <img src="https://randomuser.me/api/portraits/women/46.jpg" alt="Photo Profil" class="avatar"/>
+      <div class="pseudo">Emma</div>
+      <div class="desc">Designer graphique et gestion des annonces GeekSoft.</div>
+    </div>
+    <div class="carte-profil">
+      <img src="https://randomuser.me/api/portraits/men/15.jpg" alt="Photo Profil" class="avatar"/>
+      <div class="pseudo">Maxime</div>
+      <div class="desc">Support technique et contact pour les bots marchands.</div>
+    </div>
+  </div>
 </body>
 </html>
