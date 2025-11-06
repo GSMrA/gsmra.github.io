@@ -16,6 +16,8 @@
       --gray-bg: #191919;
       --max-width: 1100px;
       --shadow: 0 4px 24px rgba(40, 40, 50, 0.16), 0 1.5px 8px #4446;
+      --bar-bg: #222930;
+      --bar-accent: #32c1ff;
     }
     html, body {
       height: 100%;
@@ -41,12 +43,7 @@
       z-index: 1000;
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
     }
-    .logo {
-      height: 70px;
-      width: auto;
-      display: block;
-      filter: drop-shadow(0 0 15px var(--glow));
-    }
+    .logo { height: 70px; width: auto; display: block; filter: drop-shadow(0 0 15px var(--glow)); }
     .title {
       position: absolute;
       left: 50%;
@@ -67,8 +64,11 @@
       flex-wrap: wrap;
       gap: 40px;
       justify-content: center;
-      margin-top: 160px;
       padding-bottom: 60px;
+      margin: auto;
+      margin-top: 25vh; /* descend vers le bas, ajuste selon ton écran */
+      height: 70vh;     /* espace vertical pour centrer verticalement */
+      align-content: center; /* centre le contenu verticalement dans le parent */
     }
     .carte-profil {
       background: var(--card-bg);
@@ -84,57 +84,78 @@
       padding: 36px 22px 30px 22px;
       animation: profileFloatIn 1s cubic-bezier(.46,.85,.58,1) forwards;
       opacity: 0;
-      transform: translateY(90px) scale(0.99);
-      transition: box-shadow 0.26s, transform 0.22s;
+      transform: translateY(60px) scale(0.98);
+      transition:
+        box-shadow 0.25s,
+        transform 1.5s cubic-bezier(.22,.42,.52,.97),
+        z-index 0.35s;
       position: relative;
+      cursor: pointer;
+      z-index: 1;
     }
     .carte-profil:nth-child(1) { animation-delay: 0.2s; }
     .carte-profil:nth-child(2) { animation-delay: 0.4s; }
     .carte-profil:nth-child(3) { animation-delay: 0.6s; }
     .carte-profil:nth-child(4) { animation-delay: 0.8s; }
-    .carte-profil:hover {
-      box-shadow: 0 12px 38px #2226, 0 2.5px 20px #ddd4;
-      transform: scale(1.03) translateY(-6px);
+    .carte-profil:nth-child(5) { animation-delay: 1s; }
+    .carte-profil:nth-child(6) { animation-delay: 1.2s; }
+    @keyframes profileFloatIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .carte-profil:hover,
+    .carte-profil:focus-visible {
+      box-shadow: 0 22px 60px #222f, 0 6.5px 30px #32c1ff99;
+      transform: scale(1.16) translateY(-18px) !important;
+      z-index: 9999;
+      transition: transform 1.5s cubic-bezier(.22,.42,.52,.97), box-shadow 1.5s cubic-bezier(.22,.42,.52,.97);
     }
-    @keyframes profileFloatIn {
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
+
     .avatar {
       width: 90px;
       height: 90px;
       border-radius: 50%;
       background: var(--glow);
       object-fit: cover;
-      box-shadow: 0 0 0 4px #222, 0 2px 15px #aaa8;
       margin-bottom: 22px;
       animation: fadeInUp 0.7s;
+      box-shadow: 0 0 0 3px #222, 0 2px 15px #aaa8;
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(40px);}
       to { opacity: 1; transform: translateY(0);}
     }
-    .pseudo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--white);
+    .pseudo { font-size: 1.22rem; font-weight: 700; color: var(--white); margin-bottom: 10px; letter-spacing: 1px; }
+    .desc { font-size: 1rem; color: var(--muted); margin-bottom: 10px; text-align: center; }
+    .contact-info {
+      display: block;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(.36,1.19,.6,.74), opacity 0.22s;
+      overflow: hidden;
+      font-size: 1.06rem;
+      color: var(--bar-accent);
       text-align: center;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
+      font-weight: bold;
+      margin-bottom: -10px;
+      margin-top: 0;
+      pointer-events: none;
     }
-    .desc {
-      font-size: 1rem;
-      color: var(--muted);
-      text-align: center;
-      margin-bottom: 10px;
+    .carte-profil:hover .contact-info,
+    .carte-profil:focus-visible .contact-info {
+      opacity: 1;
+      max-height: 80px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      pointer-events: all;
     }
-    @media (max-width: 769px) {
+
+    @media (max-width: 995px) {
       .cartes {flex-direction: column; gap: 40px; align-items: center;}
       .topbar {padding: 16px;}
       .title {font-size: 2.2rem;}
     }
     @media (max-width:480px){
       .logo{height:45px}
-      .cartes {margin-top: 126px;}
+      .cartes {margin-top: 0;}
       .carte-profil {padding: 24px 10px; min-width: 90vw; max-width:98vw;}
       .title{font-size:1.25rem;}
     }
@@ -145,27 +166,7 @@
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
     <div class="title">GEEKSOFT - CONTACT</div>
   </header>
-  <div class="cartes">
-    <div class="carte-profil">
-      <img src="https://avatars.githubusercontent.com/u/1?v=4" alt="Photo Profil" class="avatar"/>
-      <div class="pseudo">Admin GeekSoft</div>
-      <div class="desc">Développeur principal du projet GeekSoft et organisateur des tournois Discord.</div>
-    </div>
-    <div class="carte-profil">
-      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo Profil" class="avatar"/>
-      <div class="pseudo">Lucas</div>
-      <div class="desc">Responsable bots personnalisés et aide à la configuration Discord.</div>
-    </div>
-    <div class="carte-profil">
-      <img src="https://randomuser.me/api/portraits/women/46.jpg" alt="Photo Profil" class="avatar"/>
-      <div class="pseudo">Emma</div>
-      <div class="desc">Designer graphique et gestion des annonces GeekSoft.</div>
-    </div>
-    <div class="carte-profil">
-      <img src="https://randomuser.me/api/portraits/men/15.jpg" alt="Photo Profil" class="avatar"/>
-      <div class="pseudo">Maxime</div>
-      <div class="desc">Support technique et contact pour les bots marchands.</div>
-    </div>
-  </div>
+  <div class="cartes" id="cartes"></div>
+  <script src="membres.js"></script>
 </body>
 </html>
