@@ -1,7 +1,7 @@
 const membres = [
   { image: "image1.jpg", pseudo: "Artemix89", desc: "Créateur, Développeur, et Gérant de GeekSoft", contact: "artemixtsb@gmail.com" },
   { image: "image2.png", pseudo: "Mix260", desc: "Assistant HTML et CSS", contact: "mixpro2taff@gmail.com" },
-  { image: "image3.png", pseudo: "JustSomebody", desc: "Gérant de la communication a temp partiel", contact: "Aucun Contact" },
+  { image: "image3.png", pseudo: "JustSomebody", desc: "Gérant de la communication a temps partiel", contact: "Aucun Contact" },
   { image: "image4.png", pseudo: "Stor", desc: "Amis et tout premier client pour son serveur. Également Testeur a temps partiel et Youtuber", 
     contact: "Son discord : <a href=\"https://discord.gg/cd7YWe8pqV\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a><br>Youtube : <a href=\"https://www.youtube.com/@levraistor\" target=\"_blank\" rel=\"noopener noreferrer\">Youtube</a>" 
   },
