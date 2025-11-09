@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GeekSoft - Liste des devis</title>
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #0b0b0b;
+      --text-main: #ffffff;
+      --muted: #cccccc;
+      --accent: #ffffff;
+      --card-bg: #141414;
+      --shadow: 0 0 25px rgba(255,255,255,0.2);
+    }
+    html, body {
+      margin:0; font-family:'Poppins',sans-serif;
+      background:var(--background); color:var(--text-main);
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh; overflow-x:hidden;
+    }
+    .topbar {
+      position:fixed; top:20px; left:50%;
+      transform:translateX(-50%);
+      background:#000; color:var(--text-main);
+      padding:20px 30px; display:flex; align-items:center;
+      justify-content:space-between; border-radius:18px;
+      width:90%; max-width:900px;
+      box-shadow:0 0 20px rgba(255,255,255,0.4); z-index:100;
+    }
+    .logo {height:55px; filter:drop-shadow(0 0 8px var(--accent));}
+    .title {font-weight:700; font-size:2rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-main); text-shadow:0 0 15px rgba(255,255,255,0.6); margin:0;}
+    .spacer {height:120px;}
+    .card {
+      background:var(--card-bg); border-radius:20px;
+      padding:30px; width:95%; max-width:1400px;
+      box-shadow:var(--shadow); margin-bottom:60px;
+      overflow:hidden; position:relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    table {
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #181818;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow:0 0 10px rgba(255,255,255,0.09);
+    }
+    th, td {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 1.04rem;
+    }
+    th {color: var(--accent); background:#222222;}
+    tr {
+      transition: background 0.18s;
+      cursor: pointer;
+    }
+    tr:hover { background: #242633; }
+    .muted{color:var(--muted);}
+    .loader {
+      width: 35px; aspect-ratio: 1;
+      --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
+      background:var(--_g) 0 0, var(--_g) 100% 0,
+                 var(--_g) 100% 100%,var(--_g) 0 100%;
+      background-size: 40% 40%;
+      animation: l38 .5s infinite;
+      margin: auto; margin-top:20px;
+    }
+    @keyframes l38 { 100% {background-position: 100% 0,100% 100%,0 100%,0 0} }
+    .error { color: #ff8080; margin-top:24px; font-size:1.1rem;}
+    @media (max-width:900px){
+      .topbar {max-width:98vw;width:98vw;}
+      .card {max-width:98vw;width:98vw;}
+      table, th, td {font-size:.98rem;}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+    <div class="title">GEEKSOFT - LISTE DES DEVIS</div>
+  </header>
+  <div class="spacer"></div>
+  <div class="card" id="card">
+    <h2>Mes devis</h2>
+    <div class="loader" id="loader"></div>
+    <div class="error" id="error-msg" style="display:none"></div>
+    <table id="devis-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Nom du bot</th>
+          <th>ID</th>
+          <th>Dernier statut</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    function statusLabel(val) {
+      switch(val) {
+        case 'RECU': return "Reçu";
+        case 'LU': return "Lu";
+        case 'APPROUVE': return "Approuvé";
+        case 'REPONCE': return "Répondu";
+        default: return "Inconnu";
+      }
+    }
+    // On charge la liste au chargement
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      const loader = document.getElementById('loader');
+      const table = document.getElementById('devis-table');
+      const error = document.getElementById('error-msg');
+      const tbody = table.querySelector('tbody');
+      try {
+        const resp = await fetch('https://devmra.pythonanywhere.com/devislist');
+        const data = await resp.json();
+        if(!Array.isArray(data)) throw new Error("Format inattendu");
+        if(data.length === 0) {
+          error.textContent = "Aucun devis trouvé.";
+          error.style.display = 'block';
+          loader.style.display = 'none';
+          return;
+        }
+        data.forEach(devis=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            `<td>${devis.nom_bot ? devis.nom_bot : "<span class='muted'>(inconnu)</span>"}</td>` +
+            `<td>${devis.id}</td>` +
+            `<td>${statusLabel(devis.dernier_status_true)}</td>`;
+          tr.onclick = ()=>window.location.href = `mondevis.html?devis=${devis.id}`;
+          tbody.appendChild(tr);
+        });
+        loader.style.display = 'none';
+        table.style.display = 'table';
+      } catch(err){
+        error.textContent = "Erreur lors du chargement des devis.";
+        error.style.display = 'block';
+        loader.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
