@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GeekSoft - Paiement Devis</title>
+  <title>GeekSoft - Envoi Devis</title>
   <link rel="icon" type="image/png" href="GEEKSOFT.png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --background: #0b0b0b;
@@ -16,219 +15,154 @@
       --card-bg: #141414;
       --shadow: 0 0 25px rgba(255,255,255,0.2);
     }
-
-    html,body{margin:0;font-family:'Poppins',sans-serif;background:var(--background);color:var(--text-main);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
-    .topbar{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#000;color:var(--text-main);padding:20px 30px;display:flex;align-items:center;justify-content:space-between;border-radius:18px;width:90%;max-width:900px;box-shadow:0 0 20px rgba(255,255,255,0.4);z-index:100}
-    .logo{height:55px;filter:drop-shadow(0 0 8px var(--accent))}
-    .title{font-weight:700;font-size:2rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-main);text-shadow:0 0 15px rgba(255,255,255,0.6);margin:0}
-    .spacer{height:120px;}
-
-    .card { background:var(--card-bg); border-radius:20px; padding:30px; width:90%; max-width:900px; box-shadow:var(--shadow); margin-bottom:60px; overflow:hidden; position:relative; }
-
-    .stage { display:flex; width:200%; transition:transform .6s cubic-bezier(.22,.9,.3,1); }
-    .panel { width:50%; box-sizing:border-box; padding:20px 30px; }
-
+    html, body {
+      margin:0; font-family:'Poppins',sans-serif;
+      background:var(--background); color:var(--text-main);
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh; overflow-x:hidden;
+    }
+    .topbar {
+      position:fixed; top:20px; left:50%;
+      transform:translateX(-50%);
+      background:#000; color:var(--text-main);
+      padding:20px 30px; display:flex; align-items:center;
+      justify-content:space-between; border-radius:18px;
+      width:90%; max-width:900px;
+      box-shadow:0 0 20px rgba(255,255,255,0.4); z-index:100;
+    }
+    .logo {height:55px; filter:drop-shadow(0 0 8px var(--accent));}
+    .title {font-weight:700; font-size:2rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-main); text-shadow:0 0 15px rgba(255,255,255,0.6); margin:0;}
+    .spacer {height:120px;}
+    .card {
+      background:var(--card-bg); border-radius:20px;
+      padding:30px; width:90%; max-width:900px;
+      box-shadow:var(--shadow); margin-bottom:60px;
+      overflow:hidden; position:relative;
+    }
     form .row{display:flex;gap:12px;margin-bottom:12px}
     label{display:block;font-size:0.9rem;margin-bottom:6px;color:var(--muted)}
-    input[type="text"],input[type="email"],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:#0f0f0f;color:var(--text-main)}
+    input[type="text"],input[type="email"],select,textarea{
+      width:100%;padding:10px;border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:#0f0f0f;color:var(--text-main)
+    }
     textarea{min-height:90px;resize:vertical}
-    .btn{display:inline-block;padding:12px 18px;border-radius:12px;background:var(--accent);color:#000;font-weight:600;border:none;cursor:pointer}
-    .btn-secondary{background:#555;color:#fff;}
+    .btn{display:inline-block;padding:12px 18px;
+      border-radius:12px;background:var(--accent);
+      color:#000;font-weight:600;border:none;cursor:pointer}
     .muted{color:var(--muted);font-size:0.9rem;margin-top:8px}
-
-    .price{font-size:1.6rem;font-weight:500;margin:10px 0 25px 0;color:var(--text-main)}
-    .paypal-area{max-width:360px;margin:0 auto}
-
     .confirm{padding:20px;text-align:center}
-
-    /* Loader */
     .loader {
-      width: 35px;
-      aspect-ratio: 1;
+      width: 35px; aspect-ratio: 1;
       --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
-      background:
-        var(--_g) 0    0,
-        var(--_g) 100% 0,
-        var(--_g) 100% 100%,
-        var(--_g) 0    100%;
+      background:var(--_g) 0 0, var(--_g) 100% 0,
+                 var(--_g) 100% 100%,var(--_g) 0 100%;
       background-size: 40% 40%;
-      animation: l38 .5s infinite; 
+      animation: l38 .5s infinite;
       margin: auto;
     }
     @keyframes l38 { 100% {background-position: 100% 0,100% 100%,0 100%,0 0} }
     .loader-overlay {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background: rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      border-radius: 20px;
-      display:none;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; border-radius: 20px; display:none;
     }
-
-    /* Récap aligné à gauche */
     #recap{margin-left:0;text-align:left;white-space:pre-wrap;}
-
     @media (max-width:900px){
-      .stage{flex-direction:column;width:100%}
       .panel{width:100%}
     }
   </style>
-
-  <!-- PayPal SDK avec hosted buttons -->
-  <script 
-    src="https://www.paypal.com/sdk/js?client-id=BAARVD2jx5IiVnvntDbXIr373cCT40elk40sjDGIB8MzbSwEYIDvUcA8IlghJCrfGjhCp37MbcEIB3CKto&components=hosted-buttons&disable-funding=venmo&currency=EUR">
-  </script>
 </head>
-
 <body>
   <header class="topbar">
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
     <div class="title">GEEKSOFT - DEVIS</div>
   </header>
-
   <div class="spacer"></div>
-
   <div class="card" id="card">
-    <div class="loader-overlay" id="loader-overlay">
-      <div class="loader"></div>
-    </div>
-
-    <div class="stage" id="stage">
-      <!-- PANEL 1 : FORMULAIRE -->
-      <div class="panel" id="panel-form">
-        <h2>Paiement du devis</h2>
-        <p class="muted">Remplissez vos informations et décrivez ce que le bot doit faire.</p>
-
-        <form id="quote-form">
-          <div class="row">
-            <div style="flex:1">
-              <label for="firstname">Prénom</label>
-              <input id="firstname" name="firstname" type="text" required />
-            </div>
-            <div style="flex:1">
-              <label for="lastname">Nom</label>
-              <input id="lastname" name="lastname" type="text" required />
-            </div>
+    <div class="loader-overlay" id="loader-overlay"><div class="loader"></div></div>
+    <div id="form-panel">
+      <h2>Envoyer un devis</h2>
+      <p class="muted">Remplis tes infos et décris le bot voulu.</p>
+      <form id="quote-form">
+        <div class="row">
+          <div style="flex:1">
+            <label for="firstname">Prénom</label>
+            <input id="firstname" name="firstname" type="text" required />
           </div>
-
-          <div class="row">
-            <div style="flex:1">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" required />
-            </div>
-            <div style="flex:1">
-              <label for="botname">Nom du bot</label>
-              <input id="botname" name="botname" type="text" placeholder="Ex : MonSuperBot" required />
-            </div>
+          <div style="flex:1">
+            <label for="lastname">Nom</label>
+            <input id="lastname" name="lastname" type="text" required />
           </div>
-
-          <div class="row">
-            <div style="flex:1">
-              <label for="members">Nombre de membres</label>
-              <select id="members" name="members">
-                <option value="0-100">0 - 100</option>
-                <option value="101-500">101 - 500</option>
-                <option value="501-2000">501 - 2000</option>
-                <option value="2001+">2001+</option>
-              </select>
-            </div>
-          </div>
-
-          <label for="features">Fonctionnalités demandées</label>
-          <textarea id="features" name="features" placeholder="Ex : commandes modération, XP, tickets..."></textarea>
-
-          <div style="display:flex;gap:12px;margin-top:18px;align-items:center">
-            <button type="submit" class="btn" id="send-quote">Envoyer mon devis</button>
-            <div class="muted" id="status-note">Après envoi, tu seras redirigé vers le paiement.</div>
-          </div>
-        </form>
-      </div>
-
-      <!-- PANEL 2 : PAIEMENT -->
-      <div class="panel" id="panel-pay" aria-hidden="true">
-        <h2>Récapitulatif & Paiement</h2>
-        <div id="recap"></div>
-        <button class="btn btn-secondary" id="edit-info" style="margin-bottom:12px;">Modifier mes infos</button>
-
-        <div class="price">Montant : <strong id="amount-display">0,50 €</strong></div>
-        <div class="paypal-area" id="paypal-area">
-          <!-- Ici on insère ton bouton hébergé -->
-          <div id="paypal-container-9EPBY76H9Z6DW"></div>
         </div>
-        <p class="muted">Paiement sécurisé via PayPal. Une fois le paiement effectué, vous recevrez le devis complet par e-mail.</p>
-      </div>
+        <div class="row">
+          <div style="flex:1">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+          <div style="flex:1">
+            <label for="botname">Nom du bot</label>
+            <input id="botname" name="botname" type="text" placeholder="Ex : MonSuperBot" required />
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1">
+            <label for="members">Nombre de membres</label>
+            <select id="members" name="members">
+              <option value="0-100">0 - 100</option>
+              <option value="101-500">101 - 500</option>
+              <option value="501-2000">501 - 2000</option>
+              <option value="2001+">2001+</option>
+            </select>
+          </div>
+        </div>
+        <label for="features">Fonctionnalités demandées</label>
+        <textarea id="features" name="features" placeholder="Ex : commandes modération, XP, tickets..."></textarea>
+        <div style="display:flex;gap:12px;margin-top:18px;align-items:center">
+          <button type="submit" class="btn" id="send-quote">Envoyer mon devis</button>
+          <div class="muted" id="status-note"></div>
+        </div>
+      </form>
     </div>
-
-    <!-- CONFIRMATION -->
     <div id="confirmation" style="display:none" class="confirm">
-      <h2>Devis payé ✅</h2>
-      <p>Merci — votre paiement a été reçu. Vous allez recevoir le devis complet par e-mail dans quelques minutes.</p>
-      <p class="muted">Si problème, contactez-nous.</p>
+      <h2>Devis envoyé ✅</h2>
+      <p>Merci — nous avons bien reçu ta demande. Tu recevras une réponse par e-mail rapidement.</p>
+      <p class="muted">Si problème, contacte-nous.</p>
     </div>
   </div>
-
   <script>
-    const PRICE_EUR = "0.50";
-    const stage = document.getElementById('stage');
-    const form = document.getElementById('quote-form');
-    const recap = document.getElementById('recap');
     const loader = document.getElementById('loader-overlay');
-    const editBtn = document.getElementById('edit-info');
+    const form = document.getElementById('quote-form');
     const confirmation = document.getElementById('confirmation');
-
+    const formPanel = document.getElementById('form-panel');
     function showLoader(){ loader.style.display='flex'; }
     function hideLoader(){ loader.style.display='none'; }
-    function showPaymentPanel(){
-      stage.style.transform = window.innerWidth > 900 ? 'translateX(-50%)' : 'translateX(0)';
-      document.getElementById('panel-pay').setAttribute('aria-hidden','false');
-    }
-    function showConfirmation(){
-      stage.style.display='none';
-      confirmation.style.display='block';
-    }
-
     form.addEventListener('submit', async function(e){
       e.preventDefault();
       showLoader();
-
       const data = new FormData(form);
+      // Structure le JSON comme demandé dans la capture d’écran
       const payload = {
-        firstname: data.get('firstname'),
-        lastname: data.get('lastname'),
-        email: data.get('email'),
-        botname: data.get('botname'),
-        members_range: data.get('members'),
-        features: data.get('features') || '(non précisé)',
-        amount: PRICE_EUR
+        "prenom": data.get('firstname'),
+        "nom": data.get('lastname'),
+        "email": data.get('email'),
+        "nom_bot": data.get('botname'),
+        "nombre_membres": data.get('members'),
+        "fonctionnalites": data.get('features')
       };
-
-      recap.innerHTML =
-        `Nom du bot : ${payload.botname}\nPrénom/Nom : ${payload.firstname} ${payload.lastname}\nEmail : ${payload.email}\nMembres : ${payload.members_range}\nFonctionnalités : ${payload.features}`;
-
-      showPaymentPanel();
-
-      // on monte le bouton PayPal hébergé
-      setTimeout(() => {
-        paypal.HostedButtons({
-          hostedButtonId: "9EPBY76H9Z6DW",
-          onApprove: function(){
-            showConfirmation();
-          },
-          onError: function(err){
-            console.error("Erreur PayPal", err);
-            alert("Erreur lors du paiement PayPal. Réessaie dans quelques instants.");
-          }
-        }).render("#paypal-container-9EPBY76H9Z6DW");
-      }, 300);
-
+      try {
+        await fetch('https://devmra.pythonanywhere.com/devisadd', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        formPanel.style.display = 'none';
+        confirmation.style.display = 'block';
+      } catch (err){
+        document.getElementById('status-note').textContent = "Erreur lors de l'envoi, réessaye dans quelques minutes.";
+      }
       hideLoader();
-    });
-
-    editBtn.addEventListener('click',()=>{
-      stage.style.transform='translateX(0)';
     });
   </script>
 </body>
