@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GeekSoft - Statut Devis</title>
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #0b0b0b;
+      --text-main: #ffffff;
+      --muted: #cccccc;
+      --accent: #ffffff;
+      --card-bg: #141414;
+      --shadow: 0 0 25px rgba(255,255,255,0.2);
+    }
+    html, body {
+      margin:0; font-family:'Poppins',sans-serif;
+      background:var(--background); color:var(--text-main);
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh; overflow-x:hidden;
+    }
+    .topbar {
+      position:fixed; top:20px; left:50%;
+      transform:translateX(-50%);
+      background:#000; color:var(--text-main);
+      padding:20px 30px; display:flex; align-items:center;
+      justify-content:space-between; border-radius:18px;
+      width:90%; max-width:900px;
+      box-shadow:0 0 20px rgba(255,255,255,0.4); z-index:100;
+    }
+    .logo {height:55px; filter:drop-shadow(0 0 8px var(--accent));}
+    .title {font-weight:700; font-size:2rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-main); text-shadow:0 0 15px rgba(255,255,255,0.6); margin:0;}
+    .spacer {height:120px;}
+    .card {
+      background:var(--card-bg); border-radius:20px;
+      padding:30px; width:95%; max-width:1400px;
+      box-shadow:var(--shadow); margin-bottom:60px;
+      overflow:hidden; position:relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    label{display:block;font-size:0.9rem;margin-bottom:6px;color:var(--muted)}
+    input[type="text"]{
+      width:350px;max-width:90vw;padding:10px;border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:#0f0f0f;color:var(--text-main)
+    }
+    .btn{display:inline-block;padding:12px 18px;
+      border-radius:12px;background:var(--accent);
+      color:#000;font-weight:600;border:none;cursor:pointer;
+      margin-top:12px
+    }
+    .status {
+      background:#232323;
+      border-radius:12px;
+      padding:18px 28px;
+      margin-top:30px;
+      margin-bottom:12px;
+      font-size:1.15rem;
+      box-shadow:0 0 8px rgba(255,255,255,0.05);
+      min-width:330px;
+      max-width:90vw;
+      color:var(--text-main);
+    }
+    .error { color: #ff8080; margin-top:18px;}
+    @media (max-width:900px){
+      .topbar {max-width:98vw;width:98vw;}
+      .card {max-width:98vw;width:98vw;}
+      .status {min-width:0;}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+    <div class="title">GEEKSOFT - STATUT DU DEVIS</div>
+  </header>
+  <div class="spacer"></div>
+  <div class="card" id="card">
+    <h2>Consulter le statut d'un devis</h2>
+    <form id="status-form" autocomplete="off" style="margin-bottom:18px;">
+      <label for="devisid">ID du devis (timestamp)</label>
+      <input id="devisid" name="devisid" type="text" placeholder="Ex : 1731154924001628" required />
+      <button type="submit" class="btn">Vérifier le statut</button>
+    </form>
+    <div class="status" id="status-result" style="display:none"></div>
+    <div class="error" id="error-msg" style="display:none"></div>
+  </div>
+  <script>
+    // Fonction pour obtenir le paramètre ?devis=xxxx dans l'URL
+    function getDevisIdFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('devis');
+    }
+
+    const form = document.getElementById('status-form');
+    const result = document.getElementById('status-result');
+    const error = document.getElementById('error-msg');
+    const devisInput = document.getElementById('devisid');
+
+    // Fonction pour afficher le statut
+    async function showStatus(devisId){
+      if(!devisId) return;
+      result.textContent = "Chargement...";
+      result.style.display = 'block';
+      error.style.display = 'none';
+      try {
+        const response = await fetch(`https://devmra.pythonanywhere.com/devisstatus/${devisId}`);
+        const data = await response.json();
+        if(data.error){
+          error.textContent = "Erreur : " + data.error;
+          error.style.display = 'block';
+          result.style.display = 'none';
+        } else {
+          result.innerHTML =
+            `<b>Reçu :</b> ${data.RECU === "True" ? "✅ Oui" : "⏳ Non"}<br>` +
+            `<b>Lu :</b> ${data.LU === "True" ? "✅ Oui" : "⏳ Non"}<br>` +
+            `<b>Approuvé :</b> ${data.APPROUVE === "True" ? "✅ Oui" : "⏳ Non"}<br>` +
+            `<b>Répondu :</b> ${data.REPONCE === "True" ? "✅ Oui" : "⏳ Non"}`;
+          result.style.display = 'block';
+        }
+      } catch(err){
+        error.textContent = "Erreur de connexion ou format JSON invalide";
+        error.style.display = 'block';
+        result.style.display = 'none';
+      }
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const devisId = devisInput.value.trim();
+      showStatus(devisId);
+    });
+
+    // Si l'ID est présent dans l'URL => auto-afficher le statut
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const urlDevisId = getDevisIdFromURL();
+      if(urlDevisId){
+        devisInput.value = urlDevisId;
+        showStatus(urlDevisId);
+      }
+    });
+  </script>
+</body>
+</html>
