@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Mentions légales - GeekSoft</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="https://geeksoft.online/GEEKSOFT.png">
+    <style>
+        /* Réutilise le style de ta taskbar */
+        :root {
+            --black: #1e1e1e;
+            --white: #fff;
+            --muted: #b2b2b2;
+            --glow: #686868;
+            --gray-bg: #191919;
+            --bar-bg: #222930;
+            --bar-accent: #32c1ff;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial Black', Impact, sans-serif;
+            background: var(--gray-bg);
+            color: var(--white);
+        }
+        .topbar {
+            position: fixed;
+            top: 20px;
+            left: 50vw;
+            transform: translateX(-50%);
+            background: #000;
+            color: var(--white);
+            padding: 28px 40px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
+            border-radius: 24px;
+            width: 93vw;
+            max-width: 1300px;
+            z-index: 1000;
+        }
+        .logo { height: 70px; filter: drop-shadow(0 0 15px var(--glow)); }
+        .title { font-weight: 900; font-size: 2.5rem; letter-spacing: 3px; text-transform: uppercase; color: var(--white); margin: auto; }
+        .legales-container {
+            margin-top: 140px;
+            max-width: 900px;
+            padding: 36px 32px;
+            background: #222930;
+            border-radius: 22px;
+            box-shadow: 0 4px 16px var(--black);
+        }
+        h1, h2, h3 { color: var(--bar-accent);}
+        p, li { color: var(--muted);}
+        ul { padding-left: 20px; }
+        a { color: var(--bar-accent);}
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <img src="https://geeksoft.online/GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+        <div class="title">GeekSoft - Mentions légales</div>
+    </header>
+    <div class="legales-container">
+        <h1>Mentions légales</h1>
+        <h2>Éditeur du site</h2>
+        <p><strong>GeekSoft</strong> - Société individuelle<br>
+        Adresse : [mettre l'adresse de ton entreprise]<br>
+        Email : [ton email de contact]<br>
+        Responsable de publication : Mahé Guignard</p>
+        
+        <h2>Hébergeur</h2>
+        <p>[Nom de ton hébergeur actuel, ex : LWS ou OVH]<br>
+        Adresse : [Adresse de l’hébergeur]</p>
+        
+        <h2>Collecte des données personnelles</h2>
+        <p>GeekSoft collecte les informations nécessaires pour l'établissement et l’envoi de devis aux utilisateurs (nom, email, Discord, etc.) via le site. Ces données sont stockées de façon sécurisée et ne sont jamais transmises à des tiers.</p>
+        <ul>
+            <li>Finalité : envoi de devis et gestion des demandes clients.</li>
+            <li>Base légale : consentement lors de la soumission du formulaire.</li>
+            <li>Droit d’accès, de rectification et de suppression : contactez <a href="mailto:artemixtsb@gmail.com">artemixtsb@gmail.com</a></li>
+        </ul>
+        
+        <h2>Cookies</h2>
+        <p>Ce site n’utilise pas de cookies à des fins non nécessaires ou de suivi publicitaire.</p>
+        <h2>Propriété intellectuelle</h2>
+        <p>Tout contenu présent sur le site GeekSoft (textes, images, logos, etc.) est protégé par le droit d’auteur. Toute reproduction totale ou partielle est interdite sans autorisation préalable.</p>
+        <h2>Contact</h2>
+        <p>Pour toute question concernant les mentions légales, contactez [ton email ou formulaire de contact].</p>
+    </div>
+</body>
+</html>
