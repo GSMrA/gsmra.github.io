@@ -22,16 +22,77 @@
       min-height:100vh; overflow-x:hidden;
     }
     .topbar {
-      position:fixed; top:20px; left:50%;
-      transform:translateX(-50%);
-      background:#000; color:var(--text-main);
-      padding:20px 30px; display:flex; align-items:center;
-      justify-content:space-between; border-radius:18px;
-      width:90%; max-width:900px;
-      box-shadow:0 0 20px rgba(255,255,255,0.4); z-index:100;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--black);
+      color: var(--white);
+      padding: 22px 36px 18px 36px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.16);
+      border-radius: 24px;
+      width: 90%;
+      max-width: 1300px;
+      z-index: 1000;
     }
-    .logo {height:55px; filter:drop-shadow(0 0 8px var(--accent));}
-    .title {font-weight:700; font-size:2rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-main); text-shadow:0 0 15px rgba(255,255,255,0.6); margin:0;}
+
+    .logo-title-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .logo {
+      height: 70px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 0 25px var(--glow));
+    }
+
+    .title {
+      font-size: 3.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white);
+      font-weight: 900;
+      text-shadow: 0 0 25px var(--glow), 0 0 50px var(--glow), 0 0 15px var(--glow);
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: row;
+      gap: 38px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .nav a {
+      color: var(--white);
+      text-decoration: none;
+      text-transform: uppercase;
+      font-size: 1.13rem;
+      letter-spacing: 1px;
+      font-family: 'Arial Black', Impact, sans-serif;
+      font-weight: bold;
+      position: relative;
+      filter: drop-shadow(0 0 10px var(--glow));
+      text-shadow: 0 0 10px var(--glow);
+      transition: filter 0.2s;
+    }
+
+    .nav a:hover, .nav a.active {
+      filter: drop-shadow(0 0 23px var(--glow));
+      text-decoration: underline;
+      text-shadow: 0 0 23px var(--glow);
+    }
     .spacer {height:120px;}
     .card {
       background:var(--card-bg); border-radius:20px;
@@ -79,6 +140,13 @@
     <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
     <div class="title">GEEKSOFT - DEVIS</div>
   </header>
+  <nav class="nav">
+    <a href="index.html" class="active">Accueil</a>
+    <a href="creations.html">Créations</a>
+    <a href="devis.html">Devis</a>
+    <a href="questions.html">Questions</a>
+    <a href="contact.html">Contact</a>
+  </nav>
   <div class="spacer"></div>
   <div class="card" id="card">
     <div class="loader-overlay" id="loader-overlay"><div class="loader"></div></div>
