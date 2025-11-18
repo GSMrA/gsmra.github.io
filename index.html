@@ -10,20 +10,15 @@
             --black: #000;
             --white: #fff;
             --glow: #fff;
-            --devise: #13d2ff;
             --gray-bg: #1e1e1e;
         }
-
         html, body {
             height: 100%;
             margin: 0;
             font-family: 'Arial Black', Impact, sans-serif;
             background: var(--gray-bg);
             color: var(--white);
-            scroll-behavior: smooth;
         }
-
-        /* ====== BARRE DU HAUT ====== */
         .topbar {
             position: fixed;
             top: 20px;
@@ -35,14 +30,13 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.16);
             border-radius: 24px;
             width: 90%;
-            max-width: 1300px;
+            max-width: 800px;
             z-index: 1000;
         }
-
         .logo-title-wrapper {
             display: flex;
             flex-direction: row;
@@ -50,14 +44,12 @@
             gap: 16px;
             min-width: 0;
         }
-
         .logo {
             height: 70px;
             width: auto;
             display: block;
             filter: drop-shadow(0 0 25px var(--glow));
         }
-
         .title {
             font-size: 3.5rem;
             letter-spacing: 3px;
@@ -68,240 +60,30 @@
             white-space: nowrap;
             line-height: 1;
         }
-
-        .nav {
-            display: flex;
-            flex-direction: row;
-            gap: 38px;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .nav a {
-            color: var(--white);
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 1.13rem;
-            letter-spacing: 1px;
-            font-family: 'Arial Black', Impact, sans-serif;
-            font-weight: bold;
-            position: relative;
-            filter: drop-shadow(0 0 10px var(--glow));
-            text-shadow: 0 0 10px var(--glow);
-            transition: filter 0.2s;
-        }
-
-        .nav a:hover, .nav a.active {
-            filter: drop-shadow(0 0 23px var(--glow));
-            text-decoration: underline;
-            text-shadow: 0 0 23px var(--glow);
-        }
-
-        /* ====== CONTENU PRINCIPAL ====== */
-        .container {
-            min-height: 100vh;
-            padding-top: 170px;
-            padding-bottom: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .welcome {
-            margin-bottom: 30px;
-            padding: 10px 0 22px 0;
-        }
-
-        .giant-title {
-            font-size: 3.4rem;
-            font-weight: 900;
-            color: #FCFCF9;
-            text-shadow: 0 0 18px #fff;
-            margin-bottom: 8px;
-            margin-top: 0;
-            letter-spacing: 2px;
-            line-height: 1.07;
-        }
-
-        .welcome-lead {
-            font-size: 1.25rem;
-            color: #dedede;
-            font-weight: 400;
-            margin: 0 auto;
-            line-height: 1.6;
-            max-width: 700px;
-        }
-
-        /* ====== BLOCS CENTRÉS ====== */
-        .block-container {
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            position: relative;
-            margin: 60px auto;
-            width: 90%;
-            max-width: 1200px;
-            transition: width 0.3s ease;
-        }
-
-        .block {
-            flex: 1 1 auto;
-            background: #313332 !important;
-            border-radius: 28px;
-            padding: 60px 5vw;
-            box-sizing: border-box;
-            color: #FCFCF9;
-            border: 2px solid #222;
-            box-shadow: 0 6px 36px #0002;
-            position: relative;
-            z-index: 2;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: left 0.75s cubic-bezier(.55,-0.05,.5,1.2);
-        }
-
-        /* Left par défaut uniquement pour le premier bloc */
-        .block-container:first-of-type .block {
-            left: 14%;
-        }
-
-        .block-side {
-            flex: 0 0 28%;
-            max-width: 340px;
-            background: #242526;
-            margin-left: -40px;
-            border-radius: 28px;
-            box-shadow: 10px 0 30px #0004;
+        .maintenance-section {
+            margin-top: 190px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.6s cubic-bezier(.18,.89,.32,1.28);
-            padding: 20px 16px;
-            color: #fff;
-            text-align: center;
+            justify-content: center;
         }
-
-        /* Glissement et apparition uniquement pour le premier bloc */
-        .block-container:first-of-type:hover .block,
-        .block-container:first-of-type:focus-within .block {
-            left: -20%;
-        }
-
-        .block-container:first-of-type:hover .block-side,
-        .block-container:first-of-type:focus-within .block-side {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .block-container:first-of-type:hover .block-side .side-image,
-        .block-container:first-of-type:focus-within .block-side .side-image {
-            transform: scale(1.05);
-        }
-
-        .block .subtitle, .block .info {
-            max-width: 680px;
-            margin: 0 auto 22px auto;
-            text-align: center;
-        }
-
-        .block .subtitle {
-            color: #FCFCF9;
-            text-shadow: 0 0 18px #fff;
-            font-size: 2.1rem;
+        .maintenance-msg {
+            font-size: 2.7rem;
+            margin-bottom: 35px;
             font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .block .info {
-            color: #FCFCF9;
-            font-size: 1.15rem;
-            text-shadow: none;
-        }
-
-        .block-side h3 {
-            font-size: 1.4rem;
-            margin: 0 0 12px 0;
-            color: var(--devise);
-            text-shadow: 0 0 8px var(--devise);
-        }
-
-        .block-side .side-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 16px;
-            margin: 0 auto 18px auto;
-            box-shadow: 0 4px 18px #0006;
-            transition: transform 0.4s;
-        }
-
-        /* ====== BOUTON CTA RÉDUIT ====== */
-        .cta-btn {
-            display: inline-block;
-            margin-top: 26px;
-            font-size: 1.2rem;
-            background: none;
-            color: #fff !important;
-            border: 2px solid var(--devise);
-            padding: 14px 24px; /* largeur réduite */
-            border-radius: 8px;
-            box-shadow: 0 0 5px var(--devise), 0 0 11px var(--devise);
-            cursor: pointer;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            filter: drop-shadow(0 0 3px var(--devise));
-            transition: background 0.23s, color 0.23s, box-shadow 0.23s;
-        }
-
-        .cta-btn:hover {
-            background: var(--devise);
-            color: #0c262c !important;
-            box-shadow: 0 0 8px var(--devise);
-        }
-
-        footer {
-            padding: 22px 20px;
+            color: #13d2ff;
+            text-shadow: 0 0 14px #13d2ff99;
             text-align: center;
-            color: #888;
-            font-size: 13px;
         }
-
-        /* ====== RESPONSIVE ====== */
-        @media (max-width:1300px){
-            .block-container { width:94%; max-width:1100px; }
-            .block-container:first-of-type:hover .block { left:-22%; }
-        }
-        @media (max-width:1000px){
-            .block-container { width:96%; max-width:900px; }
-            .block-container:first-of-type:hover .block { left:-18%; }
-        }
-        @media (max-width:800px){
-            .block-container { flex-direction:column; width:96%; align-items:center; }
-            .block-side { display:none; }
-            .block { left:0; margin-bottom:20px; min-height:240px; }
-        }
-        @media (max-width:620px) {
-            .logo-title-wrapper { flex-direction: column; align-items:flex-start; gap:6px; }
-            .topbar { flex-direction:column; align-items:flex-start; padding:9px 4vw; }
-            .nav { padding-top:6px;width:100%;justify-content:flex-start; }
-            .title { font-size:1.04rem;}
-            .logo {height:28px;}
-        }
-        @media (max-width:480px){
-            .container {padding-top:140px;font-size:15px;}
-            .nav a{font-size:0.83rem;}
-            .giant-title{font-size:1.19rem;}
-            .welcome-lead{font-size:0.92rem;}
-            .block .subtitle{font-size:0.98rem;}
-            .block{margin-bottom:2vw;}
+        .countdown {
+            font-size: 2rem;
+            background: rgba(22,22,22,0.8);
+            padding: 28px 42px;
+            border-radius: 15px;
+            border: 2px solid #13d2ff;
+            box-shadow: 0 0 24px #13d2ff44;
+            letter-spacing: 4px;
+            text-align: center;
         }
     </style>
 </head>
@@ -311,71 +93,55 @@
             <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
             <div class="title">GEEKSOFT</div>
         </div>
-        <nav class="nav">
-            <a href="index.html" class="active">Accueil</a>
-            <a href="creations.html">Créations</a>
-            <a href="devis.html">Devis</a>
-            <a href="questions.html">Questions</a>
-            <a href="contact.html">Contact</a>
-        </nav>
     </header>
-
-    <main class="container">
-        <div class="welcome">
-            <h1 class="giant-title">Bienvenue sur GeekSoft</h1>
-            <p class="welcome-lead">
-                Experts français en création de bots Discord sur mesure.<br>
-                Automatisez, animez et sécurisez vos serveurs avec style !
-            </p>
-        </div>
-
-        <section class="block-container">
-            <div class="block">
-                <div class="subtitle">Bots Discord 100% personnalisés pour tous les besoins</div>
-                <div class="info">
-                    <br>Automatisez, animez et sécurisez votre communauté avec nos créations sur mesure.<br>
-                </div>
-            </div>
-            <div class="block-side">
-                <h3>Notre Premier Bot</h3>
-                <img src="imgindex0.png" alt="Bots Discord" class="side-image" />
-            </div>
-        </section>
-
-        <section class="block-container">
-            <div class="block">
-                <div class="subtitle">Support et évolutivité</div>
-                <div class="info">
-                    <br>Assistance gratuite, et évolutions à la demande*.<br>
-                    Un bot qui grandit avec votre serveur !<br><br>
-                    (* Selon le forfait choisi lors de l'achat)
-                </div>
-            </div>
-        </section>
-
-        <section class="block-container">
-            <div class="block">
-                <div class="subtitle">Installation & Intégration</div>
-                <div class="info">
-                    <br>On vous guide pas à pas, tutos vidéos pour intégrer facilement sur Discord.<br>
-                    Paiement sécurisé PayPal · Livraison rapide · Support réactif
-                </div>
-                <a href="devis.html" class="cta-btn">Obtenir un devis</a>
-            </div>
-        </section>
+    <main class="maintenance-section">
+        <div class="maintenance-msg">Site en maintenance</div>
+        <div class="countdown" id="countdown"></div>
     </main>
-
-    <footer>
-        © <span id="year"></span> GeekSoft — Tous droits réservés - v3.2.0
-    </footer>
-
     <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
-    <script>
-        fetch('https://devmra.pythonanywhere.com/visite')
-            .then(res => res.text())
-            .then(message => console.log(message));
+        // Calcule la date dans 1 mois à 00:00 (UTC+1/CET)
+        function getTargetDate() {
+            const now = new Date();
+            let month = now.getMonth() + 1;
+            let year = now.getFullYear();
+            if (month > 11) { month = 0; year++; }
+            // 1 mois plus tard, jour courant
+            const target = new Date(year, month, now.getDate(), 0, 0, 0, 0);
+            // Si aujourd'hui le 31 et mois suivant a moins -> rollback au dernier jour du mois
+            if (target.getMonth() !== ((now.getMonth() + 1) % 12)) {
+                // Passé au mois suivant, donc le jour n'existe pas, on prend dernier jour mois suivant
+                target.setDate(0);
+            }
+            return target;
+        }
+
+        const targetDate = getTargetDate();
+        const countdown = document.getElementById("countdown");
+
+        function updateCountdown() {
+            const now = new Date();
+            let diff = targetDate - now;
+            if (diff <= 0) {
+                countdown.textContent = "Le site sera bientôt de retour !";
+                return;
+            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+            const minutes = Math.floor(diff / (1000 * 60));
+            diff -= minutes * (1000 * 60);
+            const seconds = Math.floor(diff / 1000);
+
+            countdown.textContent =
+                days + "j " +
+                String(hours).padStart(2, "0") + "h " +
+                String(minutes).padStart(2, "0") + "m " +
+                String(seconds).padStart(2, "0") + "s";
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
