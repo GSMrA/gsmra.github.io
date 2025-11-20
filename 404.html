@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <title>Erreur 404 - GeekSoft</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <style>
+    :root {
+      --black: #1e1e1e;
+      --white: #fff;
+      --muted: #b2b2b2;
+      --glow: #686868;
+      --gray-bg: #191919;
+      --bar-accent: #32c1ff;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial Black', Impact, sans-serif;
+      background: var(--gray-bg);
+      color: var(--white);
+    }
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 50vw;
+      transform: translateX(-50%);
+      background: #000;
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
+      border-radius: 24px;
+      width: 93vw;
+      max-width: 1300px;
+      z-index: 1000;
+      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
+    }
+    @keyframes slideDown {
+      from { opacity:0; transform: translateX(-50%) translateY(-40px);}
+      to { opacity:1; transform: translateX(-50%) translateY(0);}
+    }
+    .logo { height: 70px; width: auto; display: block; filter: drop-shadow(0 0 15px var(--glow)); }
+    .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 3.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90vw;
+    }
+    .error-content {
+      margin-top: 170px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+    }
+    .error-code {
+      font-size: 7rem;
+      font-weight: bold;
+      color: var(--bar-accent);
+      letter-spacing: 12px;
+      text-shadow: 0 2px 22px var(--glow), 0 0 60px #32c1ff55;
+      margin-bottom: 0;
+    }
+    .error-message {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+    .error-desc {
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+    .back-btn {
+      color: var(--white);
+      padding: 12px 38px;
+      background: var(--bar-accent);
+      border-radius: 22px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border: none;
+      transition: background 0.22s;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #32c1ff33;
+    }
+    .back-btn:hover { background: #218ab5; }
+    @media (max-width:480px){
+      .logo{height:45px}
+      .title{font-size:1.25rem;}
+      .topbar {padding: 10px;}
+      .error-code{font-size:3.2rem;}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+    <div class="title">GeekSoft - MEMBRES</div>
+  </header>
+  <main class="error-content">
+    <div class="error-code">404</div>
+    <div class="error-message">Page introuvable</div>
+    <div class="error-desc">
+      Cette page n'existe pas ou a été déplacée.<br>
+      Vérifiez l'URL ou retournez à l'accueil.
+    </div>
+    <a href="Acceuil.html" class="back-btn">Accueil</a>
+  </main>
+</body>
+</html>
