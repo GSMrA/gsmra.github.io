@@ -143,9 +143,9 @@
             position: relative;
             display: inline-block;
             width: 1ch;
-            height: 1em;
-            overflow: hidden;
-            vertical-align: middle;
+            /* plus de height forcée ! */
+            overflow: visible;
+            vertical-align: baseline;
         }
         .chiffre-leave {
             position: absolute;
@@ -204,26 +204,24 @@
 
         let lastValues = {days:'', hours:'', minutes:'', seconds:''};
 
-        function buildChiffre(str, key) {
-            let out = '';
+        function blockGroup(str, unit, key) {
+            let group = '';
             let prev = lastValues[key];
             let prevDigits = prev.padStart(str.length, '0');
             for(let i=0;i<str.length;i++) {
                 const chiffre = str[i];
                 let prevChiffre = prevDigits[i] || '';
-                out += `<span class="chiffre-bloc">`;
+                group += `<span class="chiffre-bloc">`;
                 if(chiffre !== prevChiffre && prevChiffre !== undefined) {
-                    // Sortie animé
-                    out += `<span class="chiffre-leave">${prevChiffre}</span>`;
-                    // Entrée animé
-                    out += `<span class="chiffre-enter">${chiffre}</span>`;
+                    group += `<span class="chiffre-leave">${prevChiffre}</span>`;
+                    group += `<span class="chiffre-enter">${chiffre}</span>`;
                 } else {
-                    // Stable
-                    out += `<span>${chiffre}</span>`;
+                    group += `<span>${chiffre}</span>`;
                 }
-                out += `</span>`;
+                group += `</span>`;
             }
-            return out;
+            group += `<span style="margin-left:0.1em">${unit}</span>`;
+            return group;
         }
 
         function updateCountdown() {
@@ -247,10 +245,10 @@
             const secondsStr = String(seconds).padStart(2, "0");
 
             countdown.innerHTML =
-                buildChiffre(daysStr, 'days') + 'j ' +
-                buildChiffre(hoursStr, 'hours') + 'h ' +
-                buildChiffre(minutesStr, 'minutes') + 'm ' +
-                buildChiffre(secondsStr, 'seconds');
+                blockGroup(daysStr, 'j', 'days') + ' ' +
+                blockGroup(hoursStr, 'h', 'hours') + ' ' +
+                blockGroup(minutesStr, 'm', 'minutes') + ' ' +
+                blockGroup(secondsStr, 's', 'seconds');
 
             lastValues = {
                 days: daysStr,
@@ -259,7 +257,6 @@
                 seconds: secondsStr
             };
 
-            // Nettoyage des vieux chiffres sortants
             setTimeout(() => {
                 document.querySelectorAll('.chiffre-leave').forEach(e => e.remove());
             }, 400);
