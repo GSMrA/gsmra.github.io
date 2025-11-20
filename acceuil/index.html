@@ -1,1 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <title>Accueil - GeekSoft</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <style>
+    :root {
+      --black: #1e1e1e;
+      --white: #fff;
+      --muted: #b2b2b2;
+      --card-bg: #28292d;
+      --card-border: #333;
+      --glow: #686868;
+      --gray-bg: #191919;
+      --bar-accent: #32c1ff;
+      --shadow: 0 4px 24px rgba(40,40,50,.16), 0 1.5px 8px #4446;
+      --max-width: 1300px;
+    }
 
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Arial Black', Impact, sans-serif;
+      background: var(--gray-bg);
+      color: var(--white);
+    }
+
+    /* ───── TOPBAR ───── */
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 50vw;
+      transform: translateX(-50%);
+      background: #000;
+      padding: 28px 40px;
+      border-radius: 24px;
+      width: 93vw;
+      max-width: 1300px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,.2);
+      z-index: 1000;
+      animation: slideDown .8s cubic-bezier(.44,1.3,.44,1) forwards;
+    }
+
+    .logo {
+      height: 70px;
+      filter: drop-shadow(0 0 15px var(--glow));
+    }
+
+    .top-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 3rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-shadow: 0 0 15px var(--glow);
+      letter-spacing: 3px;
+    }
+
+    @keyframes slideDown {
+      from { opacity:0; transform: translate(-50%, -40px); }
+      to { opacity:1; transform: translate(-50%, 0); }
+    }
+
+    /* ───── HERO (Bienvenue) ───── */
+    .hero {
+      margin-top: 32vh;
+      text-align: center;
+      padding: 40px 20px;
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    .hero-title {
+      font-size: 3.6rem;
+      font-weight: 900;
+      text-shadow: 0 0 20px var(--glow);
+      margin-bottom: 14px;
+    }
+
+    .hero-sub {
+      font-size: 1.3rem;
+      color: var(--muted);
+      max-width: 700px;
+      margin: auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity:0; transform: translateY(40px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    /* ───── QUI SOMMES NOUS ───── */
+    .section {
+      max-width: 900px;
+      margin: 140px auto 100px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px var(--glow);
+    }
+
+    .section-text {
+      font-size: 1.15rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 995px) {
+      .top-title { font-size: 2rem; }
+      .hero-title { font-size: 2.6rem; }
+    }
+
+    @media (max-width: 480px) {
+      .logo { height: 45px; }
+      .hero-title { font-size: 2rem; }
+      .top-title { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ───────── TOPBAR ───────── -->
+  <header class="topbar">
+    <img src="GEEKSOFT.png" class="logo" alt="GeekSoft">
+    <div class="top-title">GeekSoft</div>
+  </header>
+
+  <!-- ───────── BIENVENUE ───────── -->
+  <section class="hero">
+    <div class="hero-title">Bienvenue sur GeekSoft</div>
+    <div class="hero-sub">
+      Votre référence pour des bots Discord modernes, performants et fiables.
+    </div>
+  </section>
+
+  <!-- ───────── QUI SOMMES-NOUS ───────── -->
+  <section class="section">
+    <div class="section-title">Qui sommes-nous ?</div>
+    <div class="section-text">
+      GeekSoft est une équipe passionnée spécialisée dans le développement de bots Discord
+      sur mesure. Nous créons des outils puissants, sécurisés et adaptés à tous types de
+      communautés : gaming, entreprises, projets, serveurs privés et bien plus encore.  
+      <br><br>
+      Notre objectif est simple : offrir des solutions professionnelles accessibles à tous.
+    </div>
+  </section>
+
+</body>
+</html>
