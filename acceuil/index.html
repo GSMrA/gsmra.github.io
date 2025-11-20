@@ -126,6 +126,20 @@
       .top-title { font-size: 1.3rem; }
     }
   </style>
+   <script>
+  // Vérifier si le serveur Flask est actif
+  fetch('https://devmra.pythonanywhere.com/alive')
+    .then(response => response.text())
+    .then(data => {
+      if (data.trim() !== 'ALIVE') {
+        window.location.href = '/';
+      }
+    })
+    .catch(() => {
+      // En cas d'erreur de connexion, rediriger
+      window.location.href = '/';
+    });
+ </script>
 </head>
 
 <body>
