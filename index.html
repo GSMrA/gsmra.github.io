@@ -1,269 +1,58 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GeekSoft</title>
-    <link rel="icon" type="image/png" href="GEEKSOFT.png">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <style>
-        :root {
-            --black: #000;
-            --white: #fff;
-            --glow: #fff;
-            --gray-bg: #1e1e1e;
-        }
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: 'Arial Black', Impact, sans-serif;
-            background: var(--gray-bg);
-            color: var(--white);
-        }
-        .topbar {
-            position: fixed;
-            left: 20px;
-            right: 20px;
-            top: 20px;
-            background: var(--black);
-            color: var(--white);
-            padding: 28px 0 24px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 50px var(--glow), 0 0 80px rgba(255, 255, 255, 0.2), 0 12px 30px rgba(0, 0, 0, 0.6);
-            border-radius: 20px;
-            z-index: 1000;
-            border: 2px solid var(--glow);
-            animation: topbarGlow 3s ease-in-out infinite;
-        }
-        @keyframes topbarGlow {
-            0%, 100% {
-                box-shadow: 0 0 50px var(--glow), 0 0 80px rgba(255, 255, 255, 0.2), 0 12px 30px rgba(0, 0, 0, 0.6);
-            }
-            50% {
-                box-shadow: 0 0 70px var(--glow), 0 0 120px rgba(255, 255, 255, 0.3), 0 12px 40px rgba(0, 0, 0, 0.8);
-            }
-        }
-        .logo-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            min-width: 0;
-        }
-        .logo {
-            height: 80px;
-            width: auto;
-            filter: drop-shadow(0 0 25px var(--glow)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
-            animation: logoPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes logoPulse {
-            0%, 100% {
-                filter: drop-shadow(0 0 25px var(--glow)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
-            }
-            50% {
-                filter: drop-shadow(0 0 35px var(--glow)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));
-            }
-        }
-        .title {
-            font-size: 4.8rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--white);
-            font-weight: 900;
-            text-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow), 0 0 60px rgba(255, 255, 255, 0.3);
-            white-space: nowrap;
-            line-height: 1;
-            text-align: center;
-            animation: titleGlow 3s ease-in-out infinite;
-        }
-        @keyframes titleGlow {
-            0%, 100% {
-                text-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow), 0 0 60px rgba(255, 255, 255, 0.3);
-            }
-            50% {
-                text-shadow: 0 0 30px var(--glow), 0 0 60px var(--glow), 0 0 90px rgba(255, 255, 255, 0.5);
-            }
-        }
-        .maintenance-section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-top: 80px;
-        }
-        .maintenance-msg {
-            margin-top: 80px;
-            font-size: 2.8rem;
-            font-weight: bold;
-            color: var(--glow);
-            text-shadow: 0 0 20px var(--glow), 0 0 40px rgba(255, 255, 255, 0.3);
-            text-align: center;
-            animation: msgPulse 2s ease-in-out infinite;
-        }
-        @keyframes msgPulse {
-            0%, 100% {
-                opacity: 1;
-                text-shadow: 0 0 20px var(--glow), 0 0 40px rgba(255, 255, 255, 0.3);
-            }
-            50% {
-                opacity: 0.8;
-                text-shadow: 0 0 30px var(--glow), 0 0 60px rgba(255, 255, 255, 0.5);
-            }
-        }
-        .countdown {
-            margin-top: 60px;
-            display: block;
-            font-size: 5rem;
-            font-family: 'Arial Black', Impact, sans-serif;
-            letter-spacing: 8px;
-            color: var(--white);
-            text-shadow: 0 0 20px var(--glow), 0 0 40px rgba(255, 255, 255, 0.4), 0 0 60px var(--glow);
-            text-align: center;
-            opacity: 0;
-            transform: translateY(60px) scale(0.9);
-            animation: fadeInCountdown 2s cubic-bezier(.14,.97,.56,1.15) 0.3s forwards, countdownGlow 2.5s ease-in-out 0.3s infinite;
-        }
-        @keyframes fadeInCountdown {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        @keyframes countdownGlow {
-            0%, 100% {
-                text-shadow: 0 0 20px var(--glow), 0 0 40px rgba(255, 255, 255, 0.4), 0 0 60px var(--glow);
-            }
-            50% {
-                text-shadow: 0 0 30px var(--glow), 0 0 60px rgba(255, 255, 255, 0.6), 0 0 90px var(--glow), 0 0 120px rgba(255, 255, 255, 0.2);
-            }
-        }
-        /* ANIMATION COMPTEUR chiffre par chiffre */
-        .chiffre-bloc {
-            position: relative;
-            display: inline-block;
-            width: 1ch;
-            height: 1em;
-            line-height: 1em;
-            overflow: visible;
-            vertical-align: baseline;
-        }
-        .chiffre-leave {
-            position: absolute;
-            left: 0; right: 0; top: 0;
-            animation: chiffreLeave 350ms cubic-bezier(.42,0,1,1);
-        }
-        @keyframes chiffreLeave {
-            from { opacity: 1; transform: translateY(0);}
-            to   { opacity: 0; transform: translateY(-110%);}
-        }
-        .chiffre-enter {
-            position: absolute;
-            left: 0; right: 0; top: -50;
-            animation: chiffreEnter 370ms cubic-bezier(.10,.57,.20,1.07);
-        }
-        @keyframes chiffreEnter {
-            from { opacity: 0; transform: translateY(110%);}
-            to   { opacity: 1; transform: translateY(1);}
-        }
-        @media (max-width:820px) {
-            .topbar {
-                left: 10px;
-                right: 10px;
-            }
-            .logo {height:48px;}
-            .title {font-size:2.2rem;}
-            .countdown {font-size:2rem;}
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>GeekSoft - Redirection</title>
+  <style>
+    /* Loader CSS */
+    .loader {
+      width: 35px;
+      aspect-ratio: 1;
+      --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
+      background:
+        var(--_g) 0    0,
+        var(--_g) 100% 0,
+        var(--_g) 100% 100%,
+        var(--_g) 0    100%;
+      background-size: 40% 40%;
+      animation: l38 .5s infinite; 
+      margin: 25px auto;
+    }
+    @keyframes l38 {
+      100% {background-position: 100% 0,100% 100%,0 100%,0 0}
+    }
+    /* Minimal page style */
+    body {margin:0;}
+    #main-content {display:flex; flex-direction:column; align-items:center;}
+  </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="logo-title-wrapper">
-            <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
-            <div class="title">GEEKSOFT</div>
-        </div>
-    </header>
-    <main class="maintenance-section">
-        <div class="maintenance-msg">Site en maintenance</div>
-        <span class="countdown" id="countdown"></span>
-    </main>
-    <script>
-        function getTargetDate() {
-            const now = new Date();
-            let month = now.getMonth() + 1;
-            let year = now.getFullYear();
-            if (month > 11) { month = 0; year++; }
-            const target = new Date(year, month, now.getDate(), 0, 0, 0, 0);
-            if (target.getMonth() !== ((now.getMonth() + 1) % 12)) {
-                target.setDate(0);
-            }
-            return target;
+  <!-- TOPBAR (à adapter avec ta vraie topbar si besoin) -->
+  <nav style="background:#333;color:#fff;padding:10px 20px;">
+    <strong>GeekSoft</strong> | <a href="Acceuil.html" style="color:#fff;">Accueil</a>
+  </nav>
+  <div id="main-content">
+    <div class="loader"></div>
+    <p id="status" style="text-align:center;margin-top:10px;">Vérification du serveur...</p>
+  </div>
+  <script>
+    // Async check server
+    fetch("https://devmra.pythonanywhere.com/alive")
+      .then(res => res.text())
+      .then(txt => {
+        if(txt.trim() === "Le Serveur Python Anywhere est Bien en Ligne.") {
+          window.location.replace("Acceuil.html");
+        } else {
+          showMaintenance();
         }
-        const targetDate = getTargetDate();
-        const countdown = document.getElementById("countdown");
+      })
+      .catch(showMaintenance);
 
-        let lastValues = {days:'', hours:'', minutes:'', seconds:''};
-
-        function blockGroup(str, unit, key) {
-            let group = '';
-            let prev = lastValues[key];
-            let prevDigits = prev.padStart(str.length, '0');
-            for(let i=0;i<str.length;i++) {
-                const chiffre = str[i];
-                let prevChiffre = prevDigits[i] || '';
-                group += `<span class="chiffre-bloc">`;
-                if(chiffre !== prevChiffre && prevChiffre !== undefined) {
-                    group += `<span class="chiffre-leave">${prevChiffre}</span>`;
-                    group += `<span class="chiffre-enter">${chiffre}</span>`;
-                } else {
-                    group += `<span>${chiffre}</span>`;
-                }
-                group += `</span>`;
-            }
-            group += `<span style="margin-left:0.1em">${unit}</span>`;
-            return group;
-        }
-
-        function updateCountdown() {
-            const now = new Date();
-            let diff = targetDate - now;
-            if (diff <= 0) {
-                countdown.textContent = "Le site sera bientôt de retour !";
-                return;
-            }
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            diff -= days * (1000 * 60 * 60 * 24);
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            diff -= hours * (1000 * 60 * 60);
-            const minutes = Math.floor(diff / (1000 * 60));
-            diff -= minutes * (1000 * 60);
-            const seconds = Math.floor(diff / 1000);
-
-            const daysStr = days.toString();
-            const hoursStr = String(hours).padStart(2, "0");
-            const minutesStr = String(minutes).padStart(2, "0");
-            const secondsStr = String(seconds).padStart(2, "0");
-
-            countdown.innerHTML =
-                blockGroup(daysStr, 'j', 'days') + ' ' +
-                blockGroup(hoursStr, 'h', 'hours') + ' ' +
-                blockGroup(minutesStr, 'm', 'minutes') + ' ' +
-                blockGroup(secondsStr, 's', 'seconds');
-
-            lastValues = {
-                days: daysStr,
-                hours: hoursStr,
-                minutes: minutesStr,
-                seconds: secondsStr
-            };
-
-            setTimeout(() => {
-                document.querySelectorAll('.chiffre-leave').forEach(e => e.remove());
-            }, 400);
-        }
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-    </script>
+    function showMaintenance() {
+      document.getElementById("status").textContent =
+        "Le serveur est en maintenance. Revenez plus tard.";
+      // Loader reste affiché
+    }
+  </script>
 </body>
 </html>
