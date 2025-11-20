@@ -138,15 +138,32 @@
                 text-shadow: 0 0 30px var(--glow), 0 0 60px rgba(255, 255, 255, 0.6), 0 0 90px var(--glow), 0 0 120px rgba(255, 255, 255, 0.2);
             }
         }
-        /* Animation brusque puis ralentissement pour chiffres */
-        @keyframes chiffrePopIn {
-            0% { transform: scale(2); opacity: 0; }
-            60% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .chiffre-anim {
+        /* ANIMATION COMPTEUR chiffre par chiffre */
+        .chiffre-bloc {
+            position: relative;
             display: inline-block;
-            animation: chiffrePopIn 320ms cubic-bezier(.24,1.8,.54,1.03);
+            width: 1ch;
+            height: 1em;
+            overflow: hidden;
+            vertical-align: middle;
+        }
+        .chiffre-leave {
+            position: absolute;
+            left: 0; right: 0;
+            animation: chiffreLeave 350ms cubic-bezier(.42,0,1,1);
+        }
+        @keyframes chiffreLeave {
+            from { opacity: 1; transform: translateY(0);}
+            to   { opacity: 0; transform: translateY(-110%);}
+        }
+        .chiffre-enter {
+            position: absolute;
+            left: 0; right: 0;
+            animation: chiffreEnter 370ms cubic-bezier(.10,.57,.20,1.07);
+        }
+        @keyframes chiffreEnter {
+            from { opacity: 0; transform: translateY(110%);}
+            to   { opacity: 1; transform: translateY(0);}
         }
         @media (max-width:820px) {
             .topbar {
@@ -187,12 +204,24 @@
 
         let lastValues = {days:'', hours:'', minutes:'', seconds:''};
 
-        function buildChiffre(str, key, forceAnim) {
+        function buildChiffre(str, key) {
             let out = '';
-            for (let i = 0; i < str.length; i++) {
+            let prev = lastValues[key];
+            let prevDigits = prev.padStart(str.length, '0');
+            for(let i=0;i<str.length;i++) {
                 const chiffre = str[i];
-                const anim = forceAnim || (lastValues[key][i] !== chiffre) ? ' chiffre-anim' : '';
-                out += `<span class="${anim.trim()}">${chiffre}</span>`;
+                let prevChiffre = prevDigits[i] || '';
+                out += `<span class="chiffre-bloc">`;
+                if(chiffre !== prevChiffre && prevChiffre !== undefined) {
+                    // Sortie animé
+                    out += `<span class="chiffre-leave">${prevChiffre}</span>`;
+                    // Entrée animé
+                    out += `<span class="chiffre-enter">${chiffre}</span>`;
+                } else {
+                    // Stable
+                    out += `<span>${chiffre}</span>`;
+                }
+                out += `</span>`;
             }
             return out;
         }
@@ -218,10 +247,10 @@
             const secondsStr = String(seconds).padStart(2, "0");
 
             countdown.innerHTML =
-                buildChiffre(daysStr, 'days', lastValues.days === '') + 'j ' +
-                buildChiffre(hoursStr, 'hours', lastValues.hours === '') + 'h ' +
-                buildChiffre(minutesStr, 'minutes', lastValues.minutes === '') + 'm ' +
-                buildChiffre(secondsStr, 'seconds', lastValues.seconds === '');
+                buildChiffre(daysStr, 'days') + 'j ' +
+                buildChiffre(hoursStr, 'hours') + 'h ' +
+                buildChiffre(minutesStr, 'minutes') + 'm ' +
+                buildChiffre(secondsStr, 'seconds');
 
             lastValues = {
                 days: daysStr,
@@ -229,6 +258,11 @@
                 minutes: minutesStr,
                 seconds: secondsStr
             };
+
+            // Nettoyage des vieux chiffres sortants
+            setTimeout(() => {
+                document.querySelectorAll('.chiffre-leave').forEach(e => e.remove());
+            }, 400);
         }
         updateCountdown();
         setInterval(updateCountdown, 1000);
