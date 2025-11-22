@@ -1,9 +1,11 @@
--35px;  10px;<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <title>Accueil - GeekSoft</title>
-  <meta charset="utf-8" />  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" />  
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" type="image/png" href="GEEKSOFT.png">
+
   <style>
     :root {
       --black: #1e1e1e;
@@ -60,7 +62,8 @@
       text-shadow: 0 0 15px var(--glow);
       letter-spacing: 3px;
     }
-        .top-links {
+
+    .top-links {
       display: flex;
       gap: 20px;
       position: absolute;
@@ -68,12 +71,14 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
     .top-links a {
-      color: var(white);
+      color: var(--white);
       text-decoration: none;
       font-size: 0.9rem;
       transition: opacity 0.3s ease;
     }
+
     .top-links a:hover {
       opacity: 0.7;
     }
@@ -121,8 +126,8 @@
     .section-title {
       font-size: 2.4rem;
       font-weight: 900;
-      margin-bottom: 20px;
       text-shadow: 0 0 15px var(--glow);
+      margin-bottom: 20px;
     }
 
     .section-text {
@@ -142,20 +147,21 @@
       .top-title { font-size: 1.3rem; }
     }
   </style>
-   <script>
-  // Vérifier si le serveur Flask est actif
-  fetch('https://devmra.pythonanywhere.com/alive')
-    .then(response => response.text())
-    .then(data => {
-      if (data.trim() !== 'ALIVE') {
+
+  <script>
+    // Vérifier si le serveur Flask est actif
+    fetch('https://devmra.pythonanywhere.com/alive')
+      .then(response => response.text())
+      .then(data => {
+        if (data.trim() !== 'ALIVE') {
+          window.location.href = '/';
+        }
+      })
+      .catch(() => {
+        // En cas d'erreur de connexion, rediriger
         window.location.href = '/';
-      }
-    })
-    .catch(() => {
-      // En cas d'erreur de connexion, rediriger
-      window.location.href = '/';
-    });
- </script>
+      });
+  </script>
 </head>
 
 <body>
@@ -164,7 +170,8 @@
   <header class="topbar">
     <img src="GEEKSOFT.png" class="logo" alt="GeekSoft">
     <div class="top-title">GeekSoft - Acceuil</div>
-        <div class="top-links">
+
+    <div class="top-links">
       <a href="https://www.geeksoft.com/contact">Contact</a>
       <a href="/devis">Devis</a>
     </div>
