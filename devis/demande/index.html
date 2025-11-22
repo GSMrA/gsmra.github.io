@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Demande de devis - GeekSoft</title>
+  <link rel="icon" type="image/png" href="https://geeksoft.online/devis/GEEKSOFT.png">
+  <style>
+    :root{
+      --bg: #0f0f10;
+      --panel-bg: rgba(10,10,10,0.85);
+      --muted: #b2b2b2;
+      --neon: #ffffff;
+      --neon-weak: #eaeaea;
+      --accent: #32c1ff;
+      --glow: #686868;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(180deg,#0a0a0b 0%, #141416 100%);
+      color:var(--neon);
+      overflow:hidden;
+    }
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      padding: 32px 56px 32px 150px;
+      border-radius: 28px;
+      width: 99vw;
+      max-width: 1450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 38px var(--glow);
+      z-index: 1000;
+    }
+    .logo {
+      height: 75px;
+      filter: drop-shadow(0 0 15px #686868);
+      position: absolute;
+      left: 58px;
+      top: 25px;
+    }
+    .top-title {
+      font-size: 2.2rem;
+      font-weight:900;
+      text-shadow:0 0 10px rgba(120,120,120,0.3)
+    }
+    .top-links {
+      position: absolute;
+      right: 50px;
+      top: 36px;
+      display: flex;
+      gap: 32px;
+    }
+    .top-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.17rem;
+      transition: 0.3s ease;
+    }
+    .top-links a:hover {
+      opacity: 0.7;
+    }
+    .stage-wrap{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width: 100vw;
+      max-width: 1340px;
+      height: 94vh;
+      min-height: 680px;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel-track{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 200%;
+      transition: transform 560ms cubic-bezier(0.76,0.05,0.24,0.97);
+      will-change: transform;
+    }
+    .panel{
+      width: 100%;
+      max-width: 620px;
+      min-height: 540px;
+      padding: 64px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 360ms, transform 480ms;
+    }
+    .panel[aria-hidden="true"] {
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.94) translateY(18px);
+      z-index: 0;
+    }
+    .panel[aria-hidden="false"] {
+      pointer-events: auto;
+      opacity: 1;
+      transform: none;
+      z-index: 1;
+    }
+    .panel-card{
+      background: var(--panel-bg);
+      border-radius:20px;
+      padding:38px 32px;
+      min-height:440px;
+      max-width:600px;
+      width:100%;
+      box-shadow: 0 6px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      align-items:stretch;
+      justify-content:center;
+    }
+    h2{ margin:0; font-size:1.7rem; letter-spacing:0.2px; text-shadow:0 0 8px rgba(120,120,120,0.2) }
+    p.lead{ margin:0; color:var(--muted); font-size:1.05rem }
+
+    .form-row{ display:flex; gap:18px; }
+    .form-col{ flex:1; display:flex; flex-direction:column; gap:12px; }
+    label{ font-size:0.98rem; color:var(--muted) }
+    input[type="text"], input[type="email"], input[type="number"], textarea{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      padding:15px 16px;
+      border-radius:12px;
+      color:var(--neon);
+      outline:none;
+      font-size:1.08rem;
+      transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+    input:focus, textarea:focus{
+      border-color: rgba(255,255,255,0.28);
+      box-shadow: 0 0 18px rgba(255,255,255,0.09);
+      transform: translateY(-2px);
+    }
+    textarea{ min-height:130px; resize:vertical; }
+    .panel-footer{
+      margin-top:auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+    }
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:17px 30px;
+      border-radius:14px;
+      background:var(--neon);
+      color:#000;
+      font-weight:700;
+      text-decoration:none;
+      border:none;
+      cursor:pointer;
+      box-shadow: 0 0 24px var(--neon);
+      font-size:1.1rem;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+    .btn:hover{ transform:translateY(-3px); box-shadow:0 0 35px var(--neon) }
+    .btn.ghost{
+      background:transparent;
+      color:var(--neon);
+      border:1.5px solid rgba(255,255,255,0.08);
+      box-shadow:none;
+    }
+    .small { font-size:0.98rem; padding:12px 20px; border-radius:11px }
+    .status{ color:var(--muted); font-size:1rem; display:flex; gap:10px; align-items:center }
+    .status.success{ color: #b7ffbd; }
+    .status.error{ color: #ffb7b7; }
+    .loader {
+      width:20px; height:20px; border-radius:50%;
+      border:3px solid rgba(255,255,255,0.12);
+      border-top-color:var(--neon);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    /* Pop-up animation + confirmation */
+    @keyframes popup-in {
+      from { opacity:0; transform: scale(0.8) translate(-50%,-50%);}
+      to   { opacity:1; transform: scale(1) translate(-50%,-50%);}
+    }
+    #confirm-popup {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20,20,20,0.96);
+      color: #fff;
+      box-shadow: 0 0 44px #32c1ff96;
+      border-radius: 20px;
+      padding: 40px 40px 28px 40px;
+      z-index: 5000;
+      min-width: 340px;
+      max-width: 95vw;
+      text-align: center;
+      font-size: 1.23rem;
+      font-family: 'Arial', sans-serif;
+      transition: opacity 420ms;
+      opacity: 0;
+    }
+    #confirm-popup.show {
+      animation: popup-in 0.48s cubic-bezier(.32,.61,.46,1.41);
+    }
+    #confirm-popup button {
+      margin-top: 28px;
+      background: #32c1ff;
+      color: #000;
+      border: none;
+      border-radius: 11px;
+      padding: 13px 34px;
+      font-size: 1.05rem;
+      font-weight:700;
+      cursor: pointer;
+      box-shadow: 0 0 19px #32c1ff;
+      transition: background 280ms;
+    }
+    #confirm-popup button:hover {
+      background: #fff;
+      color: #32c1ff;
+    }
+    @media (max-width:900px){
+      .stage-wrap{ height:96vh; width:98vw; min-height:360px;}
+      .panel-track{ width:300% }
+      .panel,.panel-card{ max-width:99vw; min-width:1px; }
+      .topbar{ max-width: 98vw; padding:14px 16px 14px 55px; }
+      .logo{ height:44px; left:12px; top:12px;}
+      .top-links{ right:14px; gap:10px; top:19px;}
+      .top-title{ font-size:1.14rem;}
+      #confirm-popup { min-width:190px; font-size:1rem; padding:24px 7vw 18px 7vw;}
+      #confirm-popup button { padding:11px 23px; font-size:1rem;}
+    }
+    button[disabled] { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none }
+    .ico { font-weight:900; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="https://geeksoft.online/devis/GEEKSOFT.png" class="logo" alt="GeekSoft">
+    <div class="top-title">GeekSoft - Demande de devis</div>
+    <div class="top-links">
+      <a href="https://geeksoft.online/">Accueil</a>
+      <a href="https://geeksoft.online/devis">Devis</a>
+    </div>
+  </header>
+  <div class="stage-wrap" role="main" aria-label="Formulaire de demande de devis">
+    <div id="track" class="panel-track">
+      <!-- Panel 1 : Infos personnelles -->
+      <section class="panel" aria-hidden="false">
+        <div class="panel-card">
+          <h2>1. Tes informations</h2>
+          <p class="lead">Renseigne ton identité et ton e-mail pour qu'on puisse te contacter.</p>
+          <form id="form-personal" onsubmit="return false;">
+            <div class="form-row">
+              <div class="form-col">
+                <label for="nom">Nom</label>
+                <input id="nom" name="nom" type="text" placeholder="Dupont" required>
+              </div>
+              <div class="form-col">
+                <label for="prenom">Prénom</label>
+                <input id="prenom" name="prenom" type="text" placeholder="Pierre" required>
+              </div>
+            </div>
+            <div style="margin-top:12px" class="form-col">
+              <label for="email">E-mail</label>
+              <input id="email" name="email" type="email" placeholder="pierre.dupont@email.com" required>
+            </div>
+          </form>
+          <div class="panel-footer">
+            <div class="status" id="status-personal">Remplis les champs, puis clique <strong>Suivant</strong>.</div>
+            <div style="display:flex; gap:8px;">
+              <button id="btn-next" class="btn small">Suivant ➜</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Panel 2 : Infos du bot / serveur -->
+      <section class="panel" aria-hidden="true">
+        <div class="panel-card">
+          <h2>2. Infos du bot & serveur</h2>
+          <p class="lead">Décris brièvement ce que tu souhaites et la taille de ton serveur.</p>
+          <form id="form-bot" onsubmit="return false;">
+            <div class="form-col">
+              <label for="nom_bot">Nom du bot</label>
+              <input id="nom_bot" name="nom_bot" type="text" placeholder="SuperBot" required>
+            </div>
+            <div class="form-col">
+              <label for="description">Description (fonctionnalités souhaitées)</label>
+              <textarea id="description" name="description" placeholder="Ex: modération, messages de bienvenue..." required></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-col">
+                <label for="nom_du_serveur">Nom du serveur</label>
+                <input id="nom_du_serveur" name="nom_du_serveur" type="text" placeholder="MaCommunautéDiscord" required>
+              </div>
+              <div class="form-col">
+                <label for="taille_serveur">Taille du serveur (membres)</label>
+                <input id="taille_serveur" name="taille_serveur" type="number" placeholder="153" min="1" required>
+              </div>
+            </div>
+          </form>
+          <div class="panel-footer">
+            <div class="status" id="status-bot">Vérifie puis clique <strong>Envoyer</strong>.</div>
+            <div style="display:flex; gap:8px;">
+              <button id="btn-back" class="btn ghost small">◀ Retour</button>
+              <button id="btn-submit" class="btn small">Envoyer</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div id="confirm-popup">
+    <div id="confirm-message"></div>
+    <button id="confirm-close">OK</button>
+  </div>
+  <script>
+    const ALIVE_URL = 'https://devmra.pythonanywhere.com/alive';
+    const SUBMIT_URL = 'https://DEVMrA.pythonanywhere.com/newdevis';
+    const track = document.getElementById('track');
+    const btnNext = document.getElementById('btn-next');
+    const btnBack = document.getElementById('btn-back');
+    const btnSubmit = document.getElementById('btn-submit');
+    const statusPersonal = document.getElementById('status-personal');
+    const statusBot = document.getElementById('status-bot');
+    const fields = {
+      nom: document.getElementById('nom'),
+      prenom: document.getElementById('prenom'),
+      email: document.getElementById('email'),
+      nom_bot: document.getElementById('nom_bot'),
+      description: document.getElementById('description'),
+      nom_du_serveur: document.getElementById('nom_du_serveur'),
+      taille_serveur: document.getElementById('taille_serveur')
+    };
+    let panelIndex = 0;
+    (function checkAliveOnLoad(){
+      fetch(ALIVE_URL).then(r => r.text()).then(txt => {
+        if (txt.trim() !== 'ALIVE') {
+          window.location.href = '/';
+        }
+      }).catch(() => {
+        window.location.href = '/';
+      });
+    })();
+    function slideTo(index){
+      const percent = index * 50;
+      track.style.transform = `translateX(-${percent}%)`;
+      panelIndex = index;
+      Array.from(track.children).forEach((el, i) => {
+        el.setAttribute('aria-hidden', i !== index ? 'true' : 'false');
+      });
+    }
+    function validatePersonal(){
+      const {nom, prenom, email} = fields;
+      if (!nom.value.trim() || !prenom.value.trim() || !email.value.trim()) {
+        return {ok:false, message:'Tous les champs personnels sont requis.'};
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email.value.trim())) {
+        return {ok:false, message:'Email invalide.'};
+      }
+      return {ok:true};
+    }
+    function validateBot(){
+      const {nom_bot, description, nom_du_serveur, taille_serveur} = fields;
+      if (!nom_bot.value.trim() || !description.value.trim() || !nom_du_serveur.value.trim() || !taille_serveur.value) {
+        return {ok:false, message:'Tous les champs du bot/serveur sont requis.'};
+      }
+      if (Number(taille_serveur.value) <= 0 || isNaN(Number(taille_serveur.value))) {
+        return {ok:false, message:'La taille du serveur doit être un nombre valide.'};
+      }
+      return {ok:true};
+    }
+    btnNext.addEventListener('click', () => {
+      const v = validatePersonal();
+      if (!v.ok) {
+        statusPersonal.className = 'status error';
+        statusPersonal.textContent = v.message;
+        return;
+      }
+      statusPersonal.className = 'status';
+      statusPersonal.textContent = 'Ok. Passage à la section suivante...';
+      setTimeout(() => slideTo(1), 180);
+    });
+    btnBack.addEventListener('click', () => {
+      slideTo(0);
+      statusBot.className = 'status';
+      statusBot.textContent = 'Tu peux modifier les infos précédentes.';
+    });
+    btnSubmit.addEventListener('click', async () => {
+      const v = validateBot();
+      if (!v.ok) {
+        statusBot.className = 'status error';
+        statusBot.textContent = v.message;
+        return;
+      }
+      const payload = {
+        nom: fields.nom.value.trim(),
+        prenom: fields.prenom.value.trim(),
+        email: fields.email.value.trim(),
+        nom_bot: fields.nom_bot.value.trim(),
+        description: fields.description.value.trim(),
+        nom_du_serveur: fields.nom_du_serveur.value.trim(),
+        taille_serveur: Number(fields.taille_serveur.value)
+      };
+      btnSubmit.disabled = true;
+      btnBack.disabled = true;
+      const loader = document.createElement('div');
+      loader.className = 'loader';
+      statusBot.innerHTML = '';
+      statusBot.appendChild(loader);
+      const text = document.createElement('span');
+      text.textContent = ' Envoi en cours...';
+      statusBot.appendChild(text);
+
+      try {
+        const res = await fetch(SUBMIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const txt = await res.text().catch(()=>null);
+          statusBot.className = 'status error';
+          statusBot.textContent = `Erreur serveur: ${res.status} ${res.statusText}${txt ? ' - '+txt : ''}`;
+          btnSubmit.disabled = false;
+          btnBack.disabled = false;
+          return;
+        }
+        statusBot.className = 'status success';
+        statusBot.textContent = 'Devis envoyé ! Nous reviendrons vers toi par e-mail.';
+
+        // --- Afficher la popup animée + redirection ---
+        const popup = document.getElementById('confirm-popup');
+        document.getElementById('confirm-message').textContent =
+          `La confirmation de votre demande a été envoyée par mail au ${fields.email.value.trim()}`;
+        popup.style.display = 'block';
+        setTimeout(() => { popup.classList.add('show'); popup.style.opacity = '1'; }, 10);
+
+      } catch (err) {
+        console.error(err);
+        statusBot.className = 'status error';
+        statusBot.textContent = 'Impossible de contacter le serveur. Réessaie plus tard.';
+      } finally {
+        btnSubmit.disabled = false;
+        btnBack.disabled = false;
+      }
+    });
+    fields.email.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); btnNext.click(); }
+    });
+    fields.description.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        btnSubmit.click();
+      }
+    });
+
+    // -- Fermer la popup et rediriger
+    document.getElementById('confirm-close').onclick = function() {
+      const popup = document.getElementById('confirm-popup');
+      popup.style.opacity = '0';
+      setTimeout(() => {
+        popup.style.display = 'none';
+        popup.classList.remove('show');
+        window.location.href = "https://www.geeksoft.online/acceuil";
+      }, 420);
+    };
+    slideTo(0);
+  </script>
+</body>
+</html>
