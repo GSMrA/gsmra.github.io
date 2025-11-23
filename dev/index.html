@@ -91,18 +91,22 @@
       background: #fff;
       color: #18191c;
     }
+    @media (max-width: 800px) {
+      .main-content { margin-left: 0; padding:12px;}
+      .discord-sidebar { width:60px;}
+      .panel-card {max-width:98vw;}
+    }
   </style>
 </head>
 <body>
-  <!-- Sidebar Discord style -->
   <div class="discord-sidebar">
     <div class="sidebar-btn selected" title="Vue générale">&#128187;</div>
     <div class="sidebar-btn" title="Admin Devis" onclick="showPanel('admin')">&#128221;</div>
     <div class="sidebar-btn" title="Réponse Devis" onclick="showPanel('reponse')">&#9993;</div>
     <div class="sidebar-btn" title="Dev Flask/API" onclick="showPanel('dev')">&#9881;</div>
+    <div class="sidebar-btn" title="Status Site" onclick="showPanel('status')">&#128308;</div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content" id="mainPanel">
     <div class="panel-header">GeekSoft DEV PANEL</div>
     <div class="panel-list">
@@ -128,6 +132,13 @@
         <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API</a>
       </div>
       <div class="panel-card">
+        <div class="panel-title">Gestion du Statut du Site</div>
+        <div class="panel-desc">
+          Change la visibilité du site (OFFLINE / ALIVE) avec le slider admin.
+        </div>
+        <a href="https://geeksoft.online/dev/STATUS" target="_blank" class="panel-link">Ouvrir STATUS Panel</a>
+      </div>
+      <div class="panel-card">
         <div class="panel-title">Retour à GeekSoft</div>
         <div class="panel-desc">
           Page d’accueil GeekSoft.
@@ -136,78 +147,54 @@
       </div>
     </div>
   </div>
-
   <script>
     function showPanel(panel) {
       document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('selected'));
-      if(panel === 'admin') document.querySelectorAll('.sidebar-btn')[1].classList.add('selected');
-      else if(panel === 'reponse') document.querySelectorAll('.sidebar-btn')[2].classList.add('selected');
-      else if(panel === 'dev') document.querySelectorAll('.sidebar-btn')[3].classList.add('selected');
-      else document.querySelectorAll('.sidebar-btn')[0].classList.add('selected');
-
+      const idx = {general:0,admin:1,reponse:2,dev:3,status:4}[panel] ?? 0;
+      document.querySelectorAll('.sidebar-btn')[idx].classList.add('selected');
       const panels = {
         "admin": {
-          html: `
-            <div class="panel-header">Admin Devis</div>
+          html: `<div class="panel-header">Admin Devis</div>
             <div class="panel-list">
               <div class="panel-card">
                 <div class="panel-title">Admin Devis</div>
                 <div class="panel-desc">Gère et consulte tous les devis reçus, détails, statuts.</div>
                 <a href="https://geeksoft.online/devis/admin" target="_blank" class="panel-link">Ouvrir Admin Devis</a>
               </div>
-            </div>
-          `
+            </div>`
         },
         "reponse": {
-          html: `
-            <div class="panel-header">Réponse aux Devis</div>
+          html: `<div class="panel-header">Réponse aux Devis</div>
             <div class="panel-list">
               <div class="panel-card">
                 <div class="panel-title">Réponse Devis</div>
                 <div class="panel-desc">Envoie une réponse + facture PDF personnalisée à chaque client.</div>
                 <a href="https://geeksoft.online/devis/reponce" target="_blank" class="panel-link">Ouvrir Réponse Devis</a>
               </div>
-            </div>
-          `
+            </div>`
         },
         "dev": {
-          html: `
-            <div class="panel-header">Dev Flask/API Tester</div>
+          html: `<div class="panel-header">Dev Flask/API Tester</div>
             <div class="panel-list">
               <div class="panel-card">
                 <div class="panel-title">Dev Flask/API Tester</div>
                 <div class="panel-desc">Testeur universel de requêtes Flask/API (POST, GET, PATCH...), preview JSON ou brut.</div>
                 <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API Tester</a>
               </div>
-            </div>
-          `
+            </div>`
+        },
+        "status": {
+          html: `<div class="panel-header">Gestion du Statut du Site</div>
+            <div class="panel-list">
+              <div class="panel-card">
+                <div class="panel-title">Gestion du Statut du Site</div>
+                <div class="panel-desc">Change la visibilité du site (OFFLINE / ALIVE) avec le slider admin.</div>
+                <a href="https://geeksoft.online/dev/STATUS" target="_blank" class="panel-link">Ouvrir STATUS Panel</a>
+              </div>
+            </div>`
         }
       };
-      document.getElementById('mainPanel').innerHTML = panels[panel]?.html || `
-        <div class="panel-header">GeekSoft DEV PANEL</div>
-        <div class="panel-list">
-          <div class="panel-card">
-            <div class="panel-title">Admin Devis</div>
-            <div class="panel-desc">Gère et consulte tous les devis reçus, détails, statuts.</div>
-            <a href="https://geeksoft.online/devis/admin" target="_blank" class="panel-link">Ouvrir Admin Devis</a>
-          </div>
-          <div class="panel-card">
-            <div class="panel-title">Réponse aux Devis</div>
-            <div class="panel-desc">Envoie une réponse + facture PDF personnalisée à chaque client.</div>
-            <a href="https://geeksoft.online/devis/admin/reponce" target="_blank" class="panel-link">Ouvrir Réponse Devis</a>
-          </div>
-          <div class="panel-card">
-            <div class="panel-title">Dev Flask/API Tester</div>
-            <div class="panel-desc">Teste toutes tes endpoints Flask/API, POST/GET/JSON, preview du résultat.</div>
-            <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API</a>
-          </div>
-          <div class="panel-card">
-            <div class="panel-title">Retour à GeekSoft</div>
-            <div class="panel-desc">Page d’accueil GeekSoft.</div>
-            <a href="https://geeksoft.online/" target="_blank" class="panel-link">Accueil GeekSoft</a>
-          </div>
-        </div>
-      `;
+      document.getElementById('mainPanel').innerHTML = panels[panel]?.html || document.getElementById('mainPanel').innerHTML;
     }
   </script>
 </body>
