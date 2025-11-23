@@ -88,6 +88,7 @@
     td {
       padding: 14px;
       border-top: 1px solid #333;
+      vertical-align: top;
     }
     tr {
       cursor: pointer;
@@ -168,6 +169,7 @@
           <th>Email</th>
           <th>Bot</th>
           <th>Serveur</th>
+          <th>Description</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -188,6 +190,12 @@
   const API = 'https://DEVMrA.pythonanywhere.com/admin_devis';
   let devisData = {};
 
+  // Fonction helper pour remplacer \n par <br>
+  function nl2br(txt) {
+    if (!txt) return '—';
+    return txt.replace(/\n/g, '<br>');
+  }
+
   async function handleLogin() {
     const id = document.getElementById('idInput').value.trim();
     const mdp = document.getElementById('mdpInput').value.trim();
@@ -207,25 +215,19 @@
         body: JSON.stringify({ id, mdp })
       });
 
-      console.log('Status:', res.status);
-
       if (!res.ok) {
         msg.innerHTML = '<div class="message error">Identifiants invalides</div>';
         return;
       }
 
       const data = await res.json();
-      console.log('Data:', data);
-
       devisData = data;
 
       document.getElementById('loginSection').classList.add('hidden');
       document.getElementById('tableSection').classList.remove('hidden');
-
       fillTable(data);
 
     } catch (err) {
-      console.error(err);
       msg.innerHTML = '<div class="message error">Erreur: ' + err.message + '</div>';
     }
   }
@@ -235,7 +237,7 @@
     tbody.innerHTML = '';
 
     if (!data || Object.keys(data).length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Aucun devis</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Aucun devis</td></tr>';
       return;
     }
 
@@ -243,17 +245,16 @@
       const parsed = parseDevis(content);
       const row = tbody.insertRow();
       row.innerHTML = `
-        <td>${parsed.ID || '?'}</td>
-        <td>${parsed.Nom || '—'}</td>
-        <td>${parsed.Prénom || '—'}</td>
-        <td>${parsed.Email || '—'}</td>
-        <td>${parsed['Nom du bot'] || '—'}</td>
-        <td>${parsed['Nom du serveur'] || '—'}</td>
+        <td>${nl2br(parsed.ID)}</td>
+        <td>${nl2br(parsed.Nom)}</td>
+        <td>${nl2br(parsed.Prénom)}</td>
+        <td>${nl2br(parsed.Email)}</td>
+        <td>${nl2br(parsed['Nom du bot'])}</td>
+        <td>${nl2br(parsed['Nom du serveur'])}</td>
+        <td>${nl2br(parsed['Description'])}</td>
       `;
       row.onclick = () => openModal(parsed);
     }
-
-    console.log('Table remplie avec', Object.keys(data).length, 'devis');
   }
 
   function parseDevis(text) {
@@ -277,7 +278,7 @@
     for (const [key, val] of Object.entries(devis)) {
       const div = document.createElement('div');
       div.className = 'detail';
-      div.innerHTML = `<strong>${key}</strong> : ${val}`;
+      div.innerHTML = `<strong>${key}</strong> : ${nl2br(val)}`;
       content.appendChild(div);
     }
 
