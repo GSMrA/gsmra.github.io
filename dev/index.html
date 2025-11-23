@@ -1,98 +1,214 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Testeur d'API (HTML only)</title>
+  <title>GeekSoft DEV PANEL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; max-width: 900px; margin: 20px auto; }
-    textarea, input, select { width: 100%; box-sizing: border-box; margin-top: 5px; }
-    textarea { height: 150px; font-family: monospace; }
-    pre { background: #222; color: #eee; padding: 10px; white-space: pre-wrap; }
-    .status { font-weight: bold; }
-    .error { color: red; }
+    body {
+      background: #18191c;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+    }
+    .discord-sidebar {
+      width: 80px;
+      background: #23272a;
+      height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 20px;
+      z-index: 2;
+    }
+    .sidebar-btn {
+      width: 48px; height: 48px;
+      margin: 12px 0;
+      border-radius: 50%;
+      background: #36393f;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.18s;
+      font-size: 2rem;
+    }
+    .sidebar-btn.selected, .sidebar-btn:hover {
+      background: #32c1ff;
+      color: #000;
+    }
+    .main-content {
+      margin-left: 80px;
+      padding: 44px 22px;
+      background: #18191c;
+      min-height: 100vh;
+    }
+    .panel-header {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      color: #32c1ff;
+      letter-spacing: 1px;
+    }
+    .panel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      margin-top: 14px;
+    }
+    .panel-card {
+      background: #23272a;
+      border-radius: 13px;
+      box-shadow: 0 1px 9px #0a0a0b40;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-width: 420px;
+    }
+    .panel-title {
+      font-size: 1.22rem;
+      color: #fff;
+      margin-bottom: 2px;
+      font-weight: bold;
+      letter-spacing:0.5px;
+    }
+    .panel-desc {
+      color: #aaa;
+      font-size: 0.98rem;
+      margin-bottom: 4px;
+    }
+    .panel-link {
+      background: #32c1ff;
+      color: #23272a;
+      padding: 8px 20px;
+      font-weight: bold;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.18s;
+      margin-top:6px;
+    }
+    .panel-link:hover {
+      background: #fff;
+      color: #18191c;
+    }
   </style>
 </head>
 <body>
-  <h1>Testeur HTTP / API</h1>
+  <!-- Sidebar Discord style -->
+  <div class="discord-sidebar">
+    <div class="sidebar-btn selected" title="Vue générale">&#128187;</div>
+    <div class="sidebar-btn" title="Admin Devis" onclick="showPanel('admin')">&#128221;</div>
+    <div class="sidebar-btn" title="Réponse Devis" onclick="showPanel('reponse')">&#9993;</div>
+    <div class="sidebar-btn" title="Dev Flask/API" onclick="showPanel('dev')">&#9881;</div>
+  </div>
 
-  <form id="api-form">
-    <label>Méthode HTTP</label>
-    <select name="method" id="method">
-      <option>GET</option>
-      <option>POST</option>
-      <option>PUT</option>
-      <option>PATCH</option>
-      <option>DELETE</option>
-    </select>
-
-    <label>URL de l'endpoint</label>
-    <input type="text" id="url" placeholder="https://exemple.com/api/...">
-
-    <label>JSON (optionnel)</label>
-    <textarea id="json-body" placeholder='{"key": "value"}'></textarea>
-
-    <button type="submit">Envoyer</button>
-  </form>
-
-  <p id="error" class="error"></p>
-  <p id="status" class="status"></p>
-
-  <h2>Réponse brute</h2>
-  <pre id="response"></pre>
+  <!-- Main Content -->
+  <div class="main-content" id="mainPanel">
+    <div class="panel-header">GeekSoft DEV PANEL</div>
+    <div class="panel-list">
+      <div class="panel-card">
+        <div class="panel-title">Admin Devis</div>
+        <div class="panel-desc">
+          Gère et consulte tous les devis reçus, détails, statuts.
+        </div>
+        <a href="https://geeksoft.online/devis/admin" target="_blank" class="panel-link">Ouvrir Admin Devis</a>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title">Réponse aux Devis</div>
+        <div class="panel-desc">
+          Envoie une réponse + facture PDF personnalisée à chaque client.
+        </div>
+        <a href="https://geeksoft.online/devis/reponce" target="_blank" class="panel-link">Ouvrir Réponse Devis</a>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title">Dev Flask/API Tester</div>
+        <div class="panel-desc">
+          Teste toutes tes endpoints Flask/API, POST/GET/JSON, preview du résultat.
+        </div>
+        <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API</a>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title">Retour à GeekSoft</div>
+        <div class="panel-desc">
+          Page d’accueil GeekSoft.
+        </div>
+        <a href="https://geeksoft.online/" target="_blank" class="panel-link">Accueil GeekSoft</a>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const form = document.getElementById("api-form");
-    const urlInput = document.getElementById("url");
-    const methodSelect = document.getElementById("method");
-    const jsonTextarea = document.getElementById("json-body");
-    const errorEl = document.getElementById("error");
-    const statusEl = document.getElementById("status");
-    const responseEl = document.getElementById("response");
+    function showPanel(panel) {
+      document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('selected'));
+      if(panel === 'admin') document.querySelectorAll('.sidebar-btn')[1].classList.add('selected');
+      else if(panel === 'reponse') document.querySelectorAll('.sidebar-btn')[2].classList.add('selected');
+      else if(panel === 'dev') document.querySelectorAll('.sidebar-btn')[3].classList.add('selected');
+      else document.querySelectorAll('.sidebar-btn')[0].classList.add('selected');
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      errorEl.textContent = "";
-      statusEl.textContent = "";
-      responseEl.textContent = "";
-
-      const url = urlInput.value.trim();
-      const method = methodSelect.value.toUpperCase();
-      const jsonRaw = jsonTextarea.value.trim();
-
-      if (!url) {
-        errorEl.textContent = "URL obligatoire.";
-        return;
-      }
-
-      let body = undefined;
-      let headers = {};
-
-      if (jsonRaw) {
-        try {
-          JSON.parse(jsonRaw); // juste pour valider
-          body = jsonRaw;
-          headers["Content-Type"] = "application/json";
-        } catch (err) {
-          errorEl.textContent = "JSON invalide.";
-          return;
+      const panels = {
+        "admin": {
+          html: `
+            <div class="panel-header">Admin Devis</div>
+            <div class="panel-list">
+              <div class="panel-card">
+                <div class="panel-title">Admin Devis</div>
+                <div class="panel-desc">Gère et consulte tous les devis reçus, détails, statuts.</div>
+                <a href="https://geeksoft.online/devis/admin" target="_blank" class="panel-link">Ouvrir Admin Devis</a>
+              </div>
+            </div>
+          `
+        },
+        "reponse": {
+          html: `
+            <div class="panel-header">Réponse aux Devis</div>
+            <div class="panel-list">
+              <div class="panel-card">
+                <div class="panel-title">Réponse Devis</div>
+                <div class="panel-desc">Envoie une réponse + facture PDF personnalisée à chaque client.</div>
+                <a href="https://geeksoft.online/devis/reponce" target="_blank" class="panel-link">Ouvrir Réponse Devis</a>
+              </div>
+            </div>
+          `
+        },
+        "dev": {
+          html: `
+            <div class="panel-header">Dev Flask/API Tester</div>
+            <div class="panel-list">
+              <div class="panel-card">
+                <div class="panel-title">Dev Flask/API Tester</div>
+                <div class="panel-desc">Testeur universel de requêtes Flask/API (POST, GET, PATCH...), preview JSON ou brut.</div>
+                <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API Tester</a>
+              </div>
+            </div>
+          `
         }
-      }
-
-      try {
-        const res = await fetch(url, {
-          method,
-          headers,
-          body: body
-        });
-
-        statusEl.textContent = "Status HTTP : " + res.status;
-
-        const text = await res.text();
-        responseEl.textContent = text;
-      } catch (err) {
-        errorEl.textContent = "Erreur lors de la requête : " + err;
-      }
-    });
+      };
+      document.getElementById('mainPanel').innerHTML = panels[panel]?.html || `
+        <div class="panel-header">GeekSoft DEV PANEL</div>
+        <div class="panel-list">
+          <div class="panel-card">
+            <div class="panel-title">Admin Devis</div>
+            <div class="panel-desc">Gère et consulte tous les devis reçus, détails, statuts.</div>
+            <a href="https://geeksoft.online/devis/admin" target="_blank" class="panel-link">Ouvrir Admin Devis</a>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title">Réponse aux Devis</div>
+            <div class="panel-desc">Envoie une réponse + facture PDF personnalisée à chaque client.</div>
+            <a href="https://geeksoft.online/devis/reponce" target="_blank" class="panel-link">Ouvrir Réponse Devis</a>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title">Dev Flask/API Tester</div>
+            <div class="panel-desc">Teste toutes tes endpoints Flask/API, POST/GET/JSON, preview du résultat.</div>
+            <a href="https://geeksoft.online/dev/flask" target="_blank" class="panel-link">Ouvrir Dev Flask/API</a>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title">Retour à GeekSoft</div>
+            <div class="panel-desc">Page d’accueil GeekSoft.</div>
+            <a href="https://geeksoft.online/" target="_blank" class="panel-link">Accueil GeekSoft</a>
+          </div>
+        </div>
+      `;
+    }
   </script>
 </body>
 </html>
