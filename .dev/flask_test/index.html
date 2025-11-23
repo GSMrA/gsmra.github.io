@@ -97,15 +97,17 @@
       document.getElementById('statusMsg').innerHTML =
         `<div class="${status===200 ? "success":"error"}">Code HTTP : ${status} ${res.statusText}</div>`;
 
+      // Correction : lire une seule fois le body
+      let rawText = await res.text();
       let data;
       try {
-        data = await res.json();
+        data = JSON.parse(rawText);
       } catch {
-        data = await res.text();
+        data = rawText;
       }
 
       // Vue JSON pretty
-      if (typeof data === "object") {
+      if (typeof data === "object" && data !== null) {
         document.getElementById('resultPreview').innerHTML = formatPreview(data);
         document.getElementById('resultCode').textContent = JSON.stringify(data, null, 2);
       } else {
@@ -119,7 +121,6 @@
   }
 
   function formatPreview(obj) {
-    // Affichage visuel des objets et tableaux
     if (Array.isArray(obj)) {
       return '<ul>' + obj.map(item => `<li>${formatPreview(item)}</li>`).join('') + '</ul>';
     } else if (obj && typeof obj === "object") {
