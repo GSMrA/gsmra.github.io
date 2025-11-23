@@ -3,40 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Devis Response - GeekSoft</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>GeekSoft - Admin Devis Response</title>
   <style>
-    /* Style de base, adapte selon ton design */
     body { font-family: Arial, sans-serif; background: #0a0a0b; color: #fff; padding: 20px; }
     .container { max-width: 1200px; margin: 0 auto; }
-    .hidden { display: none; }
     .login-box { max-width: 400px; margin: 50px auto; background: #1a1a1a; padding: 30px; border-radius: 12px; }
-    .response-box { background: #1a1a1a; padding: 30px; border-radius: 12px; margin: 32px auto; max-width: 700px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 8px; color: #aaa; }
-    .form-group input, .form-group textarea { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff; }
+    .hidden { display: none; }
     table { width: 100%; background: #1a1a1a; border-radius: 12px; border-collapse: collapse; margin-top: 32px; }
     th, td { padding: 14px; }
     th { background: #2a2a2a; }
     tr { cursor: pointer; }
     tr:hover { background: #222; }
-    button { margin-top: 4px; width: 100%; padding: 14px; background: #32c1ff; color: #000; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-    button:hover { background: #fff; }
+    button, .montant-btn { margin-top: 4px; padding: 12px; background: #32c1ff; color: #000; border: none; border-radius: 6px; font-size: 1.05rem; font-weight: bold; cursor: pointer;}
+    button:hover, .montant-btn:hover { background: #fff; color: #000;}
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
     .modal.show { display: flex; }
-    .modal-content { background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 600px; width: 95%; position: relative; }
+    .modal-content { background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 650px; width: 99%; position: relative; }
     .close { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; color: #aaa; }
     .close:hover { color: #fff; }
-    .pdf-preview { margin-top: 16px; border: 1px solid #333; background: #222; padding: 14px; border-radius: 8px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; color: #aaa; margin-bottom: 8px;}
+    .form-group input, .form-group textarea { width:100%; padding:12px; background:#2a2a2a; border:1px solid #444; border-radius:6px; color:#fff;}
+    .montant-list { margin-bottom: 14px;}
+    .montant-row { display: flex; gap: 12px; align-items: center; margin-bottom:5px;}
+    .montant-row input { flex: 1 1 60%; min-width: 0;}
+    .montant-prix { max-width: 110px; }
+    .danger { background: #ff6b6b!important; color:#000;}
+    .success { background: #51cf66!important; color: #000;}
     .message { margin-top: 16px; padding: 12px; border-radius: 6px; text-align: center; }
-    .error { background: #ff6b6b; color: #000; }
-    .success { background: #51cf66; color: #000; }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>GeekSoft - Réponse au Devis</h1>
-
+  <h1>GeekSoft – Réponse aux Devis</h1>
   <!-- LOGIN -->
   <div id="loginSection" class="login-box">
     <h2>Connexion Admin</h2>
@@ -52,7 +51,7 @@
     <div id="loginMessage"></div>
   </div>
 
-  <!-- TABLE -->
+  <!-- TABLE DES DEVIS -->
   <div id="tableSection" class="hidden">
     <table>
       <thead>
@@ -79,19 +78,18 @@
     <form id="responseForm" onsubmit="event.preventDefault(); sendResponse();">
       <div class="form-group">
         <label>Message au client :</label>
-        <textarea id="messageInput" rows="4" placeholder="Merci pour votre demande..."></textarea>
+        <textarea id="messageInput" rows="3" placeholder="Merci pour votre demande..."></textarea>
       </div>
       <div class="form-group">
-        <label>Configurer la facture (PDF)</label>
-        <input type="text" id="factureNom" placeholder="Nom client">
-        <input type="text" id="factureMontant" placeholder="Montant total (€)">
-        <input type="text" id="facturePresta" placeholder="Prestations/Services">
-        <input type="text" id="factureDate" placeholder="Date de facture">
-        <input type="text" id="factureNum" placeholder="Numéro de facture">
+        <label>Client :</label>
+        <input type="text" id="factureNom" readonly>
       </div>
-      <button type="button" onclick="generateInvoicePDF()">Prévisualiser la facture PDF</button>
-      <div id="pdfPreview" class="pdf-preview"></div>
-      <button type="submit">Envoyer la réponse</button>
+      <div class="form-group">
+        <label>Articles & montants (€)&nbsp;<span style="font-weight:normal;font-size:0.95em;">(rajoute ou supprime des lignes)</span></label>
+        <div id="montantList" class="montant-list"></div>
+        <button type="button" class="montant-btn" onclick="addMontantRow()">+ Ajouter un montant</button>
+      </div>
+      <button type="submit">Envoyer la réponse + facture</button>
       <div id="responseMessage"></div>
     </form>
   </div>
@@ -99,15 +97,14 @@
 
 <script>
   const API = 'https://devmra.pythonanywhere.com';
-
   let devisData = {};
-  let currentEmail = "";
+  let currentEmail = "", currentClient = "";
 
+  // Login
   async function handleLogin() {
     const id = document.getElementById('idInput').value.trim();
     const mdp = document.getElementById('mdpInput').value.trim();
     const msg = document.getElementById('loginMessage');
-
     msg.innerHTML = '<div class="message">Connexion...</div>';
     try {
       const res = await fetch(API + '/admin_devis', {
@@ -115,20 +112,21 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, mdp })
       });
-      if (!res.ok) {
-        msg.innerHTML = '<div class="message error">Identifiants invalides</div>';
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        msg.innerHTML = '<div class="message danger">Identifiants invalides</div>';
         return;
       }
-      const data = await res.json();
       devisData = data;
       document.getElementById('loginSection').classList.add('hidden');
       document.getElementById('tableSection').classList.remove('hidden');
       fillTable(data);
     } catch (err) {
-      msg.innerHTML = '<div class="message error">Erreur réseau</div>';
+      msg.innerHTML = '<div class="message danger">Erreur réseau</div>';
     }
   }
 
+  // Table
   function fillTable(data) {
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
@@ -161,52 +159,64 @@
     return obj;
   }
 
-  function openResponseModal(email, nom) {
+  // Modal
+  function openResponseModal(email, client) {
     currentEmail = email;
-    document.getElementById('factureNom').value = nom || '';
+    currentClient = client;
     document.getElementById('responseModal').classList.add('show');
+    document.getElementById('factureNom').value = client || '';
+    clearMontantList();
+    addMontantRow(); // ligne minimum par défaut
+    document.getElementById('responseMessage').innerHTML = '';
+    document.getElementById('messageInput').value = '';
   }
   function closeResponseModal() {
     document.getElementById('responseModal').classList.remove('show');
-    document.getElementById('responseMessage').innerHTML = '';
-    document.getElementById('messageInput').value = '';
-    document.getElementById('factureNom').value = '';
-    document.getElementById('factureMontant').value = '';
-    document.getElementById('facturePresta').value = '';
-    document.getElementById('factureDate').value = '';
-    document.getElementById('factureNum').value = '';
-    document.getElementById('pdfPreview').innerHTML = '';
   }
 
-  let pdfBase64 = "";
+  // Montant rows dynamiques
+  function clearMontantList() {
+    document.getElementById('montantList').innerHTML = '';
+  }
+  function addMontantRow(nom='', prix='') {
+    const list = document.getElementById('montantList');
+    const div = document.createElement('div');
+    div.className = 'montant-row';
 
-  function generateInvoicePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const nom = document.getElementById('factureNom').value;
-    const montant = document.getElementById('factureMontant').value;
-    const presta = document.getElementById('facturePresta').value;
-    const date = document.getElementById('factureDate').value;
-    const num = document.getElementById('factureNum').value;
+    const inputNom = document.createElement('input');
+    inputNom.type = 'text'; inputNom.placeholder = 'Désignation';
+    inputNom.value = nom;
+    div.appendChild(inputNom);
 
-    doc.text(`Facture: ${num}`, 20, 30);
-    doc.text(`Client: ${nom}`, 20, 40);
-    doc.text(`Date: ${date}`, 20, 50);
-    doc.text(`Prestations: ${presta}`, 20, 60);
-    doc.text(`Montant total: ${montant} €`, 20, 70);
+    const inputPrix = document.createElement('input');
+    inputPrix.type = 'number'; inputPrix.min="0"; inputPrix.step="0.01";
+    inputPrix.placeholder = 'Prix (€)'; inputPrix.className="montant-prix";
+    inputPrix.value = prix;
+    div.appendChild(inputPrix);
 
-    // Aperçu PDF
-    pdfBase64 = doc.output("datauristring").split(',')[1]; // pour POST, uniquement la base64 raw
-    const pdfBlobURL = doc.output("bloburl");
-    document.getElementById('pdfPreview').innerHTML = `<a href="${pdfBlobURL}" target="_blank">Voir la facture PDF</a>`;
+    const btnDel = document.createElement('button');
+    btnDel.type = 'button'; btnDel.textContent = 'x';
+    btnDel.className = 'montant-btn danger';
+    btnDel.onclick = function(){ div.remove(); };
+    div.appendChild(btnDel);
+
+    list.appendChild(div);
   }
 
+  // ENVOI
   async function sendResponse() {
-    if (!pdfBase64) {
-      document.getElementById('responseMessage').innerHTML = '<div class="message error">Génère un PDF avant d\'envoyer.</div>';
+    const msg = document.getElementById('messageInput').value || "";
+    const items = [];
+    document.querySelectorAll('#montantList .montant-row').forEach(row => {
+      const nom = row.children[0].value.trim();
+      const prix = row.children[1].value.trim();
+      if (nom && prix && !isNaN(parseFloat(prix))) items.push({nom, prix: parseFloat(prix)});
+    });
+    if(items.length === 0) {
+      document.getElementById('responseMessage').innerHTML =
+        '<div class="message danger">Au moins un montant doit être saisi.</div>';
       return;
     }
-    const message = document.getElementById('messageInput').value;
     document.getElementById('responseMessage').innerHTML = '<div class="message">Envoi...</div>';
     try {
       const res = await fetch(API + '/send_response', {
@@ -214,18 +224,22 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: currentEmail,
-          message: message,
-          pdf: pdfBase64
+          message: msg,
+          client: currentClient,
+          items: items
         })
       });
       const data = await res.json();
       if (data.status === "sent") {
-        document.getElementById('responseMessage').innerHTML = '<div class="message success">Réponse envoyée !</div>';
+        document.getElementById('responseMessage').innerHTML =
+          '<div class="message success">Réponse envoyée !</div>';
       } else {
-        document.getElementById('responseMessage').innerHTML = '<div class="message error">Erreur : ' + (data.msg || 'envoi refusé') + '</div>';
+        document.getElementById('responseMessage').innerHTML =
+          '<div class="message danger">Erreur : ' + (data.msg || 'Envoi refused') + '</div>';
       }
     } catch (err) {
-      document.getElementById('responseMessage').innerHTML = '<div class="message error">Erreur réseau</div>';
+      document.getElementById('responseMessage').innerHTML =
+        '<div class="message danger">Erreur réseau</div>';
     }
   }
 </script>
