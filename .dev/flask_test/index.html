@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADMIN TEST Flask API</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
+    .container { max-width: 650px; margin: 0 auto;}
+    .input-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 8px; color: #aaa;}
+    input, textarea, select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; border-radius: 6px; color: #fff; font-size:1rem;}
+    textarea { min-height: 80px; font-family: monospace;}
+    button { padding: 14px 28px; background: #32c1ff; color: #222; border: none; border-radius: 6px; font-weight: bold; font-size: 1.15rem; cursor: pointer;}
+    button:hover { background: #fff;}
+    .results { margin-top: 30px;}
+    .result-preview, .result-code { background: #222; border-radius: 8px; padding: 16px; margin-bottom: 24px;}
+    pre { color: #27fc6a; font-size:1rem;}
+    .error { background: #ff6b6b; color: #222; border-radius: 6px; padding: 10px;}
+    .success { background: #51cf66; color: #222; border-radius: 6px; padding: 10px;}
+    .method-select { max-width: 130px; margin-bottom: 14px;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>ADMIN TEST – Testeur d'API Flask/JSON</h1>
+
+  <div class="input-group">
+    <label>Lien de l'API Flask à tester :</label>
+    <input type="text" id="urlInput" placeholder="https://devmra.pythonanywhere.com/endpoint">
+  </div>
+
+  <div class="input-group">
+    <label>Méthode :</label>
+    <select id="methodInput" class="method-select">
+      <option value="POST">POST</option>
+      <option value="GET">GET</option>
+      <option value="PUT">PUT</option>
+      <option value="DELETE">DELETE</option>
+      <option value="PATCH">PATCH</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label>Payload JSON à envoyer :</label>
+    <textarea id="jsonInput" placeholder='{"test": "valeur"}'></textarea>
+  </div>
+
+  <button onclick="sendRequest()">Envoyer la requête</button>
+
+  <div class="results hidden" id="resultsBox">
+    <h2>Résultat</h2>
+    <div id="resultPreview" class="result-preview"></div>
+    <div>
+      <strong>Code brut :</strong>
+      <pre id="resultCode" class="result-code"></pre>
+    </div>
+    <div id="statusMsg"></div>
+  </div>
+</div>
+
+<script>
+  async function sendRequest() {
+    const url = document.getElementById('urlInput').value.trim();
+    const method = document.getElementById('methodInput').value;
+    let json = document.getElementById('jsonInput').value.trim();
+    let body = null;
+
+    document.getElementById('resultsBox').classList.remove('hidden');
+    document.getElementById('statusMsg').innerHTML = '';
+    document.getElementById('resultPreview').innerHTML = '';
+    document.getElementById('resultCode').textContent = '';
+
+    if (!url) {
+      document.getElementById('statusMsg').innerHTML = '<div class="error">URL obligatoire !</div>';
+      return;
+    }
+
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+      if (!json) json = '{}';
+      try {
+        body = JSON.parse(json);
+      } catch (err) {
+        document.getElementById('statusMsg').innerHTML = '<div class="error">⚠️ JSON invalide</div>';
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined
+      });
+
+      const status = res.status;
+      document.getElementById('statusMsg').innerHTML =
+        `<div class="${status===200 ? "success":"error"}">Code HTTP : ${status} ${res.statusText}</div>`;
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = await res.text();
+      }
+
+      // Vue JSON pretty
+      if (typeof data === "object") {
+        document.getElementById('resultPreview').innerHTML = formatPreview(data);
+        document.getElementById('resultCode').textContent = JSON.stringify(data, null, 2);
+      } else {
+        document.getElementById('resultPreview').textContent = data;
+        document.getElementById('resultCode').textContent = data;
+      }
+
+    } catch (err) {
+      document.getElementById('statusMsg').innerHTML = '<div class="error">Erreur réseau : ' + err + '</div>';
+    }
+  }
+
+  function formatPreview(obj) {
+    // Affichage visuel des objets et tableaux
+    if (Array.isArray(obj)) {
+      return '<ul>' + obj.map(item => `<li>${formatPreview(item)}</li>`).join('') + '</ul>';
+    } else if (obj && typeof obj === "object") {
+      return '<ul>' + Object.entries(obj).map(([k, v]) =>
+        `<li><strong>${k} :</strong> ${typeof v === "object" ? formatPreview(v) : v}</li>`).join('') + '</ul>';
+    } else {
+      return `<span>${obj}</span>`;
+    }
+  }
+</script>
+</body>
+</html>
