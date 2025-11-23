@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Status Panel GeekSoft</title>
+  <style>
+    body {
+      background: #18191c;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .form-admin {
+      margin-top: 46px;
+      background: #23272a;
+      padding: 22px 36px 26px 36px;
+      border-radius: 15px;
+      box-shadow: 0 2px 21px #1118;
+      display:inline-block;
+    }
+    .form-admin label {
+      color: #aaa; display:block; margin-bottom:2px;
+    }
+    .form-admin input {
+      width: 230px; margin-bottom: 13px;
+      padding: 10px;
+      border-radius: 7px;
+      border: 1px solid #444;
+      background: #2a2a2a; color:#fff;
+      font-size: 1.1rem;
+    }
+    .status-label {
+      font-size: 1.1rem; margin-top:30px; margin-bottom:10px; text-align:center;color:#91eaff;
+    }
+    .switch-container {
+      width: 165px; margin: 26px auto;
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .slider-switch {
+      position: relative;
+      width: 135px; height: 46px;
+      background: #ff2d55;
+      border-radius: 32px;
+      box-shadow: 0 4px 12px #ff2d5530, 0 1px 9px #0008;
+      cursor: pointer;
+      transition: background 0.3s;
+      user-select:none;
+      margin-bottom:5px;
+    }
+    .slider-switch.on { background: #40e77e; box-shadow: 0 4px 12px #40e77e42, 0 1px 9px #0008;}
+    .slider-btn {
+      position: absolute;
+      top: 4px; left: 4px; width: 38px; height: 38px;
+      background: #fff;
+      border-radius:50%;
+      box-shadow: 0 2px 9px #18191c44;
+      transition: left 0.3s, background 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color:#222;
+    }
+    .slider-switch.on .slider-btn {
+      left: 93px;
+      background: #eee;
+    }
+    .switch-label {
+      position: absolute; font-size:1.15rem; top: 50%; transform: translateY(-50%);
+      font-weight:bold; width:50%; color: #fff; text-shadow:0 1px 4px #0006;
+      pointer-events:none;letter-spacing:0.5px;
+    }
+    .switch-label-left {left: 16px;}
+    .switch-label-right {right: 16px;text-align:right;}
+    .result-msg {
+      margin-top: 13px; font-size: 1.03rem;
+      min-height: 1.1em; text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <form class="form-admin" onsubmit="event.preventDefault();">
+    <label>ID Administrateur :</label>
+    <input type="text" id="idInput" placeholder="admin42" autocomplete="off"><br>
+    <label>Mot de passe :</label>
+    <input type="password" id="mdpInput" placeholder="••••••••" autocomplete="off">
+  </form>
+  <div class="switch-container">
+    <div class="status-label" id="statusLabel">...</div>
+    <div id="statusSwitch" class="slider-switch" onclick="toggleStatus()">
+      <div class="switch-label switch-label-left">OFFLINE</div>
+      <div class="switch-label switch-label-right">ALIVE</div>
+      <div class="slider-btn">&#128161;</div>
+    </div>
+    <div class="result-msg" id="switchMsg"></div>
+  </div>
+  <script>
+    const API_SITE = 'https://devmra.pythonanywhere.com';
+
+    let currentStatus = null;
+    let isSwitching = false;
+
+    function setSwitch(status) {
+      const sw = document.getElementById('statusSwitch');
+      sw.classList.toggle('on', status === 'ALIVE');
+      document.getElementById('statusLabel').textContent =
+        status === 'ALIVE' ? "Statut du site : ALIVE 🟢" :
+        status === 'OFFLINE' ? "Statut du site : OFFLINE 🔴"
+        : '...';
+      currentStatus = status;
+    }
+
+    async function getStatus() {
+      try {
+        const res = await fetch(API_SITE + '/alive');
+        const text = await res.text();
+        setSwitch(text && text.toUpperCase()==="ALIVE" ? "ALIVE" : "OFFLINE");
+      } catch {
+        setSwitch("OFFLINE");
+      }
+    }
+
+    async function toggleStatus() {
+      if (isSwitching) return;
+      const id = document.getElementById('idInput').value.trim();
+      const mdp = document.getElementById('mdpInput').value.trim();
+      const msg = document.getElementById('switchMsg');
+      if (!id || !mdp) {
+        msg.textContent = "Identifiants obligatoires.";
+        return;
+      }
+      const newStatus = currentStatus === "ALIVE" ? "OFFLINE" : "ALIVE";
+      msg.textContent = "Changement en cours...";
+      isSwitching = true;
+      try {
+        const res = await fetch(API_SITE + '/change_site_status', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id, mdp, status: newStatus
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === "success") {
+          setSwitch(newStatus);
+          msg.textContent = "Statut changé : " + newStatus;
+        } else {
+          msg.textContent = data?.error || "Erreur lors du changement";
+        }
+      } catch (e) {
+        msg.textContent = "Erreur réseau";
+      }
+      isSwitching = false;
+    }
+
+    // Initial status
+    getStatus();
+    // Refresh status on input change
+    document.getElementById('idInput').addEventListener('change', getStatus);
+    document.getElementById('mdpInput').addEventListener('change', getStatus);
+  </script>
+</body>
+</html>
