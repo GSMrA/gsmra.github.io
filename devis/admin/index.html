@@ -232,6 +232,26 @@
     }
   }
 
+  // Parser multi-ligne : supporte les champs ayant plusieurs lignes (comme "Description")
+  function parseDevis(text) {
+    const lines = text.split('\n');
+    const obj = {};
+    let currentKey = null;
+    for (const line of lines) {
+      const idx = line.indexOf(' : ');
+      if (idx > -1) {
+        // Nouvelle clé
+        currentKey = line.substring(0, idx).trim();
+        const val = line.substring(idx + 3).trim();
+        obj[currentKey] = val;
+      } else if (currentKey) {
+        // Ligne supplémentaire pour le champ en cours
+        obj[currentKey] += '\n' + line.trim();
+      }
+    }
+    return obj;
+  }
+
   function fillTable(data) {
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
@@ -255,20 +275,6 @@
       `;
       row.onclick = () => openModal(parsed);
     }
-  }
-
-  function parseDevis(text) {
-    const lines = text.split('\n').filter(l => l.trim());
-    const obj = {};
-    lines.forEach(line => {
-      const idx = line.indexOf(' : ');
-      if (idx > -1) {
-        const key = line.substring(0, idx).trim();
-        const val = line.substring(idx + 3).trim();
-        obj[key] = val;
-      }
-    });
-    return obj;
   }
 
   function openModal(devis) {
