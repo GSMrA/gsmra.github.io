@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Devis Response - GeekSoft</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ... (styles identiques ou adaptés à ton premier code, pour login/modal/table...) ... */
+    .response-box { background: #1a1a1a; padding: 30px; border-radius: 12px; margin: 32px auto; max-width: 700px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: #aaa; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff;
+    }
+    .pdf-preview { margin-top: 16px; border: 1px solid #333; background: #222; padding: 14px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>GeekSoft - Réponse au Devis</h1>
+
+  <!-- LOGIN -->
+  <div id="loginSection" class="login-box">
+    <!-- ... identique à ta version ... -->
+  </div>
+
+  <!-- TABLE -->
+  <div id="tableSection" class="hidden">
+    <!-- ... identique à ta version ... -->
+  </div>
+</div>
+
+<!-- MODAL REPONSE -->
+<div id="responseModal" class="modal" onclick="closeResponseModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="close" onclick="closeResponseModal()">&times;</span>
+    <h2>Envoyer une réponse au devis</h2>
+    <form id="responseForm">
+      <div class="form-group">
+        <label>Message au client :</label>
+        <textarea id="messageInput" rows="4" placeholder="Merci pour votre demande..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Configurer la facture (PDF)</label>
+        <input type="text" id="factureNom" placeholder="Nom client">
+        <input type="text" id="factureMontant" placeholder="Montant total (€)">
+        <input type="text" id="facturePresta" placeholder="Prestations/Services">
+        <input type="text" id="factureDate" placeholder="Date de facture">
+        <input type="text" id="factureNum" placeholder="Numéro de facture">
+        <!-- Ajoute plus de champs si besoin -->
+      </div>
+      <button type="button" onclick="generateInvoicePDF()">Prévisualiser la facture PDF</button>
+      <div id="pdfPreview" class="pdf-preview"></div>
+      <button type="button" onclick="sendResponse()">Envoyer la réponse</button>
+      <div id="responseMessage"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ... identique à ton code de login/fetch/etc ... (récupère devisData)
+  // Ajoute l'action pour openResponseModal sur chaque devis/table ligne
+  function fillTable(data) {
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    for (const [file, content] of Object.entries(data)) {
+      const parsed = parseDevis(content);
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td>${parsed.ID || '?'}</td>
+        <td>${parsed.Nom || '—'}</td>
+        <td>${parsed.Prénom || '—'}</td>
+        <td>${parsed.Email || '—'}</td>
+        <td>${parsed['Nom du bot'] || '—'}</td>
+        <td>${parsed['Nom du serveur'] || '—'}</td>
+        <td><button onclick="openResponseModal('${parsed.Email}')">Répondre</button></td>
+      `;
+      row.onclick = () => openModal(parsed);
+    }
+  }
+
+  let clientEmail = "";
+
+  function openResponseModal(email) {
+    clientEmail = email;
+    document.getElementById('responseModal').classList.add('show');
+  }
+  function closeResponseModal() {
+    document.getElementById('responseModal').classList.remove('show');
+  }
+
+  function generateInvoicePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const nom = document.getElementById('factureNom').value;
+    const montant = document.getElementById('factureMontant').value;
+    const presta = document.getElementById('facturePresta').value;
+    const date = document.getElementById('factureDate').value;
+    const num = document.getElementById('factureNum').value;
+
+    doc.text(`Facture: ${num}`, 20, 30);
+    doc.text(`Client: ${nom}`, 20, 40);
+    doc.text(`Date: ${date}`, 20, 50);
+    doc.text(`Prestations: ${presta}`, 20, 60);
+    doc.text(`Montant total: ${montant} €`, 20, 70);
+
+    // Enregistre le PDF en blob pour l’envoyer ou le prévisualiser
+    const pdfBlob = doc.output('bloburl');
+    document.getElementById('pdfPreview').innerHTML =
+      `<a href="${pdfBlob}" target="_blank">Voir la facture PDF</a>`;
+  }
+
+  async function sendResponse() {
+    const msg = document.getElementById('messageInput').value;
+    // TODO: Récupérer le PDF généré (base64 ou blob)
+    // TODO: Appeler ton API backend (Flask, etc.) pour envoyer l’email
+    document.getElementById('responseMessage').innerHTML =
+      '<div class="message success">Réponse envoyée (simulation, à connecter à ton backend)</div>';
+  }
+</script>
+</body>
+</html>
