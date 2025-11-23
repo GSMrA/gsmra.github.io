@@ -6,14 +6,31 @@
   <title>Admin Devis Response - GeekSoft</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* ... (styles identiques ou adaptés à ton premier code, pour login/modal/table...) ... */
+    /* Style de base, adapte selon ton design */
+    body { font-family: Arial, sans-serif; background: #0a0a0b; color: #fff; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .hidden { display: none; }
+    .login-box { max-width: 400px; margin: 50px auto; background: #1a1a1a; padding: 30px; border-radius: 12px; }
     .response-box { background: #1a1a1a; padding: 30px; border-radius: 12px; margin: 32px auto; max-width: 700px; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; margin-bottom: 8px; color: #aaa; }
-    .form-group input, .form-group textarea {
-      width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff;
-    }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff; }
+    table { width: 100%; background: #1a1a1a; border-radius: 12px; border-collapse: collapse; margin-top: 32px; }
+    th, td { padding: 14px; }
+    th { background: #2a2a2a; }
+    tr { cursor: pointer; }
+    tr:hover { background: #222; }
+    button { margin-top: 4px; width: 100%; padding: 14px; background: #32c1ff; color: #000; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+    button:hover { background: #fff; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 600px; width: 95%; position: relative; }
+    .close { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; color: #aaa; }
+    .close:hover { color: #fff; }
     .pdf-preview { margin-top: 16px; border: 1px solid #333; background: #222; padding: 14px; border-radius: 8px; }
+    .message { margin-top: 16px; padding: 12px; border-radius: 6px; text-align: center; }
+    .error { background: #ff6b6b; color: #000; }
+    .success { background: #51cf66; color: #000; }
   </style>
 </head>
 <body>
@@ -22,12 +39,35 @@
 
   <!-- LOGIN -->
   <div id="loginSection" class="login-box">
-    <!-- ... identique à ta version ... -->
+    <h2>Connexion Admin</h2>
+    <div class="form-group">
+      <label>ID Admin</label>
+      <input type="text" id="idInput" placeholder="admin42">
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="mdpInput" placeholder="••••••••">
+    </div>
+    <button onclick="handleLogin()">Se connecter</button>
+    <div id="loginMessage"></div>
   </div>
 
   <!-- TABLE -->
   <div id="tableSection" class="hidden">
-    <!-- ... identique à ta version ... -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Bot</th>
+          <th>Serveur</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -36,7 +76,7 @@
   <div class="modal-content" onclick="event.stopPropagation()">
     <span class="close" onclick="closeResponseModal()">&times;</span>
     <h2>Envoyer une réponse au devis</h2>
-    <form id="responseForm">
+    <form id="responseForm" onsubmit="event.preventDefault(); sendResponse();">
       <div class="form-group">
         <label>Message au client :</label>
         <textarea id="messageInput" rows="4" placeholder="Merci pour votre demande..."></textarea>
@@ -48,19 +88,47 @@
         <input type="text" id="facturePresta" placeholder="Prestations/Services">
         <input type="text" id="factureDate" placeholder="Date de facture">
         <input type="text" id="factureNum" placeholder="Numéro de facture">
-        <!-- Ajoute plus de champs si besoin -->
       </div>
       <button type="button" onclick="generateInvoicePDF()">Prévisualiser la facture PDF</button>
       <div id="pdfPreview" class="pdf-preview"></div>
-      <button type="button" onclick="sendResponse()">Envoyer la réponse</button>
+      <button type="submit">Envoyer la réponse</button>
       <div id="responseMessage"></div>
     </form>
   </div>
 </div>
 
 <script>
-  // ... identique à ton code de login/fetch/etc ... (récupère devisData)
-  // Ajoute l'action pour openResponseModal sur chaque devis/table ligne
+  const API = 'https://devmra.pythonanywhere.com';
+
+  let devisData = {};
+  let currentEmail = "";
+
+  async function handleLogin() {
+    const id = document.getElementById('idInput').value.trim();
+    const mdp = document.getElementById('mdpInput').value.trim();
+    const msg = document.getElementById('loginMessage');
+
+    msg.innerHTML = '<div class="message">Connexion...</div>';
+    try {
+      const res = await fetch(API + '/admin_devis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, mdp })
+      });
+      if (!res.ok) {
+        msg.innerHTML = '<div class="message error">Identifiants invalides</div>';
+        return;
+      }
+      const data = await res.json();
+      devisData = data;
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('tableSection').classList.remove('hidden');
+      fillTable(data);
+    } catch (err) {
+      msg.innerHTML = '<div class="message error">Erreur réseau</div>';
+    }
+  }
+
   function fillTable(data) {
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
@@ -74,26 +142,47 @@
         <td>${parsed.Email || '—'}</td>
         <td>${parsed['Nom du bot'] || '—'}</td>
         <td>${parsed['Nom du serveur'] || '—'}</td>
-        <td><button onclick="openResponseModal('${parsed.Email}')">Répondre</button></td>
+        <td><button type="button" onclick="openResponseModal('${parsed.Email}','${parsed.Nom}')">Répondre</button></td>
       `;
-      row.onclick = () => openModal(parsed);
     }
   }
 
-  let clientEmail = "";
+  function parseDevis(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    const obj = {};
+    lines.forEach(line => {
+      const idx = line.indexOf(' : ');
+      if (idx > -1) {
+        const key = line.substring(0, idx).trim();
+        const val = line.substring(idx + 3).trim();
+        obj[key] = val;
+      }
+    });
+    return obj;
+  }
 
-  function openResponseModal(email) {
-    clientEmail = email;
+  function openResponseModal(email, nom) {
+    currentEmail = email;
+    document.getElementById('factureNom').value = nom || '';
     document.getElementById('responseModal').classList.add('show');
   }
   function closeResponseModal() {
     document.getElementById('responseModal').classList.remove('show');
+    document.getElementById('responseMessage').innerHTML = '';
+    document.getElementById('messageInput').value = '';
+    document.getElementById('factureNom').value = '';
+    document.getElementById('factureMontant').value = '';
+    document.getElementById('facturePresta').value = '';
+    document.getElementById('factureDate').value = '';
+    document.getElementById('factureNum').value = '';
+    document.getElementById('pdfPreview').innerHTML = '';
   }
+
+  let pdfBase64 = "";
 
   function generateInvoicePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     const nom = document.getElementById('factureNom').value;
     const montant = document.getElementById('factureMontant').value;
     const presta = document.getElementById('facturePresta').value;
@@ -106,18 +195,38 @@
     doc.text(`Prestations: ${presta}`, 20, 60);
     doc.text(`Montant total: ${montant} €`, 20, 70);
 
-    // Enregistre le PDF en blob pour l’envoyer ou le prévisualiser
-    const pdfBlob = doc.output('bloburl');
-    document.getElementById('pdfPreview').innerHTML =
-      `<a href="${pdfBlob}" target="_blank">Voir la facture PDF</a>`;
+    // Aperçu PDF
+    pdfBase64 = doc.output("datauristring").split(',')[1]; // pour POST, uniquement la base64 raw
+    const pdfBlobURL = doc.output("bloburl");
+    document.getElementById('pdfPreview').innerHTML = `<a href="${pdfBlobURL}" target="_blank">Voir la facture PDF</a>`;
   }
 
   async function sendResponse() {
-    const msg = document.getElementById('messageInput').value;
-    // TODO: Récupérer le PDF généré (base64 ou blob)
-    // TODO: Appeler ton API backend (Flask, etc.) pour envoyer l’email
-    document.getElementById('responseMessage').innerHTML =
-      '<div class="message success">Réponse envoyée (simulation, à connecter à ton backend)</div>';
+    if (!pdfBase64) {
+      document.getElementById('responseMessage').innerHTML = '<div class="message error">Génère un PDF avant d\'envoyer.</div>';
+      return;
+    }
+    const message = document.getElementById('messageInput').value;
+    document.getElementById('responseMessage').innerHTML = '<div class="message">Envoi...</div>';
+    try {
+      const res = await fetch(API + '/send_response', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentEmail,
+          message: message,
+          pdf: pdfBase64
+        })
+      });
+      const data = await res.json();
+      if (data.status === "sent") {
+        document.getElementById('responseMessage').innerHTML = '<div class="message success">Réponse envoyée !</div>';
+      } else {
+        document.getElementById('responseMessage').innerHTML = '<div class="message error">Erreur : ' + (data.msg || 'envoi refusé') + '</div>';
+      }
+    } catch (err) {
+      document.getElementById('responseMessage').innerHTML = '<div class="message error">Erreur réseau</div>';
+    }
   }
 </script>
 </body>
