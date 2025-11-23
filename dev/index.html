@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Testeur d'API (HTML only)</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 20px auto; }
+    textarea, input, select { width: 100%; box-sizing: border-box; margin-top: 5px; }
+    textarea { height: 150px; font-family: monospace; }
+    pre { background: #222; color: #eee; padding: 10px; white-space: pre-wrap; }
+    .status { font-weight: bold; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Testeur HTTP / API</h1>
+
+  <form id="api-form">
+    <label>Méthode HTTP</label>
+    <select name="method" id="method">
+      <option>GET</option>
+      <option>POST</option>
+      <option>PUT</option>
+      <option>PATCH</option>
+      <option>DELETE</option>
+    </select>
+
+    <label>URL de l'endpoint</label>
+    <input type="text" id="url" placeholder="https://exemple.com/api/...">
+
+    <label>JSON (optionnel)</label>
+    <textarea id="json-body" placeholder='{"key": "value"}'></textarea>
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <p id="error" class="error"></p>
+  <p id="status" class="status"></p>
+
+  <h2>Réponse brute</h2>
+  <pre id="response"></pre>
+
+  <script>
+    const form = document.getElementById("api-form");
+    const urlInput = document.getElementById("url");
+    const methodSelect = document.getElementById("method");
+    const jsonTextarea = document.getElementById("json-body");
+    const errorEl = document.getElementById("error");
+    const statusEl = document.getElementById("status");
+    const responseEl = document.getElementById("response");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.textContent = "";
+      statusEl.textContent = "";
+      responseEl.textContent = "";
+
+      const url = urlInput.value.trim();
+      const method = methodSelect.value.toUpperCase();
+      const jsonRaw = jsonTextarea.value.trim();
+
+      if (!url) {
+        errorEl.textContent = "URL obligatoire.";
+        return;
+      }
+
+      let body = undefined;
+      let headers = {};
+
+      if (jsonRaw) {
+        try {
+          JSON.parse(jsonRaw); // juste pour valider
+          body = jsonRaw;
+          headers["Content-Type"] = "application/json";
+        } catch (err) {
+          errorEl.textContent = "JSON invalide.";
+          return;
+        }
+      }
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: body
+        });
+
+        statusEl.textContent = "Status HTTP : " + res.status;
+
+        const text = await res.text();
+        responseEl.textContent = text;
+      } catch (err) {
+        errorEl.textContent = "Erreur lors de la requête : " + err;
+      }
+    });
+  </script>
+</body>
+</html>
