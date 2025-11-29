@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ressources - Admin</title>
+    <title>Temple of Boom - Admin</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
         
         body {
@@ -152,23 +159,22 @@
             color: white;
             padding: 15px 10px;
             text-align: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 100;
             display: none;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+            min-height: 60px;
         }
         
         @media (max-width: 600px) {
             header {
                 padding: 10px 5px;
+                min-height: 80px;
             }
         }
         
         header.show {
-            display: block;
+            display: flex;
         }
         
         header h1 {
@@ -225,39 +231,39 @@
         
         .container {
             width: 100%;
-            min-height: calc(100vh - 70px);
-            margin-top: 70px;
-            padding: 10px;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                min-height: calc(100vh - 100px);
-                padding: 5px;
-            }
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
         }
         
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
         }
         
         .content {
             display: none;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
         .content.show {
-            display: block;
+            display: flex;
+            flex-direction: column;
         }
     </style>
 </head>
 <body>
     <!-- Login Form -->
     <div class="login-container" id="loginContainer">
-        <h1>Cette page est réservée au Developpeurs/Admins du site</h1>
+        <h1>🔐 Admin Access</h1>
         <div class="success-message" id="successMessage">Authentification réussie!</div>
         <form id="loginForm">
             <div class="form-group">
@@ -276,7 +282,7 @@
     <!-- Content (Hidden until authenticated) -->
     <div class="content" id="content">
         <header id="header">
-            <h1> Temple of Boom</h1>
+            <h1>🎮 Temple of Boom</h1>
             <div class="header-buttons">
                 <a href="/">← Retour au site</a>
                 <button id="logoutBtn">Déconnexion</button>
