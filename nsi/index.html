@@ -33,7 +33,7 @@
       transform: translateX(-50%);
       background: #000;
       color: var(--white);
-      padding: 32px 50px;
+      padding: 20px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -43,35 +43,32 @@
       max-width: 1300px;
       z-index: 1000;
       animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
+      gap: 20px;
     }
     .logo { 
-      height: 80px; 
+      height: 70px; 
       width: auto; 
       display: block; 
-      filter: drop-shadow(0 0 15px var(--glow)); 
-      position: absolute;
-      left: 50px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 15px var(--glow));
     }
     .title {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
       font-weight: 900;
-      font-size: 4rem;
-      letter-spacing: 3px;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--white);
       text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+      flex: 1;
+      text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 70vw;
     }
     .top-links {
-      position: absolute;
-      right: 50px;
       display: flex;
       gap: 25px;
+      flex-shrink: 0;
     }
     .top-links a {
       color: var(--white);
