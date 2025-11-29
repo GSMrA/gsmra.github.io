@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <title>Projets NSI - GeekSoft</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="GEEKSOFT.png">
+  <style>
+    :root {
+      --black: #1e1e1e;
+      --white: #fff;
+      --muted: #b2b2b2;
+      --card-bg: #28292d;
+      --card-border: #333;
+      --glow: #686868;
+      --gray-bg: #191919;
+      --max-width: 1100px;
+      --shadow: 0 4px 24px rgba(40, 40, 50, 0.16), 0 1.5px 8px #4446;
+      --bar-bg: #222930;
+      --bar-accent: #32c1ff;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial Black', Impact, sans-serif;
+      background: var(--gray-bg);
+      color: var(--white);
+    }
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 50vw;
+      transform: translateX(-50%);
+      background: #000;
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 30px var(--glow), 0 8px 20px rgba(255,255,255,0.2);
+      border-radius: 24px;
+      width: 93vw;
+      max-width: 1300px;
+      z-index: 1000;
+      animation: slideDown 0.8s cubic-bezier(.44,1.3,.44,1) forwards;
+    }
+    .logo { 
+      height: 70px; 
+      width: auto; 
+      display: block; 
+      filter: drop-shadow(0 0 15px var(--glow)); 
+      position: absolute;
+      left: 40px;
+    }
+    .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 3.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .top-links {
+      position: absolute;
+      right: 40px;
+      display: flex;
+      gap: 20px;
+    }
+    .top-links a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: opacity 0.3s ease;
+    }
+    .top-links a:hover {
+      opacity: 0.7;
+    }
+    .cartes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      padding-bottom: 60px;
+      margin: auto;
+      margin-top: 25vh;
+      min-height: 70vh;
+      align-content: center;
+    }
+    .carte-projet {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      min-width: 270px;
+      max-width: 320px;
+      width: 29vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 22px 30px 22px;
+      animation: projectFloatIn 1s cubic-bezier(.46,.85,.58,1) forwards;
+      opacity: 0;
+      transform: translateY(60px) scale(0.98);
+      transition:
+        box-shadow 0.25s,
+        transform 1.5s cubic-bezier(.22,.42,.52,.97),
+        z-index 0.35s;
+      position: relative;
+      cursor: pointer;
+      z-index: 1;
+      text-align: center;
+    }
+    .carte-projet:nth-child(1) { animation-delay: 0.2s; }
+    .carte-projet:nth-child(2) { animation-delay: 0.4s; }
+    .carte-projet:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes projectFloatIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .carte-projet:hover,
+    .carte-projet:focus-visible {
+      box-shadow: 0 22px 60px #222f, 0 6.5px 30px #32c1ff99;
+      transform: scale(1.16) translateY(-18px) !important;
+      z-index: 9999;
+      transition: transform 1.5s cubic-bezier(.22,.42,.52,.97), box-shadow 1.5s cubic-bezier(.22,.42,.52,.97);
+    }
+
+    .projet-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--bar-accent), #0066cc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin-bottom: 22px;
+      box-shadow: 0 0 0 3px #222, 0 2px 15px #aaa8;
+    }
+    .projet-nom { 
+      font-size: 1.22rem; 
+      font-weight: 700; 
+      color: var(--white); 
+      margin-bottom: 10px; 
+      letter-spacing: 1px; 
+    }
+    .projet-desc { 
+      font-size: 0.95rem; 
+      color: var(--muted); 
+      margin-bottom: 14px; 
+      text-align: center; 
+      line-height: 1.4;
+    }
+    .projet-link {
+      display: block;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(.36,1.19,.6,.74), opacity 0.22s;
+      overflow: hidden;
+      font-size: 0.95rem;
+      color: var(--bar-accent);
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: -10px;
+      margin-top: 0;
+      pointer-events: none;
+    }
+    .carte-projet:hover .projet-link,
+    .carte-projet:focus-visible .projet-link {
+      opacity: 1;
+      max-height: 80px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      pointer-events: all;
+    }
+    .projet-link a {
+      color: var(--bar-accent);
+      text-decoration: none;
+      transition: opacity 0.3s;
+    }
+    .projet-link a:hover {
+      opacity: 0.7;
+    }
+
+    @media (max-width: 995px) {
+      .cartes {flex-direction: column; gap: 40px; align-items: center;}
+      .topbar {padding: 16px;}
+      .title {font-size: 2.2rem;}
+      .top-links {position: static; margin-top: 20px; gap: 15px;}
+      .logo {position: static; margin-right: 20px;}
+    }
+    @media (max-width:480px){
+      .logo{height:45px}
+      .cartes {margin-top: 0;}
+      .carte-projet {padding: 24px 10px; min-width: 90vw; max-width:98vw;}
+      .title{font-size:1.25rem;}
+      .topbar{flex-direction: column; padding: 10px;}
+      .top-links{position: static; margin-top: 10px;}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="GEEKSOFT.png" alt="GEEKSOFT" class="logo" />
+    <div class="title">GeekSoft - PROJETS NSI</div>
+    <div class="top-links">
+      <a href="/">Accueil</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </header>
+  <div class="cartes" id="cartes"></div>
+
+  <script>
+    const projets = [
+      {
+        nom: "Phantom-Text",
+        desc: "Éditeur de texte avancé avec features modernes et interface intuitive.",
+        icon: "📝",
+        url: "/nsi/phantom-text/"
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cartes = document.getElementById('cartes');
+      projets.forEach(projet => {
+        const carte = document.createElement('div');
+        carte.className = 'carte-projet';
+        carte.innerHTML = `
+          <div class="projet-icon">${projet.icon}</div>
+          <div class="projet-nom">${projet.nom}</div>
+          <div class="projet-desc">${projet.desc}</div>
+          <div class="projet-link">
+            <a href="${projet.url}">Voir le projet →</a>
+          </div>
+        `;
+        cartes.appendChild(carte);
+      });
+    });
+  </script>
+</body>
+</html>
