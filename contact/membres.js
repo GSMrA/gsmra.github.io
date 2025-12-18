@@ -8,7 +8,7 @@ const membres = [
   { image: "imageNone.png", pseudo: "Jess_le_vadrouilleur", desc: "Deusième Client et également amis de longue date", 
     contact: "Son discord : <a href=\"https://discord.gg/hyqEucjydR\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a>" 
   },
-    { image: "image5.png", pseudo: "pauline.lemrdt", desc: "Amie et Graphiste pour le Projet Loup Garou", 
+    { image: "image5.png", pseudo: "pauline.lemrdt", desc: "Graphiste", 
     contact: "Son Insta : <a href=\"https://www.instagram.com/pauline.lemrdt\" target=\"_blank\" rel=\"noopener noreferrer\">Instagram</a>" 
   },
   
