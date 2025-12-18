@@ -5,9 +5,13 @@ const membres = [
   { image: "image4.png", pseudo: "Stor", desc: "Amis et tout premier client pour son serveur. Également Testeur a temps partiel et Youtuber", 
     contact: "Son discord : <a href=\"https://discord.gg/cd7YWe8pqV\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a><br>Youtube : <a href=\"https://www.youtube.com/@levraistor\" target=\"_blank\" rel=\"noopener noreferrer\">Youtube</a>" 
   },
-  { image: "image5.png", pseudo: "Jess_le_vadrouilleur", desc: "Deusième Client et également amis de longue date", 
+  { image: "imageNone.png", pseudo: "Jess_le_vadrouilleur", desc: "Deusième Client et également amis de longue date", 
     contact: "Son discord : <a href=\"https://discord.gg/hyqEucjydR\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a>" 
-  }
+  },
+    { image: "image5.png", pseudo: "pauline.lemrdt", desc: "Amie et Graphiste pour le Projet Loup Garou", 
+    contact: "Son Insta : <a href=\"https://www.instagram.com/pauline.lemrdt\" target=\"_blank\" rel=\"noopener noreferrer\">Instagram</a>" 
+  },
+  
   // { image: "image6.png", pseudo: "Ethan", desc: "Assistant technique et modérateur Discord.", contact: "ethan@geeksoft.online" }
 ];
 
