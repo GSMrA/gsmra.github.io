@@ -2,47 +2,134 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Puissance 4 Multi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puissance 4 Multi - GeekSoft</title>
     <style>
-        body { font-family: Arial; text-align: center; background: #e0e0e0; }
-        #board { display: grid; grid-template-columns: repeat(7, 80px); gap: 10px; background: #0066cc; padding: 20px; border-radius: 10px; border: 10px solid #0055aa; margin: 20px auto; }
-        .cell { width: 80px; height: 80px; background: white; border-radius: 50%; cursor: pointer; }
-        .red { background: #ff4136 !important; }
-        .yellow { background: #ffdc00 !important; }
-        .status { width: 60px; height: 60px; border-radius: 50%; margin: 10px auto; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3); }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white;
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        #lobby, #gameArea { max-width: 800px; margin: 0 auto; }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(7, 80px); 
+            gap: 10px; 
+            background: #0066cc; 
+            padding: 20px; 
+            border-radius: 20px; 
+            border: 10px solid #0055aa; 
+            margin: 30px auto; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .cell { 
+            width: 80px; 
+            height: 80px; 
+            background: white; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .cell:hover { transform: scale(1.05); }
+        .red { background: #ff4136 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
+        .yellow { background: #ffdc00 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
+        #status { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            margin: 20px auto; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset -5px -5px 10px rgba(0,0,0,0.3); 
+            transition: all 0.3s;
+        }
         .red-selected { background: #ff4136; }
         .yellow-selected { background: #ffdc00; }
-        #message { font-size: 2rem; font-weight: bold; margin: 20px; }
-        button { padding: 10px 20px; background: #060606; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; margin: 10px; }
-        button:hover { background: #383938; }
-        input { padding: 10px; font-size: 1rem; margin: 10px; }
-        #gameArea { display: none; }
+        #message { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            margin: 30px 0; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            min-height: 50px;
+        }
+        button { 
+            padding: 15px 30px; 
+            background: linear-gradient(45deg, #060606, #383838); 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            margin: 15px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
+        button:active { transform: translateY(0); }
+        input { 
+            padding: 15px; 
+            font-size: 1.1rem; 
+            border-radius: 25px; 
+            border: 3px solid #fff; 
+            background: rgba(255,255,255,0.9); 
+            margin: 10px; 
+            width: 200px;
+        }
+        #roomInfo { 
+            background: rgba(0,0,0,0.3); 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin: 20px 0; 
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        #connectStatus { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            font-weight: bold;
+            background: #4CAF50;
+        }
+        #connectStatus.disconnected { background: #f44336; }
     </style>
 </head>
 <body>
-    <h1>Puissance 4 Online</h1>
+    <div id="connectStatus">Connexion...</div>
+    <h1>🔴🟡 Puissance 4 Online 🟡🔴</h1>
+    
     <div id="lobby">
-        <button onclick="hostRoom()">Héberger une room</button>
+        <button onclick="hostRoom()">🏠 Héberger une room</button><br><br>
         <div>
-            <input id="roomCode" placeholder="Code room (ex: ABC123)" maxlength="6">
+            <input id="roomCode" placeholder="Code room (ex: ABC123)" maxlength="6" style="text-transform: uppercase;">
             <input id="playerName" placeholder="Ton pseudo">
-            <button onclick="joinRoom()">Rejoindre</button>
+            <button onclick="joinRoom()">🚀 Rejoindre</button>
         </div>
         <div id="roomInfo"></div>
     </div>
-    <div id="gameArea">
+    
+    <div id="gameArea" style="display: none;">
         <div id="status" class="status red-selected"></div>
         <div id="board"></div>
-        <div id="message"></div>
-        <button onclick="resetGame()">Reset</button>
+        <div id="message">Joue dans la colonne !</div>
+        <button onclick="resetGame()">🔄 Nouvelle partie</button>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        const WS_URL = 'wss://devmra.pythonanywhere.com'; // Ton URL + port SocketIO si différent
-        let socket, roomId, playerId, currentPlayer = 'red', gameBoard = Array(6).fill().map(() => Array(7).fill(null)), isGameOver = false;
+        const WS_URL = 'https://geeksoft.pythonanywhere.com';  // ✅ Ton adresse mise à jour
+        let socket, roomId, playerId, currentPlayer = 'red';
+        let gameBoard = Array(6).fill().map(() => Array(7).fill(null));
+        let isGameOver = false, myColor = null;
 
-        // Créer grille
+        const statusDiv = document.getElementById('connectStatus');
+
+        // Créer grille interactive
         function createBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
@@ -50,84 +137,102 @@
                 for (let c = 0; c < 7; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-                    cell.dataset.col = c;
                     cell.dataset.row = r;
-                    cell.onclick = () => playMove(c);
+                    cell.dataset.col = c;
+                    cell.onclick = () => playMove(parseInt(cell.dataset.col));
                     board.appendChild(cell);
                 }
             }
         }
 
-        // Jouer coup (local + envoi serveur)
+        // Jouer coup
         function playMove(col) {
-            if (isGameOver || currentPlayer !== getMyColor()) return;
-            socket.emit('play', { room: roomId, col: col });
+            if (isGameOver || currentPlayer !== myColor) return;
+            socket.emit('play', { room: roomId, col });
         }
 
-        // Mettre à jour UI depuis serveur
+        // Mettre à jour cellule
         function updateCell(row, col, color) {
             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            cell.classList.add(color);
-            gameBoard[row][col] = color;
-            document.getElementById('status').classList.remove('red-selected', 'yellow-selected');
-            document.getElementById('status').classList.add(`${currentPlayer === 'red' ? 'yellow' : 'red'}-selected`);
+            if (cell) {
+                cell.classList.add(color);
+                gameBoard[row][col] = color;
+            }
+            updateStatus();
         }
 
-        // Trouver position valide (bas vers haut)
+        // Status joueur courant
+        function updateStatus() {
+            const status = document.getElementById('status');
+            status.classList.remove('red-selected', 'yellow-selected');
+            status.classList.add(currentPlayer === 'red' ? 'red-selected' : 'yellow-selected');
+        }
+
+        // Connexion WebSocket persistante
+        function connect() {
+            socket = io(WS_URL, { 
+                transports: ['websocket'],  // Connexion constante WS
+                timeout: 20000,
+                reconnection: true,
+                reconnectionAttempts: 5
+            });
+
+            socket.on('connect', () => {
+                statusDiv.textContent = '✅ Connecté';
+                statusDiv.classList.remove('disconnected');
+            });
+
+            socket.on('disconnect', () => {
+                statusDiv.textContent = '❌ Déconnecté';
+                statusDiv.classList.add('disconnected');
+            });
+
+            socket.on('state', (data) => {
+                currentPlayer = data.currentPlayer;
+                myColor = data.myColor;
+                document.getElementById('message').textContent = data.message || `Tour: ${data.currentPlayer.toUpperCase()}`;
+                isGameOver = data.gameOver || false;
+                updateStatus();
+            });
+
+            socket.on('play', (data) => {
+                const row = dropPiece(data.col, data.color);
+                if (row !== -1) {
+                    updateCell(row, data.col, data.color);
+                    if (data.win) {
+                        document.getElementById('message').textContent = `${data.color.toUpperCase()} GAGNE ! 🎉`;
+                        isGameOver = true;
+                    }
+                }
+            });
+        }
+
+        // Logique chute pièce (bas vers haut)
         function dropPiece(col, color) {
             for (let row = 5; row >= 0; row--) {
                 if (!gameBoard[row][col]) {
-                    updateCell(row, col, color);
                     return row;
                 }
             }
             return -1;
         }
 
-        // Vérifier victoire (simplifié)
-        function checkWin(color) {
-            // Horizontal, vertical, diagonal (logique complète comme [web:20])
-            for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) if (checkLine(gameBoard[r][c], color, (r,c), (0,1))) return true;
-            for (let c = 0; c < 7; c++) for (let r = 0; r < 3; r++) if (checkLine(gameBoard[r][c], color, (1,0))) return true;
-            // Diagonales...
-            return false;
-        }
-
-        function checkLine(start, color, dr, dc) { /* Implémente check 4 alignés */ return false; } // À compléter de [page:0]
-
-        function getMyColor() { return playerId === 'player1' ? 'red' : 'yellow'; } // Simplifié
-
-        // Connexion SocketIO persistante
-        function connect() {
-            socket = io(WS_URL, { transports: ['websocket'] }); // Force WS constant
-            socket.on('connect', () => console.log('Connecté WS'));
-            socket.on('state', (data) => {
-                currentPlayer = data.currentPlayer;
-                // Update board from data.board (2D array)
-                document.getElementById('message').textContent = data.message || '';
-                isGameOver = data.gameOver || false;
-            });
-            socket.on('play', (data) => {
-                const row = dropPiece(data.col, data.color);
-                if (row !== -1 && checkWin(data.color)) {
-                    document.getElementById('message').textContent = `${data.color.toUpperCase()} gagne!`;
-                    isGameOver = true;
-                }
-            });
-        }
-
+        // Host room
         function hostRoom() {
             playerId = 'player1';
-            roomId = 'room_' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
             socket.emit('create_room', { room: roomId, player: playerId });
-            document.getElementById('roomInfo').innerHTML = `Ton code room: <strong>${roomId}</strong> (partage-le!)`;
-            showGame();
+            document.getElementById('roomInfo').innerHTML = 
+                `<div>🏠 Ton code room: <strong style="color: #ffd700;">${roomId}</strong></div>
+                 Partage-le avec ton adversaire !`;
+            setTimeout(showGame, 1000);
         }
 
+        // Join room
         function joinRoom() {
             roomId = document.getElementById('roomCode').value.toUpperCase();
-            const name = document.getElementById('playerName').value || 'Joueur2';
             playerId = 'player2';
+            const name = document.getElementById('playerName').value || 'Joueur2';
             socket.emit('join_room', { room: roomId, player: playerId, name });
         }
 
@@ -141,11 +246,11 @@
             socket.emit('reset', { room: roomId });
             gameBoard = Array(6).fill().map(() => Array(7).fill(null));
             isGameOver = false;
-            document.getElementById('message').textContent = '';
+            document.getElementById('message').textContent = 'Nouvelle partie !';
             createBoard();
         }
 
-        // Init
+        // Initialisation
         connect();
         createBoard();
     </script>
