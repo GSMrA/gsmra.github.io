@@ -2,368 +2,249 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puissance 4 - Physique Réaliste</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Puissance 4 - Corrigé</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --cell-size: 60px;
+            --board-padding: 15px;
+            --p1-color: #ffce00; /* Jaune plus lisible */
+            --p2-color: #ff3b30; /* Rouge vif Apple */
         }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: white;
-            overflow: hidden;
-        }
-        .game-container {
-            text-align: center;
-            background: rgba(255,255,255,0.15);
-            padding: 2rem;
-            border-radius: 25px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-            position: relative;
-        }
-        #playerTurn {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
-        }
-        #playerTurn span {
-            color: #ffd700;
-            font-weight: 700;
-            text-shadow: 0 0 10px #ffd700;
-        }
-        .board {
-            position: relative;
-            width: 490px;
-            height: 420px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(180deg, #001f5b 0%, #003087 100%);
-            border: 8px solid #1e40af;
-            border-radius: 20px;
-            box-shadow: inset 0 15px 30px rgba(0,0,0,0.6), 0 20px 40px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(7, 70px);
-            grid-template-rows: repeat(6, 70px);
-            gap: 0;
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .cell {
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 70%);
-            border: 3px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .cell:hover {
-            transform: scale(1.08);
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 70%);
-            box-shadow: inset 0 0 30px rgba(255,255,255,0.5);
-        }
-        .cell.full {
-            cursor: default;
-        }
-        .cell.full:hover {
-            transform: none;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 70%);
-        }
-        .piece {
-            position: absolute;
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            top: -100px;
-            left: 6px;
-            transition: none;
-            z-index: 10;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
-        .piece.player1 {
-            background: radial-gradient(circle at 25% 25%, #fff176 0%, #ffb300 70%, #ff8f00 100%);
-            box-shadow: 0 0 25px rgba(255,193,7,0.8);
-        }
-        .piece.player2 {
-            background: radial-gradient(circle at 25% 25%, #ff7043 0%, #f4511e 70%, #d84315 100%);
-            box-shadow: 0 0 25px rgba(244,67,54,0.8);
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-        button {
-            background: linear-gradient(45deg, #ffd700, #ffed4a);
-            color: #333;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 8px 25px rgba(255,215,0,0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(255,215,0,0.6);
-        }
-        button:active {
-            transform: translateY(-2px);
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #2c3e50;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            touch-action: manipulation; /* Empêche le zoom double-tap sur iPad */
         }
-        .overlay.show {
-            opacity: 1;
-            visibility: visible;
+
+        .game-info {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
         }
-        .overlay h2 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 20px currentColor;
-            animation: pulse 2s infinite;
+
+        .board {
+            background-color: #0055ff; /* Bleu classique P4 */
+            padding: var(--board-padding);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: grid;
+            grid-template-columns: repeat(7, var(--cell-size));
+            grid-template-rows: repeat(6, var(--cell-size));
+            gap: 10px; /* Espace entre les trous */
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background-color: #2c3e50; /* Couleur du fond de page pour effet de trou */
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3); /* Ombre interne pour profondeur */
+            overflow: visible; /* Important pour voir le jeton tomber de plus haut si besoin */
         }
-        @keyframes fall {
-            0% {
-                transform: translateY(-500px) rotateX(0deg);
-                opacity: 1;
-            }
-            70% {
-                transform: translateY(50px) rotateX(720deg);
-            }
-            90% {
-                transform: translateY(-10px) rotateX(900deg);
-            }
-            100% {
-                transform: translateY(0) rotateX(1080deg);
-                opacity: 1;
-            }
+
+        /* Le jeton */
+        .token {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateY(0);
+            z-index: 10;
         }
-        .falling {
-            animation: fall 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+
+        .token.p1 {
+            background: radial-gradient(circle at 30% 30%, #fff 5%, var(--p1-color) 40%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-        @keyframes board-shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-15px); }
-            40%, 80% { transform: translateX(15px); }
+
+        .token.p2 {
+            background: radial-gradient(circle at 30% 30%, #fff 5%, var(--p2-color) 40%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-        .win-shake {
-            animation: board-shake 0.6s ease-in-out;
+
+        /* Animation de chute */
+        .token.falling {
+            animation: fall-bounce 0.5s ease-in forwards;
         }
+
+        @keyframes fall-bounce {
+            0% { transform: translateY(var(--drop-height)); opacity: 0; }
+            70% { transform: translateY(0); opacity: 1; }
+            85% { transform: translateY(-10px); } /* Rebond */
+            100% { transform: translateY(0); }
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div id="playerTurn">Cliquez sur une colonne - <span id="currentPlayer">Joueur 1</span></div>
-        <div class="board" id="board">
-            <div class="grid" id="grid"></div>
-        </div>
-        <div class="controls">
-            <button id="newGame">Nouvelle Partie</button>
-        </div>
+
+    <div class="game-info" id="status">Tour du Joueur 1 (Jaune)</div>
+    
+    <div class="board" id="board">
+        <!-- Généré en JS -->
     </div>
 
-    <div class="overlay" id="gameEnd">
-        <h2 id="winnerText">Victoire !</h2>
-        <button id="playAgain">Rejouer</button>
-    </div>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <button onclick="resetGame()">Nouvelle Partie</button>
 
     <script>
-        class Puissance4 {
-            constructor() {
-                this.board = Array(6).fill().map(() => Array(7).fill(0));
-                this.currentPlayer = 1;
-                this.gameActive = true;
-                this.init();
-            }
+        const ROWS = 6;
+        const COLS = 7;
+        let currentPlayer = 1; // 1 = Jaune, 2 = Rouge
+        let boardState = []; // Matrice logique
+        let gameActive = true;
 
-            init() {
-                this.createGrid();
-                this.updateTurnDisplay();
-                document.getElementById('newGame').onclick = () => this.reset();
-                document.getElementById('playAgain').onclick = () => this.reset();
-            }
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
 
-            createGrid() {
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
-                for (let row = 0; row < 6; row++) {
-                    for (let col = 0; col < 7; col++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        cell.dataset.col = col;
-                        cell.onclick = () => this.dropPiece(col);
-                        grid.appendChild(cell);
-                    }
+        function initGame() {
+            boardState = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            boardElement.innerHTML = '';
+            gameActive = true;
+            currentPlayer = 1;
+            updateStatus();
+
+            // Création de la grille
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    // On écoute le clic sur la case
+                    cell.addEventListener('click', () => handleColumnClick(c));
+                    boardElement.appendChild(cell);
                 }
-            }
-
-            dropPiece(col) {
-                if (!this.gameActive) return;
-
-                const row = this.getNextOpenRow(col);
-                if (row === -1) {
-                    this.shakeColumn(col);
-                    return;
-                }
-
-                // Créer le jeton animé
-                const piece = document.createElement('div');
-                piece.className = `piece player${this.currentPlayer}`;
-                const targetCell = document.querySelector(`[data-col="${col}"]`);
-                targetCell.style.position = 'relative';
-                targetCell.appendChild(piece);
-
-                // Animation de chute
-                setTimeout(() => {
-                    piece.classList.add('falling');
-                }, 10);
-
-                // Position finale après animation
-                piece.addEventListener('animationend', () => {
-                    this.board[row][col] = this.currentPlayer;
-                    piece.style.top = '6px';
-                    piece.style.left = '6px';
-                    targetCell.classList.add('full');
-                    
-                    if (this.checkWin(row, col)) {
-                        this.endGame(`Joueur ${this.currentPlayer} GAGNE ! 🎉`);
-                        document.getElementById('board').classList.add('win-shake');
-                        return;
-                    }
-
-                    if (this.isBoardFull()) {
-                        this.endGame("ÉGALITÉ ! 😤");
-                        return;
-                    }
-
-                    this.switchPlayer();
-                });
-            }
-
-            getNextOpenRow(col) {
-                for (let row = 5; row >= 0; row--) {
-                    if (this.board[row][col] === 0) return row;
-                }
-                return -1;
-            }
-
-            shakeColumn(col) {
-                const cell = document.querySelector(`[data-col="${col}"]`);
-                cell.style.animation = 'shake 0.3s';
-                setTimeout(() => {
-                    cell.style.animation = '';
-                }, 300);
-            }
-
-            checkWin(row, col) {
-                const player = this.currentPlayer;
-                const directions = [[0,1],[1,0],[1,1],[1,-1]];
-
-                for (let [dr, dc] of directions) {
-                    let count = 1;
-                    // Direction positive
-                    let r = row + dr, c = col + dc;
-                    while (r >= 0 && r < 6 && c >= 0 && c < 7 && this.board[r][c] === player) {
-                        count++;
-                        r += dr;
-                        c += dc;
-                    }
-                    // Direction négative
-                    r = row - dr;
-                    c = col - dc;
-                    while (r >= 0 && r < 6 && c >= 0 && c < 7 && this.board[r][c] === player) {
-                        count++;
-                        r -= dr;
-                        c -= dc;
-                    }
-                    if (count >= 4) return true;
-                }
-                return false;
-            }
-
-            isBoardFull() {
-                return this.board.every(row => row.every(cell => cell !== 0));
-            }
-
-            switchPlayer() {
-                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
-                this.updateTurnDisplay();
-            }
-
-            updateTurnDisplay() {
-                document.getElementById('currentPlayer').textContent = `Joueur ${this.currentPlayer}`;
-            }
-
-            endGame(message) {
-                this.gameActive = false;
-                document.getElementById('winnerText').textContent = message;
-                document.getElementById('gameEnd').classList.add('show');
-            }
-
-            reset() {
-                this.board = Array(6).fill().map(() => Array(7).fill(0));
-                this.currentPlayer = 1;
-                this.gameActive = true;
-                document.getElementById('gameEnd').classList.remove('show');
-                document.getElementById('board').classList.remove('win-shake');
-                this.createGrid();
-                this.updateTurnDisplay();
             }
         }
 
-        // Style shake pour colonne pleine
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-8px); }
-                75% { transform: translateX(8px); }
-            }
-        `;
-        document.head.appendChild(style);
+        function handleColumnClick(colIndex) {
+            if (!gameActive) return;
 
-        // Initialiser le jeu
-        new Puissance4();
+            // Trouver la première ligne vide en partant du bas (5 -> 0)
+            let targetRow = -1;
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (boardState[r][colIndex] === 0) {
+                    targetRow = r;
+                    break;
+                }
+            }
+
+            // Colonne pleine ? On arrête
+            if (targetRow === -1) return;
+
+            // Mise à jour logique
+            boardState[targetRow][colIndex] = currentPlayer;
+
+            // Mise à jour visuelle (Animation)
+            animateToken(targetRow, colIndex, currentPlayer);
+
+            // Vérification victoire
+            if (checkWin(targetRow, colIndex)) {
+                statusElement.innerText = `🎉 VICTOIRE DU JOUEUR ${currentPlayer} ! 🎉`;
+                gameActive = false;
+                return;
+            }
+
+            // Changement de joueur
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateStatus();
+        }
+
+        function animateToken(row, col, player) {
+            // Trouver la case DOM précise
+            const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
+            
+            // Créer le jeton
+            const token = document.createElement('div');
+            token.classList.add('token');
+            token.classList.add(player === 1 ? 'p1' : 'p2');
+
+            // Calculer la hauteur de chute
+            // Chaque ligne fait ~70px (60px + 10px gap). 
+            // Si on est à la ligne 5 (bas), on doit tomber de 5 * 70px vers le haut.
+            // On ajoute un peu de marge pour qu'il vienne de "hors champ"
+            const pixelOffset = -(row * 70 + 100); 
+            token.style.setProperty('--drop-height', `${pixelOffset}px`);
+            
+            token.classList.add('falling');
+            cell.appendChild(token);
+        }
+
+        function updateStatus() {
+            if(currentPlayer === 1) {
+                statusElement.innerText = "Tour du Joueur 1 (Jaune)";
+                statusElement.style.color = "#ffce00";
+            } else {
+                statusElement.innerText = "Tour du Joueur 2 (Rouge)";
+                statusElement.style.color = "#ff3b30";
+            }
+        }
+
+        function checkWin(r, c) {
+            const player = boardState[r][c];
+            // Directions : Horizontal, Vertical, Diag Haut-Gauche, Diag Haut-Droite
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+
+            for (let [dr, dc] of directions) {
+                let count = 1;
+                // Vérifier dans un sens
+                for (let i = 1; i < 4; i++) {
+                    const nr = r + dr * i;
+                    const nc = c + dc * i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === player) count++;
+                    else break;
+                }
+                // Vérifier dans le sens opposé
+                for (let i = 1; i < 4; i++) {
+                    const nr = r - dr * i;
+                    const nc = c - dc * i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === player) count++;
+                    else break;
+                }
+                if (count >= 4) return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Démarrage
+        initGame();
+
     </script>
 </body>
 </html>
