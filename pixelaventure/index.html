@@ -34,7 +34,7 @@
         /* --- UI Principale --- */
         #game-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px; /* Plus large */
             position: relative;
         }
 
@@ -42,9 +42,43 @@
             text-align: center;
             color: var(--accent);
             text-shadow: 4px 4px 0 #000;
-            margin-bottom: 30px;
-            font-size: 24px;
+            margin-bottom: 20px;
+            font-size: 28px;
         }
+
+        /* --- MENU PRINCIPAL (NOUVEAU) --- */
+        #main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(32, 32, 40, 0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #fff;
+            box-shadow: 0 0 50px #000;
+        }
+
+        .difficulty-btn {
+            width: 250px;
+            margin: 15px;
+            padding: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 4px solid #fff;
+            background: #2d2d38;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            transition: 0.2s;
+        }
+        .difficulty-btn:hover { transform: scale(1.05); }
+        .diff-easy:hover { background: var(--success); border-color: #fff; color: #000; }
+        .diff-normal:hover { background: var(--rare); border-color: #fff; color: #000; }
+        .diff-hard:hover { background: var(--danger); border-color: #fff; }
 
         /* --- Panneau Stats Joueur --- */
         .stats-panel {
@@ -58,38 +92,37 @@
             box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
         }
 
-        .stat-box {
-            text-align: center;
-        }
+        .stat-box { text-align: center; }
         .stat-label { font-size: 10px; color: #aaa; margin-bottom: 5px; }
         .stat-value { font-size: 14px; color: #fff; }
         .stat-value.gold { color: var(--accent); }
         .stat-value.hp { color: var(--danger); }
 
-        /* --- Zone de Log (Console) --- */
+        /* --- Zone de Log (AGRANDIE) --- */
         #log-area {
             background: rgba(0,0,0,0.8);
             border: 2px solid #555;
-            height: 200px;
+            height: 400px; /* Agrandissement significatif */
             overflow-y: auto;
-            padding: 10px;
+            padding: 15px;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 15px;
             margin-bottom: 20px;
             display: flex;
-            flex-direction: column-reverse; /* Nouveaux messages en bas mais scrolables */
+            flex-direction: column-reverse; 
+            box-shadow: inset 0 0 20px #000;
         }
 
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+        .log-entry { margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px; }
         .log-combat { color: #ff8888; }
         .log-loot { color: #88ff88; }
         .log-event { color: #88ffff; }
-        .log-day { color: var(--accent); font-weight: bold; text-align: center; margin: 10px 0; border-top: 1px dashed #555; padding-top:10px;}
+        .log-day { color: var(--accent); font-weight: bold; text-align: center; margin: 15px 0; border-top: 1px dashed #555; padding-top:10px; font-size: 18px;}
 
         /* --- Actions / Boutons --- */
         #action-area {
             text-align: center;
-            min-height: 100px;
+            min-height: 80px;
         }
 
         .pixel-btn {
@@ -110,22 +143,12 @@
             background: #3d3d4d;
             box-shadow: 8px 8px 0 #000;
         }
-
-        .pixel-btn:active:not(:disabled) {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 #000;
-        }
-
-        .pixel-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-color: #555;
-            color: #aaa;
-        }
+        .pixel-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+        .pixel-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #aaa; }
 
         /* --- Marchand / Cartes --- */
         #merchant-area {
-            display: none; /* Caché par défaut */
+            display: none;
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
@@ -140,20 +163,13 @@
             text-align: center;
             position: relative;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.3s;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-
-        /* Animations des cartes */
-        .card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            z-index: 10;
-        }
-
-        /* Raretés */
+        .card:hover { transform: translateY(-10px) scale(1.02); z-index: 10; }
+        
         .card.common { border-color: #fff; }
         .card.rare { border-color: var(--rare); box-shadow: 0 0 10px var(--rare); }
         .card.legendary { border-color: var(--leg); box-shadow: 0 0 15px var(--leg); animation: pulse-leg 2s infinite; }
@@ -164,56 +180,38 @@
 
         .card-title { font-size: 10px; margin-bottom: 10px; min-height: 24px; display: flex; align-items: center; justify-content: center;}
         .card-stats { font-size: 8px; color: #aaa; text-align: left; margin-bottom: 15px; }
-        .card-stats div { margin: 2px 0; }
         .card-price { font-size: 10px; color: var(--accent); margin-top: auto; padding-top: 10px; border-top: 2px dashed #555; }
-        
-        .card-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
-        }
-
-        /* Capas spéciales */
-        .capa-tag {
-            background: #444;
-            color: #fff;
-            padding: 2px 4px;
-            font-size: 7px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 5px;
-        }
+        .card-icon { font-size: 30px; margin-bottom: 10px; }
+        .capa-tag { background: #444; color: #fff; padding: 2px 4px; font-size: 7px; border-radius: 4px; display: inline-block; margin-top: 5px; }
 
         /* Barre de vie Boss */
         #boss-bar-container {
             width: 100%;
-            height: 20px;
+            height: 24px;
             background: #333;
-            border: 2px solid #fff;
+            border: 4px solid #fff;
             margin-top: 10px;
             display: none;
             position: relative;
+            box-shadow: 4px 4px 0 #000;
         }
-        #boss-bar-fill {
-            height: 100%;
-            background: var(--danger);
-            width: 100%;
-            transition: width 0.2s;
-        }
-        #boss-name {
-            position: absolute;
-            top: -25px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: var(--danger);
-        }
+        #boss-bar-fill { height: 100%; background: var(--danger); width: 100%; transition: width 0.2s; }
+        #boss-name { position: absolute; top: -30px; left: 0; width: 100%; text-align: center; font-size: 12px; color: var(--danger); text-shadow: 1px 1px 0 #000; }
 
     </style>
 </head>
 <body>
 
     <div id="game-container">
+        <!-- MENU PRINCIPAL -->
+        <div id="main-menu">
+            <h1 style="font-size: 40px; margin-bottom: 50px;">PIXEL QUEST</h1>
+            <p style="margin-bottom: 30px; color: #aaa;">Choisissez votre destin</p>
+            <button class="difficulty-btn diff-easy" onclick="startGame('easy')">FACILE<br><span style="font-size:8px; color:#aaa">PV+ Or+ Ennemis Faibles</span></button>
+            <button class="difficulty-btn diff-normal" onclick="startGame('normal')">NORMAL<br><span style="font-size:8px; color:#aaa">Expérience Classique</span></button>
+            <button class="difficulty-btn diff-hard" onclick="startGame('hard')">DIFFICILE<br><span style="font-size:8px; color:#aaa">PV- Or- Ennemis Brutaux</span></button>
+        </div>
+
         <h1>PIXEL QUEST</h1>
 
         <div class="stats-panel">
@@ -245,7 +243,7 @@
         </div>
 
         <div id="log-area">
-            <div class="log-entry">Bienvenue, aventurier. Survivez 20 jours.</div>
+            <!-- Logs ici -->
         </div>
 
         <div id="action-area">
@@ -262,35 +260,23 @@
 // CONFIGURATION & DATA
 // ======================
 
-// Helper pour les nombres aléatoires
-function randint(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function choice(array) {
-    return array[Math.floor(Math.random() * array.length)];
-}
+function randint(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function choice(array) { return array[Math.floor(Math.random() * array.length)]; }
 
-// État du jeu
 let gameState = {
-    phase: 'start', // start, loot, event, combat, merchant, end
+    phase: 'start',
     day: 1,
-    gameOver: false
+    gameOver: false,
+    difficulty: 'normal',
+    enemyMultiplier: 1.0
 };
 
-// Joueur
-let joueur = {
-    pv: 100,
-    att: 8,
-    def: 1.8,
-    or: 50,
-    regen: 20,
-    capas: []
-};
-
+// Joueur (initialisé au start)
+let joueur = {};
 const DEF_MIN = 0.3;
 
-// Ennemis
-const ennemisData = {
+// Données de base
+const baseEnnemis = {
     "voleur": {nom: "Voleur", pv: 60, att: 6, def: 2, or: 10},
     "guerrier": {nom: "Guerrier", pv: 100, att: 10, def: 1.5, or: 20},
     "champion": {nom: "Champion", pv: 180, att: 16, def: 1, or: 30},
@@ -299,8 +285,6 @@ const ennemisData = {
 };
 
 // Objets
-// Note: On ajoute des 'type' pour le CSS (common, rare, legendary, ultra)
-// et des icones unicode pour le style
 let objets_communs = [
     {nom: "Épée rouillée", att: 3, type: "common", icon: "🗡️"},
     {nom: "Casque simple", pv: 10, type: "common", icon: "🪖"},
@@ -331,10 +315,13 @@ let objets_ultra = [
     {nom: "Cape du destin", capa: "esquive_total", type: "ultra", icon: "👻"}
 ];
 
-// ======================
-// MOTEUR GRAPHIQUE (UI)
-// ======================
+// Copies pour reset
+let pool_leg = [...objets_legendaires];
+let pool_ultra = [...objets_ultra];
 
+// ======================
+// UI Elements
+// ======================
 const uiDay = document.getElementById('ui-day');
 const uiHp = document.getElementById('ui-hp');
 const uiGold = document.getElementById('ui-gold');
@@ -346,86 +333,118 @@ const merchantArea = document.getElementById('merchant-area');
 const bossBarContainer = document.getElementById('boss-bar-container');
 const bossBarFill = document.getElementById('boss-bar-fill');
 const bossName = document.getElementById('boss-name');
+const mainMenu = document.getElementById('main-menu');
+
+// ======================
+// GESTION DU JEU
+// ======================
+
+function startGame(diff) {
+    gameState.difficulty = diff;
+    gameState.day = 1;
+    gameState.gameOver = false;
+    
+    // Reset lists
+    pool_leg = [...objets_legendaires];
+    pool_ultra = [...objets_ultra];
+    
+    logArea.innerHTML = ''; // Clear logs
+
+    // Configuration selon difficulté
+    if (diff === 'easy') {
+        joueur = { pv: 150, att: 8, def: 1.8, or: 80, regen: 30, capas: [] };
+        gameState.enemyMultiplier = 0.8; // Ennemis plus faibles
+        log("Difficulté : FACILE. Vous commencez riche et fort.", "day");
+    } else if (diff === 'normal') {
+        joueur = { pv: 100, att: 8, def: 1.8, or: 50, regen: 20, capas: [] };
+        gameState.enemyMultiplier = 1.0;
+        log("Difficulté : NORMALE. Bonne chance.", "day");
+    } else if (diff === 'hard') {
+        joueur = { pv: 80, att: 8, def: 1.8, or: 20, regen: 10, capas: [] };
+        gameState.enemyMultiplier = 1.2; // Ennemis plus forts
+        log("Difficulté : DIFFICILE. La mort vous attend.", "day");
+    }
+
+    mainMenu.style.display = 'none';
+    updateUI();
+    btnNext.style.display = 'inline-block';
+    btnNext.innerText = "Lancer Jour 1";
+    btnNext.onclick = nextPhase;
+}
 
 function updateUI() {
     uiDay.textContent = gameState.day;
     uiHp.textContent = Math.floor(joueur.pv);
     uiGold.textContent = joueur.or;
     uiAtt.textContent = joueur.att;
-    // Arrondi def à 2 décimales
     uiDef.textContent = Math.round(joueur.def * 100) / 100;
 }
 
 function log(msg, type = "normal") {
     const div = document.createElement('div');
     div.classList.add('log-entry');
-    if (type === "combat") div.classList.add('log-combat');
-    if (type === "loot") div.classList.add('log-loot');
-    if (type === "event") div.classList.add('log-event');
-    if (type === "day") div.classList.add('log-day');
-    
-    div.innerHTML = msg; // Permet d'injecter du HTML si besoin
-    logArea.prepend(div); // Ajoute en haut (le CSS flex-reverse gère l'affichage)
+    if (type) div.classList.add('log-'+type);
+    div.innerHTML = msg;
+    logArea.prepend(div);
 }
 
 function toggleButton(text, action, enabled = true) {
     btnNext.innerText = text;
     btnNext.onclick = action;
     btnNext.disabled = !enabled;
-    if(!enabled) btnNext.style.display = 'none';
-    else btnNext.style.display = 'inline-block';
+    btnNext.style.display = enabled ? 'inline-block' : 'none';
 }
 
 // ======================
-// LOGIQUE JEU
+// LOGIQUE DE JEU
 // ======================
+
+function getEnemy(key) {
+    let base = baseEnnemis[key];
+    let mult = gameState.enemyMultiplier;
+    return {
+        nom: base.nom,
+        pv: Math.floor(base.pv * mult),
+        att: Math.floor(base.att * mult),
+        def: base.def, // La def ennemie ne change pas (sinon ça casse le calcul de dégâts)
+        or: base.or
+    };
+}
 
 function appliquerObjet(obj) {
     log(`Objet obtenu : <strong>${obj.nom}</strong>`, "loot");
-    
-    // Copie de l'objet pour itérer sans problèmes
     for (const [key, val] of Object.entries(obj)) {
-        if (key === "nom" || key === "type" || key === "icon") continue;
+        if (["nom", "type", "icon"].includes(key)) continue;
         if (key === "capa") {
             if (!joueur.capas.includes(val)) {
                 joueur.capas.push(val);
-                log(`> Capacité apprise: ${val}`);
+                log(`> Compétence apprise: ${val}`);
             }
         } else {
             joueur[key] += val;
         }
     }
-    
-    // Cap Def
     joueur.def = Math.max(DEF_MIN, joueur.def);
 
-    // Retrait des listes uniques
-    if (obj.type === "legendary") {
-        objets_legendaires = objets_legendaires.filter(o => o !== obj);
-    }
-    if (obj.type === "ultra") {
-        objets_ultra = objets_ultra.filter(o => o !== obj);
-    }
+    // Retrait des listes uniques (on travaille sur les copies pool_)
+    if (obj.type === "legendary") pool_leg = pool_leg.filter(o => o.nom !== obj.nom);
+    if (obj.type === "ultra") pool_ultra = pool_ultra.filter(o => o.nom !== obj.nom);
+    
     updateUI();
 }
 
-// Phase 1 : Loot du jour
 function lootDuJour() {
-    // Probabilités : Array de [liste, chance]
     const probs = [
         [objets_communs, 100],
         [objets_communs, 50],
         [objets_rares, 50],
-        [objets_legendaires, 2],
-        [objets_ultra, 1]
+        [pool_leg, 2],
+        [pool_ultra, 1]
     ];
-
     let found = false;
     for (let p of probs) {
-        let liste = p[0];
-        let chance = p[1];
-        if (liste.length > 0 && randint(1, 100) <= chance) {
-            let obj = choice(liste);
+        if (p[0].length > 0 && randint(1, 100) <= p[1]) {
+            let obj = choice(p[0]);
             appliquerObjet(obj);
             found = true;
         }
@@ -433,17 +452,11 @@ function lootDuJour() {
     if (!found) log("Rien trouvé ce matin...", "loot");
 }
 
-// Combat
-async function combat(ennemiData) {
-    // Clonage pour ne pas modifier l'original si on veut le réutiliser (sauf boss unique)
-    let ennemi = {...ennemiData};
-    
-    log(`COMBAT : ${ennemi.nom} (PV: ${ennemi.pv})`, "combat");
-    
+async function combat(ennemi) {
+    log(`COMBAT : ${ennemi.nom} (PV: ${ennemi.pv}, ATT: ${ennemi.att})`, "combat");
     let maxPvEnnemi = ennemi.pv;
     let invincibleTour = joueur.capas.includes("invincible_3tour") ? 3 : 0;
     
-    // Affichage barre de boss si c'est un boss
     let isBoss = ennemi.nom.includes("Seigneur") || ennemi.nom.includes("Roi");
     if (isBoss) {
         bossBarContainer.style.display = 'block';
@@ -451,54 +464,32 @@ async function combat(ennemiData) {
         bossBarFill.style.width = '100%';
     }
 
-    // Boucle de combat "simulée" avec des délais pour l'animation
-    // On utilise une fonction récursive ou asynchrone pour ne pas figer le navigateur
-    
     return new Promise((resolve) => {
         let combatLoop = setInterval(() => {
-            // Tour Joueur
+            // -- JOUEUR --
             let attaques = 1;
             if (joueur.capas.includes("multi_attaque")) {
                 while(randint(1, 2) === 1) attaques++;
             }
-
             let totalDegats = 0;
             for (let i = 0; i < attaques; i++) {
-                let degats = joueur.att * ennemi.def; // Note: Formule originale Python
-                // Le système de défense Python : degats = att * def_ennemi. 
-                // Si def_ennemi = 2 (Voleur), joueur prend cher ? 
-                // Ah non, att * def -> plus def est haut, plus on fait mal ? 
-                // Vérifions le code Python : "degats = joueur['att'] * ennemi['def']"
-                // Voleur def: 2 -> degats x2. Champion def: 1 -> degats x1.
-                // C'est un système "multiplicateur de dégâts reçus par la cible".
-                
+                let degats = joueur.att * ennemi.def;
                 if (joueur.capas.includes("crit_25") && randint(1, 100) <= 25) {
                     degats *= 5;
                     log("CRITIQUE !", "combat");
                 }
-                
                 ennemi.pv -= degats;
                 totalDegats += degats;
-
-                if (joueur.capas.includes("vol_de_vie")) {
-                    joueur.pv += degats * 0.4;
-                }
+                if (joueur.capas.includes("vol_de_vie")) joueur.pv += degats * 0.4;
                 if (ennemi.pv <= 0) break;
             }
-            
             log(`Vous infligez ${Math.floor(totalDegats)} dégâts.`, "combat");
             
-            // MAJ Barre Boss
-            if (isBoss) {
-                let pct = Math.max(0, (ennemi.pv / maxPvEnnemi) * 100);
-                bossBarFill.style.width = pct + '%';
-            }
+            if (isBoss) bossBarFill.style.width = Math.max(0, (ennemi.pv / maxPvEnnemi) * 100) + '%';
 
-            // Vérif victoire
             if (ennemi.pv <= 0) {
                 clearInterval(combatLoop);
                 if (isBoss) bossBarContainer.style.display = 'none';
-                
                 joueur.or += ennemi.or;
                 joueur.pv += joueur.regen;
                 log(`VICTOIRE ! +${ennemi.or} or. +${joueur.regen} PV regen.`, "success");
@@ -507,10 +498,11 @@ async function combat(ennemiData) {
                 return;
             }
 
-            // Tour Ennemi
+            // -- ENNEMI --
             let degatsSubis = ennemi.att * joueur.def;
             if (joueur.capas.includes("reduc_degats")) degatsSubis /= 2;
-            
+            if (gameState.difficulty === 'hard') degatsSubis *= 1.1; // Bonus dégâts hard mode caché
+
             if (invincibleTour > 0) {
                 degatsSubis = 0;
                 invincibleTour--;
@@ -521,20 +513,18 @@ async function combat(ennemiData) {
             log(`${ennemi.nom} attaque ! -${Math.floor(degatsSubis)} PV.`, "combat");
             updateUI();
 
-            // Vérif défaite
             if (joueur.pv <= 0) {
                 clearInterval(combatLoop);
                 log("VOUS ÊTES MORT...", "combat");
                 resolve(false);
                 return;
             }
-
-        }, 800); // Délai entre chaque tour (ms)
+        }, 800);
     });
 }
 
-// Événements aléatoires
-const eventsPossibles = [
+// Events
+const eventsList = [
     { type: 'combat', id: 'voleur' },
     { type: 'combat', id: 'voleur' },
     { type: 'combat', id: 'guerrier' },
@@ -547,13 +537,12 @@ const eventsPossibles = [
 ];
 
 async function lancerEvent(day) {
-    let pool = [...eventsPossibles];
+    let pool = [...eventsList];
     if (day >= 5) pool.push({ type: 'combat', id: 'champion' });
-    
     let evt = choice(pool);
 
     if (evt.type === 'combat') {
-        return await combat(ennemisData[evt.id]);
+        return await combat(getEnemy(evt.id));
     } else if (evt.type === 'gain') {
         log(evt.text, "event");
         joueur.or += evt.val;
@@ -573,11 +562,11 @@ async function lancerEvent(day) {
         log("Pari chanceux ! +40 or", "event");
     }
     updateUI();
-    return true; // Le joueur est vivant (sauf si combat géré plus haut)
+    return true;
 }
 
 // Marchand
-function generateMerchantCard(obj, index) {
+function generateCard(obj) {
     const card = document.createElement('div');
     card.className = `card ${obj.type}`;
     card.onclick = () => acheterObjet(obj, card);
@@ -587,55 +576,49 @@ function generateMerchantCard(obj, index) {
         if (["nom", "type", "icon", "capa"].includes(key)) continue;
         statsHtml += `<div>${key.toUpperCase()}: ${val > 0 ? '+' : ''}${val}</div>`;
     }
-    
     let capaHtml = obj.capa ? `<div class="capa-tag">${obj.capa}</div>` : '';
 
     card.innerHTML = `
         <div class="card-icon">${obj.icon}</div>
         <div class="card-title">${obj.nom}</div>
-        <div class="card-stats">
-            ${statsHtml}
-            ${capaHtml}
-        </div>
-        <div class="card-price">PRIX: 20 OR</div>
+        <div class="card-stats">${statsHtml}${capaHtml}</div>
+        <div class="card-price">20 OR</div>
     `;
     return card;
 }
 
 function ouvrirMarchand() {
-    log("Le marchand installe son échoppe.", "event");
+    log("Le marchand est là.", "event");
     merchantArea.innerHTML = '';
     merchantArea.style.display = 'flex';
     toggleButton("Quitter le marchand", fermerMarchand);
 
-    // Génération du stock
     const probs = [
         [objets_communs, 100],
         [objets_communs, 100],
         [objets_rares, 40],
-        [objets_legendaires, 5],
-        [objets_ultra, 2]
+        [pool_leg, 5],
+        [pool_ultra, 2]
     ];
     
     for (let p of probs) {
         if (p[0].length > 0 && randint(1, 100) <= p[1]) {
             let item = choice(p[0]);
-            merchantArea.appendChild(generateMerchantCard(item));
+            merchantArea.appendChild(generateCard(item));
         }
     }
 }
 
-function acheterObjet(obj, cardElement) {
+function acheterObjet(obj, card) {
     if (joueur.or >= 20) {
         joueur.or -= 20;
         appliquerObjet(obj);
-        // Animation d'achat
-        cardElement.style.transform = "scale(0)";
-        setTimeout(() => cardElement.remove(), 300);
+        card.style.transform = "scale(0)";
+        setTimeout(() => card.remove(), 300);
     } else {
         log("Pas assez d'or !", "event");
-        cardElement.style.borderColor = "red";
-        setTimeout(() => cardElement.style.borderColor = "", 500);
+        card.style.borderColor = "red";
+        setTimeout(() => card.style.borderColor = "", 500);
     }
 }
 
@@ -645,45 +628,30 @@ function fermerMarchand() {
 }
 
 // ======================
-// CONTRÔLEUR GLOBAL
+// CONTROLEUR
 // ======================
-
 async function nextPhase() {
-    // Bouton désactivé pendant l'action
     toggleButton("...", null, false);
-
+    
     if (gameState.gameOver) {
-        location.reload();
+        mainMenu.style.display = 'flex'; // Retour menu
         return;
     }
 
     log(`===== JOUR ${gameState.day} =====`, "day");
-
-    // 1. Loot
+    
     lootDuJour();
     if (joueur.pv <= 0) return gameOver();
 
-    // 2. Event ou Boss
     let vivant = true;
-    if (gameState.day === 10) {
-        vivant = await combat(ennemisData["boss10"]);
-    } else if (gameState.day === 20) {
-        vivant = await combat(ennemisData["boss20"]);
-    } else {
-        vivant = await lancerEvent(gameState.day);
-    }
+    if (gameState.day === 10) vivant = await combat(getEnemy("boss10"));
+    else if (gameState.day === 20) vivant = await combat(getEnemy("boss20"));
+    else vivant = await lancerEvent(gameState.day);
 
-    if (!vivant) {
-        gameOver();
-        return;
-    }
+    if (!vivant) return gameOver();
 
-    // 3. Marchand (sauf si fin du jeu jour 20 gagné)
-    if (gameState.day === 20 && vivant) {
-        victory();
-    } else {
-        ouvrirMarchand();
-    }
+    if (gameState.day === 20 && vivant) victory();
+    else ouvrirMarchand();
 }
 
 function finDuJour() {
@@ -694,19 +662,21 @@ function finDuJour() {
 
 function gameOver() {
     log("☠️ FIN DE PARTIE ☠️", "combat");
-    toggleButton("Recommencer", () => location.reload(), true);
     gameState.gameOver = true;
+    toggleButton("Retour Menu", () => {
+        mainMenu.style.display = 'flex';
+        logArea.innerHTML = '';
+    }, true);
 }
 
 function victory() {
-    log("🏆 VOUS AVEZ SURVÉCU AUX 20 JOURS ! 🏆", "success");
-    toggleButton("Nouvelle Aventure", () => location.reload(), true);
+    log("🏆 LÉGENDE ! 20 JOURS SURVÉCUS ! 🏆", "success");
     gameState.gameOver = true;
+    toggleButton("Retour Menu", () => {
+        mainMenu.style.display = 'flex';
+        logArea.innerHTML = '';
+    }, true);
 }
-
-// Init
-updateUI();
-
 </script>
 </body>
 </html>
