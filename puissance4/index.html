@@ -3,387 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puissance 4 - Ultimate</title>
+    <title>Puissance 4 - CHAOS MODE</title>
     <style>
         :root {
-            --cell-size: 60px;
-            --board-gap: 8px;
-            --p1-color: #ffcc00; /* Jaune Or */
-            --p2-color: #ff3b30; /* Rouge Apple */
-            --bg-color: #1a1a2e;
-            --panel-bg: rgba(255, 255, 255, 0.1);
+            --cell-size: 55px;
+            --p1-color: #ffcc00; /* Jaune */
+            --p2-color: #ff3b30; /* Rouge */
+            --wall-color: #7f8c8d; /* Gris Béton */
+            --bonus-color: #00ffaa; /* Cyan Fluo */
+            --bg-dark: #1e1e2e;
+            --panel-bg: rgba(30, 30, 46, 0.9);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle, #2b32b2, #1488cc);
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
         }
 
-        /* --- MENU --- */
-        #menu-screen {
+        /* --- UI DU HAUT : OBJECTIFS --- */
+        .top-bar {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            animation: fadeIn 0.8s ease-out;
-            z-index: 100;
-        }
-
-        h1 {
-            font-size: 3.5rem;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 0 0 20px 20px;
             margin-bottom: 10px;
-            background: linear-gradient(to right, #ffcc00, #ff3b30);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            animation: float 3s ease-in-out infinite;
         }
 
-        .menu-btn {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 18px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 280px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-weight: 600;
-            letter-spacing: 1px;
+        .objective-card {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 30%;
         }
-
-        .menu-btn:hover {
-            transform: scale(1.05) translateY(-3px);
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        .shape-preview {
+            display: inline-grid;
+            gap: 2px;
+            margin-bottom: 5px;
         }
-
-        .menu-btn.pvp { border-left: 5px solid #ffcc00; }
-        .menu-btn.pve { border-left: 5px solid #ff3b30; }
-        .menu-btn.hard { border-left: 5px solid #00d2ff; }
-
-        /* --- JEU --- */
-        #game-screen {
-            display: none; /* Caché par défaut */
-            flex-direction: column;
-            align-items: center;
-            animation: slideUp 0.5s ease-out;
+        .mini-cell {
+            width: 10px; height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
         }
+        .mini-cell.active { background: #ffd700; box-shadow: 0 0 5px #ffd700; }
 
-        .header-bar {
+        /* --- SCORES --- */
+        .score-board {
             display: flex;
             justify-content: space-between;
-            width: 100%;
-            max-width: 500px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-
-        .back-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: rgba(255,255,255,0.7);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.2s;
-        }
-        .back-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-
-        .status-text {
+            width: 90%;
+            max-width: 450px;
+            margin: 10px 0;
             font-size: 1.2rem;
             font-weight: bold;
-            text-align: center;
         }
+        .p1-score { color: var(--p1-color); text-shadow: 0 0 10px rgba(255,204,0,0.5); }
+        .p2-score { color: var(--p2-color); text-shadow: 0 0 10px rgba(255,59,48,0.5); }
 
+        /* --- GRILLE DE JEU --- */
         .board-container {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0,0,0,0.4);
             padding: 15px;
-            border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .board {
             display: grid;
             grid-template-columns: repeat(7, var(--cell-size));
             grid-template-rows: repeat(6, var(--cell-size));
-            gap: var(--board-gap);
+            gap: 8px;
         }
 
         .cell {
             width: var(--cell-size);
             height: var(--cell-size);
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255,255,255,0.1);
             border-radius: 50%;
-            cursor: pointer;
             position: relative;
-            box-shadow: inset 0 3px 8px rgba(0,0,0,0.6);
+            cursor: pointer;
         }
+        
+        /* Bonus case lumineuse */
+        .cell.bonus::after {
+            content: "+2";
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--bonus-color);
+            text-shadow: 0 0 5px black;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse { 0%{transform:translate(-50%,-50%) scale(1);} 50%{transform:translate(-50%,-50%) scale(1.2);} 100%{transform:translate(-50%,-50%) scale(1);} }
 
         /* Jeton */
         .token {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             border-radius: 50%;
             position: absolute;
             top: 0; left: 0;
-            transform: translateY(var(--drop-start));
-            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+        }
+        .token.p1 { background: radial-gradient(circle at 30% 30%, #fff, var(--p1-color)); }
+        .token.p2 { background: radial-gradient(circle at 30% 30%, #fff, var(--p2-color)); }
+        .token.wall { 
+            background: #555; 
+            border-radius: 5px; /* Carré pour le mur */
+            box-shadow: inset 0 0 10px black;
+            border: 2px solid #999;
+        }
+        .token.placed { transform: scale(1); }
+
+        /* Effet explosion */
+        .explosion {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: orange;
+            border-radius: 50%;
+            animation: explode 0.4s forwards;
+            z-index: 10;
+        }
+        @keyframes explode { 0%{transform:scale(0); opacity:1;} 100%{transform:scale(2); opacity:0;} }
+
+        /* --- POWERS --- */
+        .powers-panel {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 50px;
         }
 
-        .token.p1 { 
-            background: radial-gradient(circle at 35% 35%, #fff 2%, var(--p1-color) 40%); 
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+        .power-btn {
+            background: #333;
+            border: 2px solid #555;
+            color: white;
+            border-radius: 50%;
+            width: 60px; height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
         }
-        .token.p2 { 
-            background: radial-gradient(circle at 35% 35%, #fff 2%, var(--p2-color) 40%); 
-            box-shadow: 0 0 15px rgba(255, 59, 48, 0.6);
+        .power-btn.active { border-color: #00ffaa; box-shadow: 0 0 15px #00ffaa; transform: scale(1.1); }
+        .power-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        
+        .cost-badge {
+            font-size: 0.7rem;
+            background: red;
+            padding: 2px 5px;
+            border-radius: 10px;
+            position: absolute;
+            bottom: -5px;
         }
+        .power-icon { font-size: 1.2rem; margin-bottom: 2px; }
 
-        .token.falling {
-            animation: dropBounce 0.6s cubic-bezier(0.5, 0, 0.5, 1.5) forwards;
-        }
-
-        /* Animations Keyframes */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes dropBounce {
-            0% { transform: translateY(var(--drop-start)); opacity: 1; }
-            60% { transform: translateY(0); }
-            80% { transform: translateY(-15px); }
-            100% { transform: translateY(0); opacity: 1; }
+        /* Indicateur de tour */
+        .turn-indicator {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #ccc;
         }
 
     </style>
 </head>
 <body>
 
-    <!-- MENU PRINCIPAL -->
-    <div id="menu-screen">
-        <h1>Puissance 4</h1>
-        <button class="menu-btn pvp" onclick="startGame('classic')">👥 2 Joueurs Classique</button>
-        <button class="menu-btn pve" onclick="startGame('ai')">🤖 Contre l'IA (Solo)</button>
-        <button class="menu-btn hard" onclick="startGame('connect5')">🔥 Mode 5 à la suite</button>
+    <!-- UI HAUT : FORMES A REALISER -->
+    <div class="top-bar" id="objectives">
+        <!-- Rempli par JS -->
     </div>
 
-    <!-- ECRAN DE JEU -->
-    <div id="game-screen">
-        <div class="header-bar">
-            <button class="back-btn" onclick="showMenu()">← Menu</button>
-            <div id="status" class="status-text">Joueur 1</div>
-            <div style="width: 70px;"></div> <!-- Spacer pour centrer le texte -->
-        </div>
+    <!-- SCORES -->
+    <div class="score-board">
+        <div class="p1-score">J1: <span id="s1">0</span> pts</div>
+        <div class="p2-score">J2: <span id="s2">0</span> pts</div>
+    </div>
 
-        <div class="board-container">
-            <div class="board" id="board"></div>
-        </div>
+    <!-- PLATEAU -->
+    <div class="board-container">
+        <div class="board" id="board"></div>
+    </div>
+
+    <!-- POUVOIRS -->
+    <div class="turn-indicator" id="turnInfo">Tour de Joueur 1</div>
+    <div class="powers-panel">
+        <button class="power-btn" onclick="selectPower('bomb')" id="btn-bomb">
+            <span class="power-icon">💣</span>
+            <span class="cost-badge">2 pts</span>
+        </button>
+        <button class="power-btn" onclick="selectPower('bigbomb')" id="btn-bigbomb">
+            <span class="power-icon">🧨</span>
+            <span class="cost-badge">5 pts</span>
+        </button>
+        <button class="power-btn" onclick="selectPower('wall')" id="btn-wall">
+            <span class="power-icon">🧱</span>
+            <span class="cost-badge">3 pts</span>
+        </button>
     </div>
 
     <script>
         const ROWS = 6;
         const COLS = 7;
-        
-        let boardState = [];
+        let boardState = []; // 0=vide, 1=J1, 2=J2, 3=Mur
+        let bonusState = []; // true si bonus sur la case
+        let scores = {1: 0, 2: 0};
         let currentPlayer = 1;
-        let gameActive = false;
-        let currentMode = 'classic'; // 'classic', 'ai', 'connect5'
-        let winCondition = 4; // 4 ou 5
-        let isAiThinking = false;
+        let selectedPower = null; // null, 'bomb', 'bigbomb', 'wall'
+        
+        // Définition des Formes cibles (Objectifs)
+        const SHAPES = [
+            { id: 1, pts: 5, grid: [[1,1,1]], name: "Ligne 3" }, // Ligne de 3
+            { id: 2, pts: 6, grid: [[1],[1],[1]], name: "Tour 3" }, // Colonne de 3
+            { id: 3, pts: 8, grid: [[1,1],[1,1]], name: "Carré" }, // Carré 2x2
+            { id: 4, pts: 10, grid: [[1,0],[1,1]], name: "L Petit" }, // Coin
+        ];
+        let currentObjectives = [];
 
-        const boardEl = document.getElementById('board');
-        const statusEl = document.getElementById('status');
-        const menuScreen = document.getElementById('menu-screen');
-        const gameScreen = document.getElementById('game-screen');
-
-        // --- GESTION DES ECRANS ---
-
-        function showMenu() {
-            gameActive = false;
-            gameScreen.style.display = 'none';
-            menuScreen.style.display = 'flex';
-        }
-
-        function startGame(mode) {
-            currentMode = mode;
-            winCondition = (mode === 'connect5') ? 5 : 4;
-            
-            menuScreen.style.display = 'none';
-            gameScreen.style.display = 'flex';
-            
-            initGame();
-        }
-
-        // --- MOTEUR DE JEU ---
+        // Coûts
+        const COSTS = { 'bomb': 2, 'bigbomb': 5, 'wall': 3 };
 
         function initGame() {
             boardState = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-            boardEl.innerHTML = '';
+            bonusState = Array(ROWS).fill().map(() => Array(COLS).fill(false));
+            scores = {1: 5, 2: 5}; // On commence avec 5 pts pour tester les pouvoirs direct
             currentPlayer = 1;
-            gameActive = true;
-            isAiThinking = false;
-            updateStatus("C'est parti ! Tour du Joueur 1");
+            selectedPower = null;
+            
+            generateObjectives();
+            renderBoard();
+            updateUI();
+            
+            // Spawn bonus périodique
+            setInterval(spawnBonus, 8000); 
+        }
 
-            // Création Grille
+        // --- GÉNÉRATION D'OBJECTIFS ---
+        function generateObjectives() {
+            const container = document.getElementById('objectives');
+            container.innerHTML = '';
+            currentObjectives = SHAPES.slice(0, 3); // Prend les 3 premiers pour l'exemple
+            
+            currentObjectives.forEach(shape => {
+                const div = document.createElement('div');
+                div.className = 'objective-card';
+                // Mini grille visu
+                let gridHtml = `<div class="shape-preview" style="grid-template-columns:repeat(${shape.grid[0].length}, 10px)">`;
+                shape.grid.forEach(row => {
+                    row.forEach(cell => {
+                        gridHtml += `<div class="mini-cell ${cell?'active':''}"></div>`;
+                    });
+                });
+                gridHtml += `</div><div>+${shape.pts} pts</div>`;
+                div.innerHTML = gridHtml;
+                container.appendChild(div);
+            });
+        }
+
+        // --- MOTEUR DE JEU ---
+        function renderBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
             for(let r=0; r<ROWS; r++){
                 for(let c=0; c<COLS; c++){
                     const cell = document.createElement('div');
                     cell.className = 'cell';
+                    if(bonusState[r][c]) cell.classList.add('bonus');
                     cell.dataset.r = r;
                     cell.dataset.c = c;
-                    cell.onclick = () => handleInput(c);
-                    boardEl.appendChild(cell);
+                    cell.onclick = () => handleCellClick(r, c);
+                    
+                    // Afficher contenu
+                    const val = boardState[r][c];
+                    if(val !== 0) {
+                        const token = document.createElement('div');
+                        token.className = `token placed ${val===1?'p1':(val===2?'p2':'wall')}`;
+                        cell.appendChild(token);
+                    }
+                    board.appendChild(cell);
                 }
             }
         }
 
-        function handleInput(col) {
-            if (!gameActive || isAiThinking) return;
-
-            if (playMove(col, currentPlayer)) {
-                // Coup valide joué
-                if(gameActive && currentMode === 'ai' && currentPlayer === 2) {
-                    // Tour de l'IA
-                    isAiThinking = true;
-                    setTimeout(aiMove, 600); // Petit délai pour le réalisme
-                }
+        function handleCellClick(r, c) {
+            // Mode Pouvoir : on clique n'importe où (ciblage précis)
+            if(selectedPower) {
+                applyPower(r, c);
+                return;
             }
-        }
 
-        function playMove(col, player) {
-            // Trouver la ligne vide la plus basse
-            let row = -1;
-            for (let r = ROWS - 1; r >= 0; r--) {
-                if (boardState[r][col] === 0) {
-                    row = r;
+            // Mode Normal : Gravité (on clique la colonne)
+            // Trouver la case vide la plus basse
+            let targetRow = -1;
+            for(let i=ROWS-1; i>=0; i--) {
+                if(boardState[i][c] === 0) {
+                    targetRow = i;
                     break;
                 }
             }
 
-            if (row === -1) return false; // Colonne pleine
-
-            // Logique
-            boardState[row][col] = player;
-
-            // Visuel
-            animateToken(row, col, player);
-
-            // Vérif Victoire
-            if (checkWin(row, col, player)) {
-                gameActive = false;
-                const winnerName = (currentMode === 'ai' && player === 2) ? "L'IA" : `Joueur ${player}`;
-                updateStatus(`🏆 ${winnerName} a gagné !`);
-                return true;
+            if(targetRow !== -1) {
+                placeToken(targetRow, c, currentPlayer);
+                nextTurn();
             }
-
-            // Vérif Match Nul
-            if (boardState.every(r => r.every(c => c !== 0))) {
-                gameActive = false;
-                updateStatus("Match Nul !");
-                return true;
-            }
-
-            // Changement Joueur
-            currentPlayer = (player === 1) ? 2 : 1;
-            
-            let nextName = `Joueur ${currentPlayer}`;
-            if (currentMode === 'ai' && currentPlayer === 2) nextName = "IA (réfléchit...)";
-            
-            updateStatus(`Tour : ${nextName}`);
-            
-            return true;
         }
 
-        function aiMove() {
-            // IA Simple : Cherche un coup gagnant, sinon bloque, sinon aléatoire
-            let chosenCol = -1;
-
-            // 1. Essayer de gagner ou bloquer (Simulation simplifiée)
-            // Pour faire simple ici : IA purement aléatoire mais valide
-            // Amélioration possible : Minimax ici
+        function placeToken(r, c, player) {
+            boardState[r][c] = player;
             
-            const validCols = [];
-            for(let c=0; c<COLS; c++) {
-                if(boardState[0][c] === 0) validCols.push(c);
+            // Récup bonus
+            if(bonusState[r][c]) {
+                scores[player] += 2;
+                bonusState[r][c] = false;
+                showFloatText(r, c, "+2 pts!", "#00ffaa");
             }
 
-            if(validCols.length > 0) {
-                // Choisir une colonne au hasard parmi les valides
-                chosenCol = validCols[Math.floor(Math.random() * validCols.length)];
-                
-                // Petite astuce : préférer le centre (colonnes 2, 3, 4)
-                const centerCols = validCols.filter(c => c >= 2 && c <= 4);
-                if(centerCols.length > 0 && Math.random() > 0.3) {
-                    chosenCol = centerCols[Math.floor(Math.random() * centerCols.length)];
-                }
-            }
-
-            playMove(chosenCol, 2);
-            isAiThinking = false;
+            // Vérif Formes
+            checkShapes(player);
+            
+            renderBoard(); // Simple refresh pour ce prototype
         }
 
-        function animateToken(row, col, player) {
-            const cell = document.querySelector(`.cell[data-r='${row}'][data-c='${col}']`);
-            const token = document.createElement('div');
-            token.className = `token p${player}`;
+        // --- GESTION DES POUVOIRS ---
+        function selectPower(power) {
+            if(scores[currentPlayer] < COSTS[power]) return; // Pas assez de pts
             
-            // Calcul distance chute (pixels)
-            // -100px pour partir d'un peu plus haut que la grille
-            const dropHeight = -((row * 60) + (row * 8) + 100); 
-            token.style.setProperty('--drop-start', `${dropHeight}px`);
-            
-            token.classList.add('falling');
-            cell.appendChild(token);
-        }
-
-        function checkWin(r, c, player) {
-            const dirs = [[0,1], [1,0], [1,1], [1,-1]]; // Horiz, Vert, Diag1, Diag2
-            
-            for(let d of dirs) {
-                let count = 1;
-                // Sens +
-                let i = 1;
-                while(true) {
-                    const nr = r + d[0]*i, nc = c + d[1]*i;
-                    if(nr<0 || nr>=ROWS || nc<0 || nc>=COLS || boardState[nr][nc] !== player) break;
-                    count++; i++;
-                }
-                // Sens -
-                i = 1;
-                while(true) {
-                    const nr = r - d[0]*i, nc = c - d[1]*i;
-                    if(nr<0 || nr>=ROWS || nc<0 || nc>=COLS || boardState[nr][nc] !== player) break;
-                    count++; i++;
-                }
-
-                if(count >= winCondition) return true;
-            }
-            return false;
-        }
-
-        function updateStatus(msg) {
-            statusEl.textContent = msg;
-            if(msg.includes("gagné")) {
-                statusEl.style.color = "#4cd137"; // Vert victoire
+            if(selectedPower === power) {
+                selectedPower = null; // Désélection
             } else {
-                statusEl.style.color = "white";
+                selectedPower = power;
+            }
+            updateUI();
+        }
+
+        function applyPower(r, c) {
+            const cost = COSTS[selectedPower];
+            scores[currentPlayer] -= cost;
+
+            if(selectedPower === 'bomb') {
+                // Détruit 1 case (remet à 0)
+                if(boardState[r][c] !== 0) {
+                    destroyCell(r, c);
+                }
+            } 
+            else if(selectedPower === 'bigbomb') {
+                // Détruit 2x2 autour
+                destroyCell(r, c);
+                if(r+1<ROWS) destroyCell(r+1, c);
+                if(c+1<COLS) destroyCell(r, c+1);
+                if(r+1<ROWS && c+1<COLS) destroyCell(r+1, c+1);
+            }
+            else if(selectedPower === 'wall') {
+                // Place un mur (gravité s'applique ou pas ? Disons qu'on peut placer un mur n'importe où vide)
+                if(boardState[r][c] === 0) {
+                    boardState[r][c] = 3; // 3 = Mur
+                }
+            }
+
+            selectedPower = null;
+            renderBoard();
+            nextTurn();
+        }
+
+        function destroyCell(r, c) {
+            boardState[r][c] = 0;
+            // Effet visuel rapide
+            const cell = document.querySelector(`.cell[data-r='${r}'][data-c='${c}']`);
+            if(cell) {
+                const boom = document.createElement('div');
+                boom.className = 'explosion';
+                cell.appendChild(boom);
             }
         }
+
+        // --- VERIF FORMES (ALGO SIMPLIFIÉ) ---
+        function checkShapes(player) {
+            // Pour chaque forme, on scanne toute la grille pour voir si elle existe pour ce joueur
+            currentObjectives.forEach(shape => {
+                const h = shape.grid.length;
+                const w = shape.grid[0].length;
+                
+                let found = false;
+                
+                for(let r=0; r <= ROWS-h; r++) {
+                    for(let c=0; c <= COLS-w; c++) {
+                        // Vérif match
+                        let match = true;
+                        for(let i=0; i<h; i++) {
+                            for(let j=0; j<w; j++) {
+                                if(shape.grid[i][j] === 1) {
+                                    if(boardState[r+i][c+j] !== player) match = false;
+                                }
+                            }
+                        }
+                        if(match) found = true;
+                    }
+                }
+
+                if(found) {
+                    // Pour éviter de gagner des pts en boucle, on pourrait "consommer" les jetons
+                    // Ici on donne juste les points et on avertit
+                    // Dans un jeu complet, il faudrait marquer ces jetons comme "utilisés"
+                    scores[player] += shape.pts;
+                    showFloatText(0, 3, `Forme Complétée ! +${shape.pts}`, "gold");
+                    
+                    // Petit reset de la forme (on supprime les jetons pour le fun/chaos ?)
+                    // Optionnel : boardState[r][c] = 0...
+                }
+            });
+        }
+
+        function spawnBonus() {
+            // Trouve une case vide au hasard
+            let r, c;
+            let tries = 0;
+            do {
+                r = Math.floor(Math.random() * ROWS);
+                c = Math.floor(Math.random() * COLS);
+                tries++;
+            } while(boardState[r][c] !== 0 && tries < 50);
+
+            if(boardState[r][c] === 0) {
+                bonusState[r][c] = true;
+                renderBoard();
+            }
+        }
+
+        function nextTurn() {
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('s1').innerText = scores[1];
+            document.getElementById('s2').innerText = scores[2];
+            document.getElementById('turnInfo').innerText = `Tour de Joueur ${currentPlayer}`;
+            
+            // Boutons pouvoirs
+            document.querySelectorAll('.power-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.disabled = false;
+            });
+
+            if(selectedPower) {
+                document.getElementById(`btn-${selectedPower}`).classList.add('active');
+                document.getElementById('turnInfo').innerText = "CLIQUEZ SUR LA GRILLE POUR UTILISER LE POUVOIR";
+            }
+
+            // Griser si pas assez de thunes
+            if(scores[currentPlayer] < 2) document.getElementById('btn-bomb').disabled = true;
+            if(scores[currentPlayer] < 5) document.getElementById('btn-bigbomb').disabled = true;
+            if(scores[currentPlayer] < 3) document.getElementById('btn-wall').disabled = true;
+        }
+
+        function showFloatText(r, c, text, color) {
+            // Créer une div volante pour afficher les points
+            const float = document.createElement('div');
+            float.innerText = text;
+            float.style.position = 'absolute';
+            float.style.left = '50%';
+            float.style.top = '20%';
+            float.style.transform = 'translate(-50%, -50%)';
+            float.style.color = color;
+            float.style.fontWeight = 'bold';
+            float.style.fontSize = '2rem';
+            float.style.textShadow = '0 0 10px black';
+            float.style.pointerEvents = 'none';
+            float.style.animation = 'floatUp 1s forwards';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 1000);
+        }
+        
+        // CSS anim floatUp
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes floatUp { to { top: 10%; opacity: 0; } }`;
+        document.head.appendChild(style);
+
+        initGame();
 
     </script>
 </body>
