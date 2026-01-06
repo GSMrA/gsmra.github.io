@@ -3,247 +3,387 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puissance 4 - Corrigé</title>
+    <title>Puissance 4 - Ultimate</title>
     <style>
         :root {
             --cell-size: 60px;
-            --board-padding: 15px;
-            --p1-color: #ffce00; /* Jaune plus lisible */
-            --p2-color: #ff3b30; /* Rouge vif Apple */
+            --board-gap: 8px;
+            --p1-color: #ffcc00; /* Jaune Or */
+            --p2-color: #ff3b30; /* Rouge Apple */
+            --bg-color: #1a1a2e;
+            --panel-bg: rgba(255, 255, 255, 0.1);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #2c3e50;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            touch-action: manipulation; /* Empêche le zoom double-tap sur iPad */
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .game-info {
+        /* --- MENU --- */
+        #menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            animation: fadeIn 0.8s ease-out;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #ffcc00, #ff3b30);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            font-size: 1.5rem;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 280px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .menu-btn.pvp { border-left: 5px solid #ffcc00; }
+        .menu-btn.pve { border-left: 5px solid #ff3b30; }
+        .menu-btn.hard { border-left: 5px solid #00d2ff; }
+
+        /* --- JEU --- */
+        #game-screen {
+            display: none; /* Caché par défaut */
+            flex-direction: column;
+            align-items: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
             margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        .status-text {
+            font-size: 1.2rem;
             font-weight: bold;
             text-align: center;
         }
 
+        .board-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
         .board {
-            background-color: #0055ff; /* Bleu classique P4 */
-            padding: var(--board-padding);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             display: grid;
             grid-template-columns: repeat(7, var(--cell-size));
             grid-template-rows: repeat(6, var(--cell-size));
-            gap: 10px; /* Espace entre les trous */
+            gap: var(--board-gap);
         }
 
         .cell {
             width: var(--cell-size);
             height: var(--cell-size);
-            background-color: #2c3e50; /* Couleur du fond de page pour effet de trou */
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 50%;
-            position: relative;
             cursor: pointer;
-            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3); /* Ombre interne pour profondeur */
-            overflow: visible; /* Important pour voir le jeton tomber de plus haut si besoin */
+            position: relative;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.6);
         }
 
-        /* Le jeton */
+        /* Jeton */
         .token {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             position: absolute;
-            top: 0;
-            left: 0;
-            transform: translateY(0);
-            z-index: 10;
+            top: 0; left: 0;
+            transform: translateY(var(--drop-start));
+            opacity: 0;
         }
 
-        .token.p1 {
-            background: radial-gradient(circle at 30% 30%, #fff 5%, var(--p1-color) 40%);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        .token.p1 { 
+            background: radial-gradient(circle at 35% 35%, #fff 2%, var(--p1-color) 40%); 
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+        }
+        .token.p2 { 
+            background: radial-gradient(circle at 35% 35%, #fff 2%, var(--p2-color) 40%); 
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.6);
         }
 
-        .token.p2 {
-            background: radial-gradient(circle at 30% 30%, #fff 5%, var(--p2-color) 40%);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
-        /* Animation de chute */
         .token.falling {
-            animation: fall-bounce 0.5s ease-in forwards;
+            animation: dropBounce 0.6s cubic-bezier(0.5, 0, 0.5, 1.5) forwards;
         }
 
-        @keyframes fall-bounce {
-            0% { transform: translateY(var(--drop-height)); opacity: 0; }
-            70% { transform: translateY(0); opacity: 1; }
-            85% { transform: translateY(-10px); } /* Rebond */
-            100% { transform: translateY(0); }
-        }
-
-        button {
-            margin-top: 30px;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            background: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        button:active {
-            transform: scale(0.95);
+        /* Animations Keyframes */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes dropBounce {
+            0% { transform: translateY(var(--drop-start)); opacity: 1; }
+            60% { transform: translateY(0); }
+            80% { transform: translateY(-15px); }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
     </style>
 </head>
 <body>
 
-    <div class="game-info" id="status">Tour du Joueur 1 (Jaune)</div>
-    
-    <div class="board" id="board">
-        <!-- Généré en JS -->
+    <!-- MENU PRINCIPAL -->
+    <div id="menu-screen">
+        <h1>Puissance 4</h1>
+        <button class="menu-btn pvp" onclick="startGame('classic')">👥 2 Joueurs Classique</button>
+        <button class="menu-btn pve" onclick="startGame('ai')">🤖 Contre l'IA (Solo)</button>
+        <button class="menu-btn hard" onclick="startGame('connect5')">🔥 Mode 5 à la suite</button>
     </div>
 
-    <button onclick="resetGame()">Nouvelle Partie</button>
+    <!-- ECRAN DE JEU -->
+    <div id="game-screen">
+        <div class="header-bar">
+            <button class="back-btn" onclick="showMenu()">← Menu</button>
+            <div id="status" class="status-text">Joueur 1</div>
+            <div style="width: 70px;"></div> <!-- Spacer pour centrer le texte -->
+        </div>
+
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+    </div>
 
     <script>
         const ROWS = 6;
         const COLS = 7;
-        let currentPlayer = 1; // 1 = Jaune, 2 = Rouge
-        let boardState = []; // Matrice logique
-        let gameActive = true;
+        
+        let boardState = [];
+        let currentPlayer = 1;
+        let gameActive = false;
+        let currentMode = 'classic'; // 'classic', 'ai', 'connect5'
+        let winCondition = 4; // 4 ou 5
+        let isAiThinking = false;
 
-        const boardElement = document.getElementById('board');
-        const statusElement = document.getElementById('status');
+        const boardEl = document.getElementById('board');
+        const statusEl = document.getElementById('status');
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+
+        // --- GESTION DES ECRANS ---
+
+        function showMenu() {
+            gameActive = false;
+            gameScreen.style.display = 'none';
+            menuScreen.style.display = 'flex';
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            winCondition = (mode === 'connect5') ? 5 : 4;
+            
+            menuScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            
+            initGame();
+        }
+
+        // --- MOTEUR DE JEU ---
 
         function initGame() {
             boardState = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-            boardElement.innerHTML = '';
-            gameActive = true;
+            boardEl.innerHTML = '';
             currentPlayer = 1;
-            updateStatus();
+            gameActive = true;
+            isAiThinking = false;
+            updateStatus("C'est parti ! Tour du Joueur 1");
 
-            // Création de la grille
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
+            // Création Grille
+            for(let r=0; r<ROWS; r++){
+                for(let c=0; c<COLS; c++){
                     const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    cell.dataset.row = r;
-                    cell.dataset.col = c;
-                    // On écoute le clic sur la case
-                    cell.addEventListener('click', () => handleColumnClick(c));
-                    boardElement.appendChild(cell);
+                    cell.className = 'cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.onclick = () => handleInput(c);
+                    boardEl.appendChild(cell);
                 }
             }
         }
 
-        function handleColumnClick(colIndex) {
-            if (!gameActive) return;
+        function handleInput(col) {
+            if (!gameActive || isAiThinking) return;
 
-            // Trouver la première ligne vide en partant du bas (5 -> 0)
-            let targetRow = -1;
+            if (playMove(col, currentPlayer)) {
+                // Coup valide joué
+                if(gameActive && currentMode === 'ai' && currentPlayer === 2) {
+                    // Tour de l'IA
+                    isAiThinking = true;
+                    setTimeout(aiMove, 600); // Petit délai pour le réalisme
+                }
+            }
+        }
+
+        function playMove(col, player) {
+            // Trouver la ligne vide la plus basse
+            let row = -1;
             for (let r = ROWS - 1; r >= 0; r--) {
-                if (boardState[r][colIndex] === 0) {
-                    targetRow = r;
+                if (boardState[r][col] === 0) {
+                    row = r;
                     break;
                 }
             }
 
-            // Colonne pleine ? On arrête
-            if (targetRow === -1) return;
+            if (row === -1) return false; // Colonne pleine
 
-            // Mise à jour logique
-            boardState[targetRow][colIndex] = currentPlayer;
+            // Logique
+            boardState[row][col] = player;
 
-            // Mise à jour visuelle (Animation)
-            animateToken(targetRow, colIndex, currentPlayer);
+            // Visuel
+            animateToken(row, col, player);
 
-            // Vérification victoire
-            if (checkWin(targetRow, colIndex)) {
-                statusElement.innerText = `🎉 VICTOIRE DU JOUEUR ${currentPlayer} ! 🎉`;
+            // Vérif Victoire
+            if (checkWin(row, col, player)) {
                 gameActive = false;
-                return;
+                const winnerName = (currentMode === 'ai' && player === 2) ? "L'IA" : `Joueur ${player}`;
+                updateStatus(`🏆 ${winnerName} a gagné !`);
+                return true;
             }
 
-            // Changement de joueur
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-            updateStatus();
+            // Vérif Match Nul
+            if (boardState.every(r => r.every(c => c !== 0))) {
+                gameActive = false;
+                updateStatus("Match Nul !");
+                return true;
+            }
+
+            // Changement Joueur
+            currentPlayer = (player === 1) ? 2 : 1;
+            
+            let nextName = `Joueur ${currentPlayer}`;
+            if (currentMode === 'ai' && currentPlayer === 2) nextName = "IA (réfléchit...)";
+            
+            updateStatus(`Tour : ${nextName}`);
+            
+            return true;
+        }
+
+        function aiMove() {
+            // IA Simple : Cherche un coup gagnant, sinon bloque, sinon aléatoire
+            let chosenCol = -1;
+
+            // 1. Essayer de gagner ou bloquer (Simulation simplifiée)
+            // Pour faire simple ici : IA purement aléatoire mais valide
+            // Amélioration possible : Minimax ici
+            
+            const validCols = [];
+            for(let c=0; c<COLS; c++) {
+                if(boardState[0][c] === 0) validCols.push(c);
+            }
+
+            if(validCols.length > 0) {
+                // Choisir une colonne au hasard parmi les valides
+                chosenCol = validCols[Math.floor(Math.random() * validCols.length)];
+                
+                // Petite astuce : préférer le centre (colonnes 2, 3, 4)
+                const centerCols = validCols.filter(c => c >= 2 && c <= 4);
+                if(centerCols.length > 0 && Math.random() > 0.3) {
+                    chosenCol = centerCols[Math.floor(Math.random() * centerCols.length)];
+                }
+            }
+
+            playMove(chosenCol, 2);
+            isAiThinking = false;
         }
 
         function animateToken(row, col, player) {
-            // Trouver la case DOM précise
-            const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
-            
-            // Créer le jeton
+            const cell = document.querySelector(`.cell[data-r='${row}'][data-c='${col}']`);
             const token = document.createElement('div');
-            token.classList.add('token');
-            token.classList.add(player === 1 ? 'p1' : 'p2');
-
-            // Calculer la hauteur de chute
-            // Chaque ligne fait ~70px (60px + 10px gap). 
-            // Si on est à la ligne 5 (bas), on doit tomber de 5 * 70px vers le haut.
-            // On ajoute un peu de marge pour qu'il vienne de "hors champ"
-            const pixelOffset = -(row * 70 + 100); 
-            token.style.setProperty('--drop-height', `${pixelOffset}px`);
+            token.className = `token p${player}`;
+            
+            // Calcul distance chute (pixels)
+            // -100px pour partir d'un peu plus haut que la grille
+            const dropHeight = -((row * 60) + (row * 8) + 100); 
+            token.style.setProperty('--drop-start', `${dropHeight}px`);
             
             token.classList.add('falling');
             cell.appendChild(token);
         }
 
-        function updateStatus() {
-            if(currentPlayer === 1) {
-                statusElement.innerText = "Tour du Joueur 1 (Jaune)";
-                statusElement.style.color = "#ffce00";
-            } else {
-                statusElement.innerText = "Tour du Joueur 2 (Rouge)";
-                statusElement.style.color = "#ff3b30";
-            }
-        }
-
-        function checkWin(r, c) {
-            const player = boardState[r][c];
-            // Directions : Horizontal, Vertical, Diag Haut-Gauche, Diag Haut-Droite
-            const directions = [
-                [0, 1], [1, 0], [1, 1], [1, -1]
-            ];
-
-            for (let [dr, dc] of directions) {
+        function checkWin(r, c, player) {
+            const dirs = [[0,1], [1,0], [1,1], [1,-1]]; // Horiz, Vert, Diag1, Diag2
+            
+            for(let d of dirs) {
                 let count = 1;
-                // Vérifier dans un sens
-                for (let i = 1; i < 4; i++) {
-                    const nr = r + dr * i;
-                    const nc = c + dc * i;
-                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === player) count++;
-                    else break;
+                // Sens +
+                let i = 1;
+                while(true) {
+                    const nr = r + d[0]*i, nc = c + d[1]*i;
+                    if(nr<0 || nr>=ROWS || nc<0 || nc>=COLS || boardState[nr][nc] !== player) break;
+                    count++; i++;
                 }
-                // Vérifier dans le sens opposé
-                for (let i = 1; i < 4; i++) {
-                    const nr = r - dr * i;
-                    const nc = c - dc * i;
-                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === player) count++;
-                    else break;
+                // Sens -
+                i = 1;
+                while(true) {
+                    const nr = r - d[0]*i, nc = c - d[1]*i;
+                    if(nr<0 || nr>=ROWS || nc<0 || nc>=COLS || boardState[nr][nc] !== player) break;
+                    count++; i++;
                 }
-                if (count >= 4) return true;
+
+                if(count >= winCondition) return true;
             }
             return false;
         }
 
-        function resetGame() {
-            initGame();
+        function updateStatus(msg) {
+            statusEl.textContent = msg;
+            if(msg.includes("gagné")) {
+                statusEl.style.color = "#4cd137"; // Vert victoire
+            } else {
+                statusEl.style.color = "white";
+            }
         }
-
-        // Démarrage
-        initGame();
 
     </script>
 </body>
