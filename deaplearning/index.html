@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Foot IA 3D - V3 Stable</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #111; }
+        #overlay {
+            position: absolute; top: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.85); padding: 15px; border-radius: 10px;
+            width: 320px; user-select: none; border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        h2 { margin: 0 0 10px 0; font-size: 18px; color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        input[type=range] { width: 100%; accent-color: #4CAF50; cursor: pointer; margin: 10px 0; }
+        .bar-container { width: 100%; background: #333; height: 10px; border-radius: 5px; margin-top: 5px; overflow: hidden;}
+        .bar-fill { height: 100%; background: #2196F3; width: 100%; transition: width 0.2s; }
+        #logs { 
+            font-family: monospace; font-size: 11px; color: #aaa; margin-top: 10px; 
+            height: 80px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;
+        }
+        .status-led { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #555; margin-right: 5px; }
+        .training { background: #ffeb3b; box-shadow: 0 0 5px #ffeb3b; }
+        .ready { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+    </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js",
+                "@tensorflow/tfjs": "https://esm.sh/@tensorflow/tfjs"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="overlay">
+        <h2>IA Dashboard <span id="statusLed" class="status-led ready"></span></h2>
+        
+        <div class="stat-row">
+            <span>Score (Bleu v Rouge)</span>
+            <span id="score" style="font-weight:bold; color:#fff">0 - 0</span>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <label>Vitesse Simulation: <span id="speedVal">1x</span></label>
+            <input type="range" id="speedSlider" min="1" max="50" step="1" value="1">
+        </div>
+
+        <div style="margin-top: 10px;">
+            <label>Exploration (Random): <span id="epsilonVal">100%</span></label>
+            <div class="bar-container">
+                <div id="epsilonBar" class="bar-fill" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <div id="logs">Système prêt.</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import * as CANNON from 'cannon-es';
+        import * as tf from '@tensorflow/tfjs';
+
+        // --- LOGGER ---
+        function log(msg) {
+            const el = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            el.innerHTML = `<div style="margin-bottom:2px"><span style="color:#666">[${time}]</span> ${msg}</div>` + el.innerHTML;
+        }
+
+        // --- SCENE THREE.JS ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.set(45, 35, 0); 
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lumières
+        const dl = new THREE.DirectionalLight(0xffffff, 1.5);
+        dl.position.set(10, 30, 10);
+        dl.castShadow = true;
+        dl.shadow.camera.left = -40; dl.shadow.camera.right = 40;
+        dl.shadow.camera.top = 40; dl.shadow.camera.bottom = -40;
+        scene.add(dl);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        // --- PHYSIQUE ---
+        const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.81, 0) });
+        const matGround = new CANNON.Material();
+        const matPlayer = new CANNON.Material();
+        const matBall = new CANNON.Material();
+
+        world.addContactMaterial(new CANNON.ContactMaterial(matGround, matPlayer, { friction: 0.0, restitution: 0 }));
+        world.addContactMaterial(new CANNON.ContactMaterial(matGround, matBall, { friction: 0.3, restitution: 0.7 }));
+        world.addContactMaterial(new CANNON.ContactMaterial(matPlayer, matBall, { friction: 0.1, restitution: 0.5 }));
+
+        const syncObjects = [];
+
+        function createMeshBody(geo, mat, mass, pos, cMat, color) {
+            const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: color }));
+            mesh.castShadow = true; mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            let shape;
+            if (geo.type === 'BoxGeometry') shape = new CANNON.Box(new CANNON.Vec3(geo.parameters.width/2, geo.parameters.height/2, geo.parameters.depth/2));
+            else if (geo.type === 'SphereGeometry') shape = new CANNON.Sphere(geo.parameters.radius);
+
+            const body = new CANNON.Body({ mass: mass, material: cMat });
+            body.addShape(shape);
+            body.position.copy(pos);
+            if (mass > 0 && geo.type !== 'SphereGeometry') body.fixedRotation = true;
+            
+            world.addBody(body);
+            syncObjects.push({ mesh, body });
+            return body;
+        }
+
+        // Terrain & Murs
+        const groundGeo = new THREE.PlaneGeometry(30, 50);
+        const groundMesh = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x228b22 }));
+        groundMesh.rotation.x = -Math.PI/2; groundMesh.receiveShadow = true;
+        scene.add(groundMesh);
+        const groundBody = new CANNON.Body({ mass: 0, material: matGround });
+        groundBody.addShape(new CANNON.Plane());
+        groundBody.quaternion.setFromEuler(-Math.PI/2, 0, 0);
+        world.addBody(groundBody);
+
+        function addWall(x, z, w, d) {
+            const b = new CANNON.Body({ mass: 0 });
+            b.addShape(new CANNON.Box(new CANNON.Vec3(w/2, 2, d/2)));
+            b.position.set(x, 2, z);
+            world.addBody(b);
+        }
+        addWall(16, 0, 2, 50); addWall(-16, 0, 2, 50);
+        addWall(0, 26, 30, 2); addWall(0, -26, 30, 2);
+
+        // Buts
+        function createGoal(z, color) {
+            const goalMat = new THREE.MeshStandardMaterial({color: color});
+            const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4, 0.5), goalMat); p1.position.set(4, 2, z); scene.add(p1);
+            const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4, 0.5), goalMat); p2.position.set(-4, 2, z); scene.add(p2);
+            const p3 = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.5, 0.5), goalMat); p3.position.set(0, 4, z); scene.add(p3);
+        }
+        createGoal(-25, 0x0000ff); createGoal(25, 0xff0000);
+
+        // Entités
+        const blue = createMeshBody(new THREE.BoxGeometry(2,2,2), null, 5, new THREE.Vector3(0,1,15), matPlayer, 0x0088ff);
+        const red = createMeshBody(new THREE.BoxGeometry(2,2,2), null, 5, new THREE.Vector3(0,1,-15), matPlayer, 0xff4444);
+        const ball = createMeshBody(new THREE.SphereGeometry(0.8), null, 1, new THREE.Vector3(0,5,0), matBall, 0xffffff);
+        ball.angularDamping = 0.5;
+
+        // --- IA TENSORFLOW ---
+        const model = tf.sequential();
+        model.add(tf.layers.dense({inputShape: [6], units: 24, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 24, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 2, activation: 'tanh'})); // Force X, Z
+        
+        // CORRECTION 1: Compilation explicite
+        const optimizer = tf.train.adam(0.005); // Learning rate un peu plus agressif
+        model.compile({
+            optimizer: optimizer,
+            loss: 'meanSquaredError'
+        });
+
+        // Variables Apprentissage
+        let epsilon = 1.0;
+        let isTraining = false; // CORRECTION 2: Flag anti-surcharge
+        let scoreB = 0, scoreR = 0;
+        let lastDist = 1000;
+
+        async function trainStep(state, action, reward) {
+            if (isTraining) return; // Si déjà occupé, on saute ce tour
+            if (reward === 0) return;
+
+            isTraining = true;
+            document.getElementById('statusLed').className = "status-led training";
+
+            try {
+                const stateT = tf.tensor2d([state]);
+                const actionT = tf.tensor2d([action]); 
+                // Pour simplifier ici, on entraîne le modèle à prédire l'action qu'on vient de faire
+                // pondérée par le reward (très simplifié)
+                
+                // Vrai Q-Learning simplifié :
+                // On veut que pour cet état, la sortie se rapproche de l'action choisie SI c'était une bonne action
+                // Si reward > 0, on fit. Si reward < 0, on pourrait fitter l'opposé, mais on va juste ignorer pour l'instant.
+                
+                if (reward > 0) {
+                     await model.fit(stateT, actionT, { epochs: 1, verbose: 0 });
+                }
+                
+                stateT.dispose();
+                actionT.dispose();
+            } catch (e) {
+                console.error(e);
+            }
+
+            isTraining = false;
+            document.getElementById('statusLed').className = "status-led ready";
+        }
+
+        // --- GAME LOOP ---
+        let simSpeed = 1;
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            simSpeed = parseInt(e.target.value);
+            document.getElementById('speedVal').innerText = simSpeed + "x";
+        });
+
+        function reset() {
+            ball.position.set(0, 5, 0); ball.velocity.set(0,0,0); ball.angularVelocity.set(0,0,0);
+            blue.position.set(0, 1, 15); blue.velocity.set(0,0,0);
+            red.position.set(0, 1, -15); red.velocity.set(0,0,0);
+            lastDist = 1000;
+        }
+
+        function update() {
+            // Boucle physique accélérée
+            for(let i=0; i<simSpeed; i++) {
+                world.step(1/60);
+
+                // --- IA BLEU ---
+                if (i % 4 === 0) { // Décision toutes les 4 frames physiques
+                    // Etat
+                    const s = [
+                        blue.position.x/30, blue.position.z/50,
+                        ball.position.x/30, ball.position.z/50,
+                        (ball.position.x - blue.position.x)/30,
+                        (ball.position.z - blue.position.z)/50
+                    ];
+
+                    // Action
+                    let act = [0,0];
+                    if (Math.random() < epsilon) {
+                        act = [Math.random()*2-1, Math.random()*2-1];
+                    } else {
+                        const pred = model.predict(tf.tensor2d([s]));
+                        act = Array.from(pred.dataSync()); // dataSync est rapide pour 1 seul vecteur
+                        pred.dispose();
+                    }
+
+                    // Appliquer physique
+                    blue.applyForce(new CANNON.Vec3(act[0]*60, 0, act[1]*60));
+
+                    // Récompenses & Entraînement
+                    const d = blue.position.distanceTo(ball.position);
+                    let r = 0;
+                    
+                    if (d < lastDist) r = 0.1; // Encourage rapprochement
+                    if (d < 1.5) r = 2.0; // Touche la balle !
+                    
+                    if (!isTraining && r > 0) {
+                         trainStep(s, act, r);
+                    }
+                    
+                    lastDist = d;
+                    if(epsilon > 0.05) epsilon *= 0.9999; // Décroissance lente
+                }
+
+                // --- BOT ROUGE (Suiveur) ---
+                const dx = ball.position.x - red.position.x;
+                const dz = ball.position.z - red.position.z;
+                red.applyForce(new CANNON.Vec3(dx*2, 0, dz*2));
+
+                // --- BUTS ---
+                if (ball.position.z < -25) { // But Bleu
+                    scoreB++;
+                    log("BUT BLEU ! (+10 pts)");
+                    document.getElementById('score').innerText = `${scoreB} - ${scoreR}`;
+                    // On pourrait entraîner avec reward=10 ici
+                    reset();
+                }
+                if (ball.position.z > 25) { // But Rouge
+                    scoreR++;
+                    log("But Rouge... (-5 pts)");
+                    document.getElementById('score').innerText = `${scoreB} - ${scoreR}`;
+                    reset();
+                }
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            update();
+            
+            // Synchro Visuelle (toujours 1 fois par frame écran)
+            syncObjects.forEach(o => {
+                o.mesh.position.copy(o.body.position);
+                o.mesh.quaternion.copy(o.body.quaternion);
+            });
+
+            // UI
+            document.getElementById('epsilonBar').style.width = (epsilon*100) + "%";
+            document.getElementById('epsilonVal').innerText = Math.floor(epsilon*100) + "%";
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        log("Initialisation terminée.");
+        animate();
+    </script>
+</body>
+</html>
