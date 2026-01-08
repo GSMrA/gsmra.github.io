@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Système Solaire : Temps Réel & Tracking</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Orbitron', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap');
+
+        /* HUD Global */
+        #hud-top {
+            position: absolute; top: 20px; left: 20px;
+            color: #00d2ff; font-size: 14px;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+        #clock { font-size: 24px; font-weight: bold; color: #fff; margin-top: 5px; }
+
+        /* Étiquette Info (Suivi 3D) */
+        #planet-label {
+            position: absolute; display: none; pointer-events: none;
+            top: 0; left: 0; z-index: 10;
+        }
+
+        .connector-line {
+            position: absolute; bottom: 0; left: 0;
+            width: 2px; height: 0;
+            background: linear-gradient(to top, transparent, #00d2ff);
+            box-shadow: 0 0 8px #00d2ff;
+            transition: height 0.5s ease-out;
+        }
+
+        .info-box {
+            position: absolute; bottom: 0; left: 20px;
+            width: 300px;
+            background: rgba(5, 12, 20, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-left: 4px solid #00d2ff;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        /* Animation d'ouverture */
+        #planet-label.active .connector-line { height: 80px; }
+        #planet-label.active .info-box { opacity: 1; transform: translateY(-80px); }
+
+        h2 { margin: 0; color: #fff; font-size: 28px; letter-spacing: 3px; text-transform: uppercase; }
+        .sub-text { font-family: 'Rajdhani', sans-serif; color: #aaa; font-size: 14px; margin-bottom: 15px; }
+
+        /* Grille de données live */
+        .data-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            margin-top: 15px; padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .data-item { display: flex; flex-direction: column; }
+        .label { color: #00d2ff; font-size: 11px; text-transform: uppercase; }
+        .value { color: #fff; font-size: 18px; font-weight: 600; }
+        .live-indicator { color: #ff3333; font-size: 10px; animation: blink 1s infinite; }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        #reset-btn {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 10px 30px;
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s;
+            display: none; /* Caché tant qu'on n'a pas cliqué */
+        }
+        #reset-btn:hover { background: #00d2ff; color: #000; box-shadow: 0 0 20px #00d2ff; }
+        
+        #loader {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background:#000; z-index:999; display:flex; 
+            justify-content:center; align-items:center; color:#00d2ff;
+            transition: opacity 1s;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">INITIALISATION SYSTÈME...</div>
+
+    <div id="hud-top">
+        <div>DATE STELLAIRE (UTC)</div>
+        <div id="clock">00:00:00</div>
+    </div>
+
+    <div id="planet-label">
+        <div class="connector-line"></div>
+        <div class="info-box">
+            <h2 id="p-name">TERRE</h2>
+            <div class="sub-text" id="p-desc">Planète habitable</div>
+            <div class="data-grid">
+                <div class="data-item">
+                    <span class="label">Distance Soleil</span>
+                    <span class="value" id="p-dist">0 UA</span>
+                </div>
+                <div class="data-item">
+                    <span class="label">Distance Terre <span class="live-indicator">● LIVE</span></span>
+                    <span class="value" id="p-earth-dist">0 km</span>
+                </div>
+                <div class="data-item">
+                    <span class="label">Température</span>
+                    <span class="value" id="p-temp">15°C</span>
+                </div>
+                <div class="data-item">
+                    <span class="label">Vitesse</span>
+                    <span class="value" id="p-speed">29 km/s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="reset-btn">Vue D'ensemble (Esc)</button>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- 1. CONFIGURATION ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 3000);
+        camera.position.set(0, 80, 150); // Vue initiale plongeante
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 5;
+        controls.maxDistance = 500;
+
+        // --- 2. LUMIÈRES ---
+        const ambientLight = new THREE.AmbientLight(0x404040, 2); 
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.PointLight(0xffffff, 3000, 1000);
+        sunLight.position.set(0, 0, 0);
+        sunLight.castShadow = true;
+        sunLight.shadow.bias = -0.0001;
+        scene.add(sunLight);
+
+        // --- 3. TEXTURES & MATÉRIAUX ---
+        const texLoader = new THREE.TextureLoader();
+        
+        // Soleil
+        const sunGeo = new THREE.SphereGeometry(8, 64, 64);
+        const sunMat = new THREE.MeshBasicMaterial({ 
+            map: texLoader.load('https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg'),
+            color: 0xffddaa 
+        });
+        const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+        // Glow
+        const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: texLoader.load('https://threejs.org/examples/textures/sprites/glow.png'),
+            color: 0xffaa33, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
+        }));
+        glowSprite.scale.set(60, 60, 1);
+        sunMesh.add(glowSprite);
+        scene.add(sunMesh);
+
+        // --- 4. PLANÈTES (Données Réelles Simplifiées) ---
+        // Période orbitale en années terrestres pour simulation vitesse relative
+        // Distance mise à l'échelle pour visibilité
+        const planetsData = [
+            { name: "Mercure", radius: 1, dist: 18, period: 0.24, speedReal: "47", temp: "167°C", tex: "https://upload.wikimedia.org/wikipedia/commons/3/30/Mercury_Coloris_Basin.jpg", desc: "Cratères et chaleur extrême" },
+            { name: "Vénus", radius: 1.8, dist: 28, period: 0.62, speedReal: "35", temp: "464°C", tex: "https://upload.wikimedia.org/wikipedia/commons/1/19/Cylindrical_Map_of_Venus.jpg", desc: "Enfer volcanique" },
+            { name: "Terre", radius: 2, dist: 40, period: 1.00, speedReal: "30", temp: "15°C", tex: "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg", desc: "Le berceau de la vie", isEarth: true },
+            { name: "Mars", radius: 1.5, dist: 55, period: 1.88, speedReal: "24", temp: "-65°C", tex: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1280px-OSIRIS_Mars_true_color.jpg", desc: "La planète rouge" },
+            { name: "Jupiter", radius: 5, dist: 80, period: 11.86, speedReal: "13", temp: "-110°C", tex: "https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg", desc: "La géante gazeuse" },
+            { name: "Saturne", radius: 4.5, dist: 110, period: 29.46, speedReal: "9", temp: "-140°C", tex: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Saturn_%28planet%29_large.jpg", desc: "Seigneur des anneaux", ring: true },
+            { name: "Uranus", radius: 3, dist: 140, period: 84.00, speedReal: "6", temp: "-195°C", tex: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg", desc: "La géante de glace" },
+            { name: "Neptune", radius: 3, dist: 170, period: 164.8, speedReal: "5", temp: "-200°C", tex: "https://upload.wikimedia.org/wikipedia/commons/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg", desc: "Vents supersoniques" }
+        ];
+
+        const planets = [];
+        let earthMesh = null; // Référence pour calculer distances
+
+        // Date de référence pour le positionnement (Timestamp actuel)
+        const timestamp = Date.now() * 0.0001; // Facteur temps pour animation continue
+
+        planetsData.forEach(data => {
+            // Calcul position initiale basé sur "temps réel" simulé
+            const angle = (Date.now() * 0.0000005 / data.period) * Math.PI * 2; 
+
+            // Groupe Orbite (pour traînée visuelle)
+            const trackGeo = new THREE.RingGeometry(data.dist - 0.2, data.dist + 0.2, 128);
+            const trackMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, opacity: 0.1, transparent: true });
+            const track = new THREE.Mesh(trackGeo, trackMat);
+            track.rotation.x = Math.PI / 2;
+            scene.add(track);
+
+            // Planète
+            const geo = new THREE.SphereGeometry(data.radius, 64, 64);
+            const mat = new THREE.MeshStandardMaterial({ 
+                map: texLoader.load(data.tex),
+                roughness: 0.5,
+                metalness: 0.1
+            });
+            const planet = new THREE.Mesh(geo, mat);
+            planet.castShadow = true;
+            planet.receiveShadow = true;
+            
+            // Stockage données custom
+            planet.userData = { 
+                name: data.name, desc: data.desc, 
+                temp: data.temp, speed: data.speedReal,
+                distSun: data.dist, // Unité arbitraire pour l'affichage
+                angle: Math.random() * Math.PI * 2, // Départ aléatoire pour esthétique si on veut, ou formule
+                period: data.period
+            };
+            
+            if(data.isEarth) earthMesh = planet;
+
+            // Anneaux
+            if(data.ring) {
+                const ringGeo = new THREE.RingGeometry(data.radius + 1.5, data.radius + 5, 64);
+                const ringMat = new THREE.MeshStandardMaterial({ 
+                    color: 0xcfb997, side: THREE.DoubleSide, transparent: true, opacity: 0.8 
+                });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.receiveShadow = true;
+                planet.add(ring);
+            }
+
+            scene.add(planet);
+            planets.push(planet);
+        });
+
+        // Fond étoilé
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCnt = 10000;
+        const pArray = new Float32Array(starsCnt * 3);
+        for(let i=0; i<starsCnt*3; i++) pArray[i] = (Math.random()-0.5) * 2000;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(pArray, 3));
+        const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.7, transparent: true, opacity: 0.8});
+        scene.add(new THREE.Points(starsGeo, starsMat));
+
+
+        // --- 5. LOGIQUE DE SUIVI (FOCUS) ---
+        let focusedPlanet = null; // Planète actuellement suivie
+        const cameraOffset = new THREE.Vector3(0, 5, 15); // Décalage caméra relative à la planète
+        const resetBtn = document.getElementById('reset-btn');
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // UI Elements
+        const labelDiv = document.getElementById('planet-label');
+        const distEl = document.getElementById('p-earth-dist');
+        
+        window.addEventListener('click', onMouseClick);
+        resetBtn.addEventListener('click', resetView);
+        window.addEventListener('keydown', (e) => { if(e.key === 'Escape') resetView(); });
+
+        function onMouseClick(event) {
+            // Ignore si clic sur le bouton
+            if(event.target === resetBtn) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(planets);
+
+            if (intersects.length > 0) {
+                focusOnPlanet(intersects[0].object);
+            }
+        }
+
+        function focusOnPlanet(planet) {
+            focusedPlanet = planet;
+            resetBtn.style.display = 'block';
+            
+            // MAJ Infos
+            document.getElementById('p-name').innerText = planet.userData.name;
+            document.getElementById('p-desc').innerText = planet.userData.desc;
+            document.getElementById('p-temp').innerText = planet.userData.temp;
+            document.getElementById('p-speed').innerText = planet.userData.speed + " km/s";
+            document.getElementById('p-dist').innerText = (planet.userData.distSun * 5) + " M km"; // Fake scale
+
+            // Afficher UI
+            labelDiv.style.display = 'block';
+            setTimeout(() => labelDiv.classList.add('active'), 50);
+        }
+
+        function resetView() {
+            focusedPlanet = null;
+            resetBtn.style.display = 'none';
+            labelDiv.classList.remove('active');
+            
+            // Retour position vue d'ensemble
+            new TWEEN.Tween(camera.position).to({x:0, y:80, z:150}, 1500).easing(TWEEN.Easing.Cubic.Out).start();
+            new TWEEN.Tween(controls.target).to({x:0, y:0, z:0}, 1500).easing(TWEEN.Easing.Cubic.Out).start();
+        }
+
+
+        // --- 6. ANIMATION & TEMPS RÉEL ---
+        // Petit moteur de Tweening simplifié pour transitions fluides (inclus manuellement pour pas dépendre de lib externe)
+        const TWEEN = {
+            _tweens: [],
+            getAll() { return this._tweens; },
+            removeAll() { this._tweens = []; },
+            add(tween) { this._tweens.push(tween); },
+            update(time) {
+                let i = 0;
+                while (i < this._tweens.length) {
+                    if (this._tweens[i].update(time)) i++;
+                    else this._tweens.splice(i, 1);
+                }
+            },
+            Tween: function(obj) {
+                this.obj = obj;
+                this.to = function(dest, duration) { this.dest=dest; this.duration=duration; return this; };
+                this.easing = function(fn) { this.easingFn=fn; return this; };
+                this.start = function() { 
+                    this.startTime = Date.now(); 
+                    this.startVals = {}; 
+                    for(let k in this.dest) this.startVals[k] = this.obj[k];
+                    TWEEN.add(this); 
+                    return this; 
+                };
+                this.update = function(time) {
+                    const elapsed = Date.now() - this.startTime;
+                    if(elapsed > this.duration) {
+                        for(let k in this.dest) this.obj[k] = this.dest[k];
+                        return false; 
+                    }
+                    const progress = this.easingFn(elapsed / this.duration);
+                    for(let k in this.dest) this.obj[k] = this.startVals[k] + (this.dest[k] - this.startVals[k]) * progress;
+                    return true;
+                }
+            },
+            Easing: { Cubic: { Out: t => --t * t * t + 1 } }
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+
+            const time = Date.now() * 0.0002; // Vitesse simulation
+
+            // 1. Mise à jour positions planètes
+            planets.forEach(p => {
+                // Orbite circulaire simple mais vitesse basée sur période réelle
+                // theta augmente avec le temps
+                const theta = time / p.userData.period + p.userData.angle; 
+                p.position.x = Math.cos(theta) * p.userData.distSun;
+                p.position.z = Math.sin(theta) * p.userData.distSun;
+                
+                // Rotation sur soi-même
+                p.rotation.y += 0.005;
+            });
+
+            sunMesh.rotation.y += 0.001;
+
+            // 2. Logique Caméra FOCUS
+            if (focusedPlanet) {
+                // La cible des contrôles devient la planète (pour tourner autour avec la souris)
+                // On utilise lerp pour que ce soit fluide et pas saccadé
+                const targetPos = focusedPlanet.position.clone();
+                controls.target.lerp(targetPos, 0.05);
+
+                // La caméra doit suivre aussi, mais rester à distance
+                // On calcule la position idéale de la caméra : Planète + Offset (tourné selon angle vue actuel si on veut, ou fixe)
+                // Ici approche simple : on garde la distance actuelle mais on centre sur la planète
+                
+                // Mise à jour distances temps réel UI
+                if(earthMesh) {
+                    const d = focusedPlanet.position.distanceTo(earthMesh.position);
+                    // Conversion échelle arbitraire 3D -> millions km
+                    const realDist = Math.floor(d * 3.5); 
+                    distEl.innerText = focusedPlanet === earthMesh ? "0 km" : realDist + " M km";
+                }
+
+                // Update UI position (Suivre la planète qui bouge)
+                updateLabelPosition(focusedPlanet);
+            }
+
+            // Horloge
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toISOString().split('T')[1].split('.')[0] + " UTC";
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function updateLabelPosition(planet) {
+            // Projeter la position 3D en 2D pour l'étiquette
+            const pPos = planet.position.clone();
+            pPos.project(camera); // -1 à +1
+
+            const x = (pPos.x * .5 + .5) * window.innerWidth;
+            const y = (pPos.y * -.5 + .5) * window.innerHeight;
+
+            // On place l'étiquette. Si la planète est derrière la caméra, on cache
+            if(pPos.z < 1) {
+                 labelDiv.style.transform = `translate(${x}px, ${y}px)`;
+                 labelDiv.style.display = 'block';
+            } else {
+                 labelDiv.style.display = 'none';
+            }
+        }
+
+        // Loader disparaît
+        THREE.DefaultLoadingManager.onLoad = () => {
+            document.getElementById('loader').style.opacity = 0;
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 1000);
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
