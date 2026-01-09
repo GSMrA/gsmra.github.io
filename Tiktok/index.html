@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cercle + split ball + export vidéo</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; background:#0b0d12; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .wrap { display:flex; gap:16px; padding:16px; align-items:flex-start; flex-wrap:wrap; }
+    canvas { background:#06070b; border:1px solid #1c2230; border-radius:12px; }
+    .panel { width: 360px; padding:12px; border:1px solid #1c2230; border-radius:12px; background:#0e1220; }
+    .panel h1 { font-size:14px; margin:0 0 10px; font-weight:600; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+    button, input {
+      background:#151b2f; color:#e8ebff; border:1px solid #2a3563; border-radius:10px;
+      padding:10px 12px; font-weight:600; cursor:pointer;
+    }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    label { display:flex; align-items:center; gap:8px; font-size:13px; opacity:.9; }
+    input[type="number"] { width: 110px; }
+    .hint { font-size:12px; opacity:.8; line-height:1.35; }
+    a#download { display:inline-block; margin-top:8px; font-size:13px; color:#aab4ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Format TikTok-ish : 9:16 -->
+    <canvas id="c" width="720" height="1280"></canvas>
+
+    <div class="panel">
+      <h1>Contrôles</h1>
+
+      <div class="row">
+        <button id="reset">Reset</button>
+        <button id="burst">Forcer une sortie</button>
+      </div>
+
+      <div class="row">
+        <button id="recStart">● Enregistrer</button>
+        <button id="recStop" disabled>■ Stop</button>
+      </div>
+
+      <div class="row">
+        <label>FPS export
+          <input id="fps" type="number" min="10" max="120" value="60">
+        </label>
+        <label>Bitrate (Mbps)
+          <input id="mbps" type="number" min="1" max="50" value="10">
+        </label>
+      </div>
+
+      <div class="hint">
+        Astuce : l’export encode la vidéo depuis le canvas (WebM) et évite la charge d’un enregistrement d’écran.
+      </div>
+
+      <a id="download" href="#" download="canvas.webm" style="display:none;">Télécharger la vidéo</a>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha: false });
+
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+
+  // Cercle “TikTok”
+  const ring = {
+    r: Math.min(W, H) * 0.23,
+    w: 18,
+    rot: 0,
+    rotSpeed: 1.25, // rad/s
+  };
+
+  // Simulation
+  const balls = [];
+  const MAX_BALLS = 700;
+
+  function rand(min, max){ return Math.random()*(max-min)+min; }
+  function hsl(h,s,l){ return `hsl(${h} ${s}% ${l}%)`; }
+
+  function spawnBall(x, y, speed, angle, radius = 10, hue = rand(180, 320)) {
+    balls.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      r: radius,
+      hue,
+      life: 0,
+    });
+    if (balls.length > MAX_BALLS) balls.splice(0, balls.length - MAX_BALLS);
+  }
+
+  function reset() {
+    balls.length = 0;
+    ring.rot = 0;
+    // Une balle qui “cherche” la sortie
+    spawnBall(cx, cy + ring.r*0.25, 520, -Math.PI/2 + rand(-0.25, 0.25), 12, rand(190, 260));
+  }
+
+  function forceExit() {
+    // Téléporte une balle près du bord, orientée vers l’extérieur => split rapide
+    spawnBall(cx + ring.r*0.98, cy, 700, 0, 12, rand(280, 340));
+  }
+
+  // Split en 3 quand la balle sort du cercle
+  function splitBall(i) {
+    const b = balls[i];
+    const speed = Math.hypot(b.vx, b.vy);
+    const base = Math.atan2(b.vy, b.vx);
+    const spread = 0.38; // rad
+    const childSpeed = speed * 0.92;
+
+    const offsets = [-spread, 0, spread];
+    for (const off of offsets) {
+      spawnBall(b.x, b.y, childSpeed, base + off, Math.max(7, b.r*0.82), (b.hue + rand(-20, 20) + 360) % 360);
+    }
+    balls.splice(i, 1);
+  }
+
+  // Fixed timestep (rendu stable)
+  const DT = 1/60;
+  let acc = 0;
+  let last = performance.now()/1000;
+
+  function step() {
+    ring.rot += ring.rotSpeed * DT;
+
+    for (let i = balls.length - 1; i >= 0; i--) {
+      const b = balls[i];
+      b.life += DT;
+
+      // Mouvement
+      b.x += b.vx * DT;
+      b.y += b.vy * DT;
+
+      // Petite “dérive” pour l’effet organique
+      const n = 0.55 * Math.sin(b.life * 3.0 + b.hue);
+      b.vx += n * 8 * DT;
+      b.vy += Math.cos(b.life * 2.6 + b.hue) * 8 * DT;
+
+      // Rebond bords
+      if (b.x < b.r) { b.x = b.r; b.vx *= -1; }
+      if (b.x > W - b.r) { b.x = W - b.r; b.vx *= -1; }
+      if (b.y < b.r) { b.y = b.r; b.vy *= -1; }
+      if (b.y > H - b.r) { b.y = H - b.r; b.vy *= -1; }
+
+      // Sortie du cercle => split
+      const dx = b.x - cx, dy = b.y - cy;
+      const d = Math.hypot(dx, dy);
+      if (d > ring.r + ring.w*0.35) {
+        splitBall(i);
+      }
+    }
+  }
+
+  function draw() {
+    // Fond
+    ctx.fillStyle = "#05060a";
+    ctx.fillRect(0, 0, W, H);
+
+    // Légère vignette
+    const grd = ctx.createRadialGradient(cx, cy, ring.r*0.2, cx, cy, Math.max(W,H)*0.75);
+    grd.addColorStop(0, "rgba(40,55,120,0.08)");
+    grd.addColorStop(1, "rgba(0,0,0,0.0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0,0,W,H);
+
+    // Cercle rotatif (dash + highlight)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ring.rot);
+
+    ctx.lineWidth = ring.w;
+    ctx.lineCap = "round";
+    ctx.setLineDash([34, 16]);
+    ctx.strokeStyle = "rgba(190,210,255,0.25)";
+    ctx.beginPath();
+    ctx.arc(0, 0, ring.r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // “segment brillant”
+    ctx.setLineDash([]);
+    const segLen = Math.PI * 0.48;
+    const a0 = -segLen * 0.15;
+    const a1 = a0 + segLen;
+    const g2 = ctx.createLinearGradient(ring.r, 0, -ring.r, 0);
+    g2.addColorStop(0, "rgba(180,120,255,0.95)");
+    g2.addColorStop(0.5, "rgba(120,190,255,0.85)");
+    g2.addColorStop(1, "rgba(255,130,170,0.95)");
+    ctx.strokeStyle = g2;
+    ctx.beginPath();
+    ctx.arc(0, 0, ring.r, a0, a1);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Balles
+    for (const b of balls) {
+      ctx.fillStyle = hsl(b.hue, 95, 65);
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fill();
+
+      // Petit glow
+      ctx.fillStyle = `hsla(${b.hue} 95% 70% / 0.15)`;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r*2.2, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // Texte discret
+    ctx.fillStyle = "rgba(230,235,255,0.65)";
+    ctx.font = "600 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillText("Canvas export (pas d’enregistrement d’écran)", 24, 46);
+  }
+
+  // Loop
+  let videoTrack = null;
+  function loop() {
+    const now = performance.now()/1000;
+    acc += Math.min(0.05, now - last);
+    last = now;
+
+    while (acc >= DT) {
+      step();
+      acc -= DT;
+    }
+    draw();
+
+    // Si on captureStream(0), on pousse une frame quand on veut
+    if (videoTrack && typeof videoTrack.requestFrame === "function") {
+      videoTrack.requestFrame();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  // Export vidéo (MediaRecorder)
+  let recorder = null;
+  let chunks = [];
+  let recording = false;
+
+  const recStart = document.getElementById("recStart");
+  const recStop  = document.getElementById("recStop");
+  const download = document.getElementById("download");
+  const fpsInput = document.getElementById("fps");
+  const mbpsInput = document.getElementById("mbps");
+
+  function pickMimeType() {
+    const prefers = [
+      "video/webm;codecs=vp9",
+      "video/webm;codecs=vp8",
+      "video/webm"
+    ];
+    if (!window.MediaRecorder) return "";
+    for (const t of prefers) {
+      if (MediaRecorder.isTypeSupported(t)) return t;
+    }
+    return "";
+  }
+
+  recStart.addEventListener("click", () => {
+    if (recording) return;
+
+    download.style.display = "none";
+    download.removeAttribute("href");
+
+    const fps = Math.max(10, Math.min(120, Number(fpsInput.value) || 60));
+    const mbps = Math.max(1, Math.min(50, Number(mbpsInput.value) || 10));
+    const bps = Math.floor(mbps * 1_000_000);
+
+    // captureStream(fps) ou captureStream(0) + requestFrame()
+    const stream = canvas.captureStream(0); // frames contrôlées par requestFrame()
+    videoTrack = stream.getVideoTracks()[0];
+
+    const mimeType = pickMimeType();
+    const opts = mimeType ? { mimeType, videoBitsPerSecond: bps } : { videoBitsPerSecond: bps };
+
+    chunks = [];
+    recorder = new MediaRecorder(stream, opts);
+
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
+
+    recorder.onstop = () => {
+      const type = recorder.mimeType || (mimeType || "video/webm");
+      const blob = new Blob(chunks, { type });
+      const url = URL.createObjectURL(blob);
+      download.href = url;
+      download.download = `canvas_${Date.now()}.webm`;
+      download.style.display = "inline-block";
+      recording = false;
+      recStart.disabled = false;
+      recStop.disabled = true;
+    };
+
+    recorder.start(); // un seul gros chunk, stop => blob final
+    recording = true;
+    recStart.disabled = true;
+    recStop.disabled = false;
+  });
+
+  recStop.addEventListener("click", () => {
+    if (!recording || !recorder) return;
+    recorder.stop();
+    recorder = null;
+    videoTrack = null;
+  });
+
+  document.getElementById("reset").addEventListener("click", reset);
+  document.getElementById("burst").addEventListener("click", forceExit);
+
+  reset();
+  loop();
+})();
+</script>
+</body>
+  </html>
