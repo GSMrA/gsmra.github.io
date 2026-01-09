@@ -312,7 +312,7 @@
                     const d = red.body.position.distanceTo(ball.body.position);
                     
                     if(d < 2.5) r += 0.1;
-                    if(d < 1.5) r += 0.5;
+                    if(d < 1.5) r += 0.2;
                     if(ball.body.velocity.z > 1) r += 0.2; // Pousse vers but adverse (+Z)
                     
                     agentRed.remember(lastStateR, lastActionR, r, sR);
