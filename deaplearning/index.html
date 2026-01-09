@@ -2,29 +2,29 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Foot IA 3D - Double Agent RL</title>
+    <title>Foot IA 3D - Stratégique & Mémorisation</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #111; }
         #overlay {
             position: absolute; top: 10px; left: 10px; color: white;
             background: rgba(0,0,0,0.85); padding: 15px; border-radius: 10px;
-            width: 340px; user-select: none; border: 1px solid #333;
+            width: 360px; user-select: none; border: 1px solid #333;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
         h2 { margin: 0 0 10px 0; font-size: 18px; color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 5px; }
         input[type=range] { width: 100%; accent-color: #4CAF50; cursor: pointer; margin: 10px 0; }
-        .bar-container { width: 100%; background: #333; height: 10px; border-radius: 5px; margin-top: 5px; overflow: hidden;}
+        .bar-container { width: 100%; background: #333; height: 8px; border-radius: 5px; margin-top: 5px; overflow: hidden;}
         .bar-fill { height: 100%; transition: width 0.2s; }
         .bar-blue { background: #2196F3; }
         .bar-red { background: #f44336; }
         #logs { 
             font-family: monospace; font-size: 11px; color: #aaa; margin-top: 10px; 
-            height: 80px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;
+            height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;
         }
         .status-led { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #555; margin-right: 5px; }
         .training { background: #ffeb3b; box-shadow: 0 0 5px #ffeb3b; }
-        .ready { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+        .memory-stat { font-size: 10px; color: #888; text-align: right; margin-top: -5px;}
     </style>
     
     <script type="importmap">
@@ -40,7 +40,7 @@
 </head>
 <body>
     <div id="overlay">
-        <h2>Double IA Dashboard <span id="statusLed" class="status-led ready"></span></h2>
+        <h2>IA Tactique (Replay Buffer) <span id="statusLed" class="status-led ready"></span></h2>
         
         <div class="stat-row">
             <span>Score (Bleu v Rouge)</span>
@@ -49,24 +49,23 @@
 
         <div style="margin-top: 10px;">
             <label>Vitesse Simulation: <span id="speedVal">1x</span></label>
-            <input type="range" id="speedSlider" min="1" max="50" step="1" value="1">
+            <input type="range" id="speedSlider" min="1" max="20" step="1" value="1">
         </div>
 
-        <div style="margin-top: 10px;">
-            <label>Exploration Bleu: <span id="epsilonBlueVal">60%</span></label>
-            <div class="bar-container">
-                <div id="epsilonBlueBar" class="bar-fill bar-blue" style="width: 60%;"></div>
-            </div>
+        <div class="stat-row" style="margin-top:10px">
+            <span>Explo Bleu</span>
+            <span id="epsilonBlueVal">50%</span>
         </div>
+        <div class="bar-container"><div id="epsilonBlueBar" class="bar-fill bar-blue" style="width: 50%;"></div></div>
 
-        <div style="margin-top: 10px;">
-            <label>Exploration Rouge: <span id="epsilonRedVal">60%</span></label>
-            <div class="bar-container">
-                <div id="epsilonRedBar" class="bar-fill bar-red" style="width: 60%;"></div>
-            </div>
+        <div class="stat-row" style="margin-top:5px">
+            <span>Explo Rouge</span>
+            <span id="epsilonRedVal">50%</span>
         </div>
-
-        <div id="logs">Système prêt. Deux IA en apprentissage.</div>
+        <div class="bar-container"><div id="epsilonRedBar" class="bar-fill bar-red" style="width: 50%;"></div></div>
+        
+        <div class="memory-stat" id="memSize">Mémoire: 0 exp</div>
+        <div id="logs">Initialisation tactique...</div>
     </div>
 
     <script type="module">
@@ -74,6 +73,17 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import * as CANNON from 'cannon-es';
         import * as tf from '@tensorflow/tfjs';
+
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            batchSize: 32,          // Taille du lot d'apprentissage
+            memorySize: 2000,       // Mémoire maximale
+            discountFactor: 0.95,   // Gamma (importance du futur)
+            learningRate: 0.002,    // Vitesse d'apprentissage
+            epsilonStart: 0.5,      // Exploration initiale (50% stratégique, 50% exploit)
+            epsilonMin: 0.05,       // Minimum 5%
+            epsilonDecay: 0.9995
+        };
 
         // --- LOGGER ---
         function log(msg) {
@@ -97,12 +107,9 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Lumières
         const dl = new THREE.DirectionalLight(0xffffff, 1.5);
         dl.position.set(10, 30, 10);
         dl.castShadow = true;
-        dl.shadow.camera.left = -40; dl.shadow.camera.right = 40;
-        dl.shadow.camera.top = 40; dl.shadow.camera.bottom = -40;
         scene.add(dl);
         scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
@@ -122,30 +129,26 @@
             const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: color }));
             mesh.castShadow = true; mesh.receiveShadow = true;
             scene.add(mesh);
-
-            let shape;
-            if (geo.type === 'BoxGeometry') shape = new CANNON.Box(new CANNON.Vec3(geo.parameters.width/2, geo.parameters.height/2, geo.parameters.depth/2));
-            else if (geo.type === 'SphereGeometry') shape = new CANNON.Sphere(geo.parameters.radius);
-
+            let shape = geo.type === 'BoxGeometry' 
+                ? new CANNON.Box(new CANNON.Vec3(geo.parameters.width/2, geo.parameters.height/2, geo.parameters.depth/2))
+                : new CANNON.Sphere(geo.parameters.radius);
             const body = new CANNON.Body({ mass: mass, material: cMat });
             body.addShape(shape);
             body.position.copy(pos);
             if (mass > 0 && geo.type !== 'SphereGeometry') body.fixedRotation = true;
-            
             world.addBody(body);
             syncObjects.push({ mesh, body });
             return body;
         }
 
-        // Terrain & Murs
-        const groundGeo = new THREE.PlaneGeometry(30, 50);
-        const groundMesh = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x228b22 }));
-        groundMesh.rotation.x = -Math.PI/2; groundMesh.receiveShadow = true;
-        scene.add(groundMesh);
+        // Terrain
         const groundBody = new CANNON.Body({ mass: 0, material: matGround });
         groundBody.addShape(new CANNON.Plane());
         groundBody.quaternion.setFromEuler(-Math.PI/2, 0, 0);
         world.addBody(groundBody);
+        const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(30, 50), new THREE.MeshStandardMaterial({ color: 0x228b22 }));
+        groundMesh.rotation.x = -Math.PI/2; groundMesh.receiveShadow = true;
+        scene.add(groundMesh);
 
         function addWall(x, z, w, d) {
             const b = new CANNON.Body({ mass: 0 });
@@ -171,73 +174,141 @@
         const ball = createMeshBody(new THREE.SphereGeometry(0.8), null, 1, new THREE.Vector3(0,5,0), matBall, 0xffffff);
         ball.angularDamping = 0.5;
 
-        // --- IA TENSORFLOW (DOUBLE AGENTS) ---
+        // --- IA SYSTEM (REPLAY MEMORY) ---
+        class ReplayBuffer {
+            constructor(maxSize) {
+                this.buffer = [];
+                this.maxSize = maxSize;
+            }
+            add(experience) {
+                if (this.buffer.length >= this.maxSize) this.buffer.shift();
+                this.buffer.push(experience);
+            }
+            sample(batchSize) {
+                const batch = [];
+                for(let i=0; i<batchSize; i++) {
+                    batch.push(this.buffer[Math.floor(Math.random() * this.buffer.length)]);
+                }
+                return batch;
+            }
+            size() { return this.buffer.length; }
+        }
+
+        const memoryBlue = new ReplayBuffer(CONFIG.memorySize);
+        const memoryRed = new ReplayBuffer(CONFIG.memorySize);
+
         function createModel() {
             const model = tf.sequential();
-            model.add(tf.layers.dense({inputShape: [8], units: 32, activation: 'relu'}));
+            // Input 10: [MyX, MyZ, BallX, BallZ, BallVX, BallVZ, OppX, OppZ, DistMyGoal, DistOppGoal]
+            model.add(tf.layers.dense({inputShape: [10], units: 64, activation: 'relu'}));
+            model.add(tf.layers.dense({units: 64, activation: 'relu'}));
             model.add(tf.layers.dense({units: 32, activation: 'relu'}));
-            model.add(tf.layers.dense({units: 16, activation: 'relu'}));
-            model.add(tf.layers.dense({units: 2, activation: 'tanh'})); // Force X, Z
-            
-            model.compile({
-                optimizer: tf.train.adam(0.003),
-                loss: 'meanSquaredError'
-            });
-            
+            model.add(tf.layers.dense({units: 2, activation: 'tanh'}));
+            model.compile({ optimizer: tf.train.adam(CONFIG.learningRate), loss: 'meanSquaredError' });
             return model;
         }
 
         const modelBlue = createModel();
         const modelRed = createModel();
 
-        // Variables Apprentissage (départ à 60% au lieu de 100%)
-        let epsilonBlue = 0.6;  // Commence à 60% d'exploration
-        let epsilonRed = 0.6;
-        const EPSILON_MIN = 0.04; // Arrêt à 4%
-        const EPSILON_DECAY = 0.99985; // Décroissance plus rapide pour atteindre 4%
-        
-        let isTrainingBlue = false;
-        let isTrainingRed = false;
+        let epsilonBlue = CONFIG.epsilonStart;
+        let epsilonRed = CONFIG.epsilonStart;
         let scoreB = 0, scoreR = 0;
-        let lastDistBlue = 1000;
-        let lastDistRed = 1000;
 
-        async function trainStep(model, state, action, reward, isBlue) {
-            const trainingFlag = isBlue ? 'isTrainingBlue' : 'isTrainingRed';
-            if (eval(trainingFlag)) return;
-            if (reward === 0) return;
+        // État plus complet pour la stratégie
+        function getState(player, opponent, goalZ, ownGoalZ) {
+            return [
+                player.position.x/30, player.position.z/50,             // Moi
+                ball.position.x/30, ball.position.z/50,                 // Balle
+                ball.velocity.x/20, ball.velocity.z/20,                 // Vitesse Balle
+                opponent.position.x/30, opponent.position.z/50,         // Adversaire
+                (ownGoalZ - player.position.z)/50,                      // Dist Def
+                (goalZ - player.position.z)/50                          // Dist Atk
+            ];
+        }
 
-            if (isBlue) isTrainingBlue = true;
-            else isTrainingRed = true;
+        // --- ENTRAINEMENT (MINI-BATCH) ---
+        async function trainAgent(model, memory) {
+            if (memory.size() < CONFIG.batchSize) return;
+
+            const batch = memory.sample(CONFIG.batchSize);
+            const states = batch.map(e => e.state);
+            const nextStates = batch.map(e => e.nextState);
             
-            document.getElementById('statusLed').className = "status-led training";
+            // Prédiction par lot pour l'efficacité
+            const tfStates = tf.tensor2d(states);
+            const tfNextStates = tf.tensor2d(nextStates);
+            
+            const qNow = model.predict(tfStates);
+            const qNext = model.predict(tfNextStates);
+            
+            const qNextData = await qNext.data(); // Récupérer les valeurs JS
+            const qNowData = await qNow.data();
+            
+            // Calcul manuel du target Q-Value
+            // Q(s,a) = r + gamma * max(Q(s', a'))
+            // Comme on a output continu (tanh -1 à 1), on approxime le gradient
+            
+            const xInputs = [];
+            const yTargets = [];
 
-            try {
-                const stateT = tf.tensor2d([state]);
-                const actionT = tf.tensor2d([action]);
+            for(let i=0; i<CONFIG.batchSize; i++) {
+                const { state, action, reward } = batch[i];
+                // Simulé: on veut que l'action prise se rapproche de (action_prise * reward_factor)
+                // C'est une simplification pour l'espace continu
                 
-                // Entraînement avec pondération par reward
+                // Si reward positif, on renforce l'action. Si négatif, on l'inverse.
+                const currentQ = [qNowData[i*2], qNowData[i*2+1]];
+                
+                let targetX, targetZ;
+                
                 if (reward > 0) {
-                    const scaledAction = tf.mul(actionT, reward * 0.5);
-                    await model.fit(stateT, scaledAction, { epochs: 1, verbose: 0 });
-                    scaledAction.dispose();
-                } else if (reward < 0) {
-                    // Pénalité: inverser légèrement l'action
-                    const invertedAction = tf.mul(actionT, -0.3);
-                    await model.fit(stateT, invertedAction, { epochs: 1, verbose: 0 });
-                    invertedAction.dispose();
+                     // On pousse vers l'action prise + un peu de la valeur future estimée
+                     targetX = action[0] + (CONFIG.discountFactor * 0.1); 
+                     targetZ = action[1] + (CONFIG.discountFactor * 0.1);
+                } else {
+                     // On s'éloigne de l'action prise
+                     targetX = -action[0] * 0.5;
+                     targetZ = -action[1] * 0.5;
                 }
                 
-                stateT.dispose();
-                actionT.dispose();
-            } catch (e) {
-                console.error(e);
-            }
+                // Clamping -1 à 1
+                targetX = Math.max(-1, Math.min(1, targetX));
+                targetZ = Math.max(-1, Math.min(1, targetZ));
 
-            if (isBlue) isTrainingBlue = false;
-            else isTrainingRed = false;
+                xInputs.push(state);
+                yTargets.push([targetX, targetZ]);
+            }
             
-            document.getElementById('statusLed').className = "status-led ready";
+            await model.fit(tf.tensor2d(xInputs), tf.tensor2d(yTargets), { epochs: 1, verbose: 0 });
+            
+            tfStates.dispose(); tfNextStates.dispose();
+            qNow.dispose(); qNext.dispose();
+        }
+
+        // --- LOGIQUE STRATEGIQUE ---
+        function getStrategicExploration(player, goalZ, ownGoalZ) {
+            // Au lieu de Random pur, on choisit une "intention"
+            const rand = Math.random();
+            const vec = new THREE.Vector3();
+            
+            if (rand < 0.4) {
+                // 1. Interception (Aller où la balle va être)
+                vec.copy(ball.position).addScaledVector(ball.velocity, 0.5).sub(player.position);
+            } else if (rand < 0.7) {
+                // 2. Positionnement Défensif (Entre balle et mon but)
+                const midPoint = new THREE.Vector3().copy(ball.position).lerp(new THREE.Vector3(0, 0, ownGoalZ), 0.5);
+                vec.copy(midPoint).sub(player.position);
+            } else if (rand < 0.9) {
+                // 3. Attaque (Frapper vers le but adverse)
+                vec.set(0, 0, goalZ).sub(player.position); 
+            } else {
+                // 4. Chaos total
+                vec.set(Math.random()-0.5, 0, Math.random()-0.5);
+            }
+            
+            vec.normalize();
+            return [vec.x, vec.z];
         }
 
         // --- GAME LOOP ---
@@ -251,145 +322,117 @@
             ball.position.set(0, 5, 0); ball.velocity.set(0,0,0); ball.angularVelocity.set(0,0,0);
             blue.position.set(0, 1, 15); blue.velocity.set(0,0,0);
             red.position.set(0, 1, -15); red.velocity.set(0,0,0);
-            lastDistBlue = 1000;
-            lastDistRed = 1000;
         }
 
-        function getState(player, goalZ) {
-            return [
-                player.position.x/30, 
-                player.position.z/50,
-                ball.position.x/30, 
-                ball.position.z/50,
-                (ball.position.x - player.position.x)/30,
-                (ball.position.z - player.position.z)/50,
-                ball.velocity.x/10,
-                (goalZ - ball.position.z)/50  // Distance au but visé
-            ];
-        }
+        let frameCount = 0;
+        let lastStateBlue = null, lastActionBlue = null;
+        let lastStateRed = null, lastActionRed = null;
 
         function update() {
             for(let i=0; i<simSpeed; i++) {
                 world.step(1/60);
+                frameCount++;
 
-                // --- IA BLEU ---
-                if (i % 3 === 0) {
-                    const s = getState(blue, -25);
-                    let act = [0,0];
-                    
+                // Décision IA toutes les 3 frames
+                if (frameCount % 3 === 0) {
+                    const sBlue = getState(blue, red, -25, 25);
+                    const sRed = getState(red, blue, 25, -25);
+
+                    // --- AGENT BLEU ---
+                    let actBlue;
                     if (Math.random() < epsilonBlue) {
-                        // Exploration guidée (moins aléatoire)
-                        const dirToBall = new THREE.Vector2(
-                            ball.position.x - blue.position.x,
-                            ball.position.z - blue.position.z
-                        ).normalize();
-                        const randomness = 0.4;
-                        act = [
-                            dirToBall.x * (1-randomness) + (Math.random()*2-1) * randomness,
-                            dirToBall.y * (1-randomness) + (Math.random()*2-1) * randomness
-                        ];
+                        actBlue = getStrategicExploration(blue, -25, 25);
                     } else {
-                        const pred = modelBlue.predict(tf.tensor2d([s]));
-                        act = Array.from(pred.dataSync());
-                        pred.dispose();
+                        const p = modelBlue.predict(tf.tensor2d([sBlue]));
+                        actBlue = Array.from(p.dataSync());
+                        p.dispose();
                     }
+                    blue.applyForce(new CANNON.Vec3(actBlue[0]*75, 0, actBlue[1]*75));
 
-                    blue.applyForce(new CANNON.Vec3(act[0]*70, 0, act[1]*70));
-
-                    // Récompenses
-                    const d = blue.position.distanceTo(ball.position);
-                    let r = 0;
-                    
-                    if (d < lastDistBlue) r = 0.15;
-                    if (d < 2) r = 1.5;
-                    if (d < 1.2) r = 3.0;
-                    if (ball.velocity.z < -1 && d < 3) r = 2.5; // Balle vers but adverse
-                    
-                    if (!isTrainingBlue && r > 0) {
-                        trainStep(modelBlue, s, act, r, true);
-                    }
-                    
-                    lastDistBlue = d;
-                    if(epsilonBlue > EPSILON_MIN) epsilonBlue *= EPSILON_DECAY;
-                }
-
-                // --- IA ROUGE ---
-                if (i % 3 === 0) {
-                    const s = getState(red, 25);
-                    let act = [0,0];
-                    
+                    // --- AGENT ROUGE ---
+                    let actRed;
                     if (Math.random() < epsilonRed) {
-                        // Exploration guidée
-                        const dirToBall = new THREE.Vector2(
-                            ball.position.x - red.position.x,
-                            ball.position.z - red.position.z
-                        ).normalize();
-                        const randomness = 0.4;
-                        act = [
-                            dirToBall.x * (1-randomness) + (Math.random()*2-1) * randomness,
-                            dirToBall.y * (1-randomness) + (Math.random()*2-1) * randomness
-                        ];
+                        actRed = getStrategicExploration(red, 25, -25);
                     } else {
-                        const pred = modelRed.predict(tf.tensor2d([s]));
-                        act = Array.from(pred.dataSync());
-                        pred.dispose();
+                        const p = modelRed.predict(tf.tensor2d([sRed]));
+                        actRed = Array.from(p.dataSync());
+                        p.dispose();
                     }
+                    red.applyForce(new CANNON.Vec3(actRed[0]*75, 0, actRed[1]*75));
 
-                    red.applyForce(new CANNON.Vec3(act[0]*70, 0, act[1]*70));
+                    // --- SAUVEGARDE EN MEMOIRE (REPLAY) ---
+                    // On récompense l'état PRÉCÉDENT basé sur la situation ACTUELLE
+                    if (lastStateBlue) {
+                        const dBall = blue.position.distanceTo(ball.position);
+                        const dOwnGoal = ball.position.distanceTo(new THREE.Vector3(0,0,25)); // But bleu est à z=25 (défense) ou z=-25?
+                        // Buts sont à +/- 25. Bleu commence à +15, attaque vers -25.
+                        
+                        let r = -0.01; // Coût de l'énergie (temps)
+                        if (dBall < 1.5) r += 0.5; // Touche balle
+                        if (ball.position.z < blue.position.z && ball.velocity.z < -0.5) r += 0.2; // Balle devant moi vers but
+                        
+                        // Récompense tactique : Être entre balle et son propre but (Défense)
+                        const vecToBall = new THREE.Vector3().copy(ball.position).sub(blue.position);
+                        const vecToOwnGoal = new THREE.Vector3(0,0,25).sub(blue.position); // But bleu à protéger est à Z=25? Non, rouge attaque Z=25.
+                        // Vérif: Blue pos +15, Goal Z=-25. Red pos -15, Goal Z=25.
+                        // Donc Blue protège Z=25. Red protège Z=-25.
+                        
+                        // Si je suis entre balle et but (Z=25)
+                        if (blue.position.z > ball.position.z && blue.position.z < 25 && Math.abs(blue.position.x - ball.position.x) < 5) {
+                            r += 0.05; // Bon placement défensif
+                        }
 
-                    // Récompenses
-                    const d = red.position.distanceTo(ball.position);
-                    let r = 0;
-                    
-                    if (d < lastDistRed) r = 0.15;
-                    if (d < 2) r = 1.5;
-                    if (d < 1.2) r = 3.0;
-                    if (ball.velocity.z > 1 && d < 3) r = 2.5; // Balle vers but adverse
-                    
-                    if (!isTrainingRed && r > 0) {
-                        trainStep(modelRed, s, act, r, false);
+                        memoryBlue.add({ state: lastStateBlue, action: lastActionBlue, reward: r, nextState: sBlue });
                     }
-                    
-                    lastDistRed = d;
-                    if(epsilonRed > EPSILON_MIN) epsilonRed *= EPSILON_DECAY;
+                    lastStateBlue = sBlue; lastActionBlue = actBlue;
+
+                    if (lastStateRed) {
+                        const dBall = red.position.distanceTo(ball.position);
+                        let r = -0.01;
+                        if (dBall < 1.5) r += 0.5;
+                        if (ball.position.z > red.position.z && ball.velocity.z > 0.5) r += 0.2; // Pousse vers but
+                        
+                        // Défense rouge (Protège Z=-25)
+                        if (red.position.z < ball.position.z && red.position.z > -25 && Math.abs(red.position.x - ball.position.x) < 5) {
+                            r += 0.05;
+                        }
+                        
+                        memoryRed.add({ state: lastStateRed, action: lastActionRed, reward: r, nextState: sRed });
+                    }
+                    lastStateRed = sRed; lastActionRed = actRed;
+
+                    // Décroissance Epsilon
+                    if (epsilonBlue > CONFIG.epsilonMin) epsilonBlue *= CONFIG.epsilonDecay;
+                    if (epsilonRed > CONFIG.epsilonMin) epsilonRed *= CONFIG.epsilonDecay;
                 }
 
                 // --- BUTS ---
-                if (ball.position.z < -25) {
+                if (ball.position.z < -26) { // But Bleu
                     scoreB++;
-                    log("⚽ <span style='color:#0088ff'>BUT BLEU!</span> (+10 pts)");
+                    log("BUT BLEU! Récompense différée.");
                     document.getElementById('score').innerText = `${scoreB} - ${scoreR}`;
-                    
-                    // Récompense massive pour le bleu
-                    const sBlue = getState(blue, -25);
-                    const lastAction = [0, -1]; // Approximation
-                    trainStep(modelBlue, sBlue, lastAction, 10, true);
-                    
-                    // Pénalité pour le rouge
-                    const sRed = getState(red, 25);
-                    const lastActionRed = [0, 1];
-                    trainStep(modelRed, sRed, lastActionRed, -3, false);
+                    // On ajoute une grosse expérience finale
+                    if(lastStateBlue) memoryBlue.add({state: lastStateBlue, action: lastActionBlue, reward: 5, nextState: lastStateBlue});
+                    if(lastStateRed) memoryRed.add({state: lastStateRed, action: lastActionRed, reward: -3, nextState: lastStateRed});
                     
                     reset();
+                    lastStateBlue=null; lastStateRed=null;
                 }
-                if (ball.position.z > 25) {
+                else if (ball.position.z > 26) { // But Rouge
                     scoreR++;
-                    log("⚽ <span style='color:#ff4444'>BUT ROUGE!</span> (+10 pts)");
+                    log("BUT ROUGE! Récompense différée.");
                     document.getElementById('score').innerText = `${scoreB} - ${scoreR}`;
-                    
-                    // Récompense massive pour le rouge
-                    const sRed = getState(red, 25);
-                    const lastAction = [0, 1];
-                    trainStep(modelRed, sRed, lastAction, 10, false);
-                    
-                    // Pénalité pour le bleu
-                    const sBlue = getState(blue, -25);
-                    const lastActionBlue = [0, -1];
-                    trainStep(modelBlue, sBlue, lastActionBlue, -3, true);
+                    if(lastStateRed) memoryRed.add({state: lastStateRed, action: lastActionRed, reward: 5, nextState: lastStateRed});
+                    if(lastStateBlue) memoryBlue.add({state: lastStateBlue, action: lastActionBlue, reward: -3, nextState: lastStateBlue});
                     
                     reset();
+                    lastStateBlue=null; lastStateRed=null;
                 }
             }
+
+            // Entraînement asynchrone (1 fois par frame visuelle pour ne pas laguer la physique)
+            trainAgent(modelBlue, memoryBlue);
+            trainAgent(modelRed, memoryRed);
         }
 
         function animate() {
@@ -401,17 +444,18 @@
                 o.mesh.quaternion.copy(o.body.quaternion);
             });
 
-            // UI
+            // UI Updates
             document.getElementById('epsilonBlueBar').style.width = (epsilonBlue*100) + "%";
             document.getElementById('epsilonBlueVal').innerText = Math.floor(epsilonBlue*100) + "%";
             document.getElementById('epsilonRedBar').style.width = (epsilonRed*100) + "%";
             document.getElementById('epsilonRedVal').innerText = Math.floor(epsilonRed*100) + "%";
+            document.getElementById('memSize').innerText = `Mémoire: ${memoryBlue.size()} exp`;
 
             controls.update();
             renderer.render(scene, camera);
         }
         
-        log("✓ Deux IA initialisées. Exploration: 60% → 4%");
+        reset();
         animate();
     </script>
 </body>
