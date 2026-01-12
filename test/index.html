@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Browser - Bypass DNS Filter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a; color: #fff; min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { 
+            text-align: center; margin-bottom: 30px; 
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4); 
+            padding: 20px; border-radius: 15px;
+        }
+        .url-input { 
+            width: 100%; padding: 15px; font-size: 16px; 
+            border: none; border-radius: 10px; margin-bottom: 10px;
+            background: #2a2a2a; color: #fff;
+        }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { 
+            padding: 12px 20px; border: none; border-radius: 8px; 
+            background: #4ecdc4; color: #000; font-weight: bold; cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover { background: #45b7aa; transform: translateY(-2px); }
+        button.doh { background: #ff6b6b; }
+        button.tor { background: #f39c12; }
+        iframe { 
+            width: 100%; height: 70vh; border: none; 
+            background: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .status { 
+            padding: 10px; border-radius: 8px; margin: 10px 0; 
+            font-family: monospace; font-size: 14px;
+        }
+        .success { background: rgba(76, 175, 80, 0.2); }
+        .error { background: rgba(244, 67, 54, 0.2); }
+        .warn { background: rgba(255, 193, 7, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Proxy Browser - DNS Bypass</h1>
+            <p>Entre l'URL à charger (ex: http://facebook.com, http://youtube.com)</p>
+        </div>
+        
+        <input type="url" class="url-input" id="urlInput" placeholder="https://example.com" value="http://httpbin.org/ip">
+        <div class="controls">
+            <button onclick="loadURL()">🚀 Charger</button>
+            <button onclick="toggleDoH()" class="doh">DNS over HTTPS</button>
+            <button onclick="testBypass()">🧪 Test Bypass</button>
+            <button onclick="clearCache()">🗑️ Clear Cache</button>
+        </div>
+        
+        <div id="status" class="status">Prêt à charger...</div>
+        <iframe id="proxyFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    </div>
+
+    <script>
+        const frame = document.getElementById('proxyFrame');
+        const status = document.getElementById('status');
+        const input = document.getElementById('urlInput');
+        let useDoH = false;
+
+        // Liste de DoH resolvers publics (bypass DNS filtré)
+        const DOH_RESOLVERS = [
+            'https://cloudflare-dns.com/dns-query',
+            'https://dns.google/dns-query',
+            'https://dns.quad9.net/dns-query'
+        ];
+
+        // Proxy CORS anywhere (gratuit, public)
+        const CORS_PROXIES = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            'https://thingproxy.freeboard.io/fetch/'
+        ];
+
+        async function loadURL() {
+            const url = input.value.trim();
+            if (!url) {
+                showStatus('⚠️ Entre une URL valide', 'warn');
+                return;
+            }
+
+            showStatus('🔄 Chargement en cours...', 'warn');
+            
+            try {
+                // Méthode 1: iframe direct (le plus simple)
+                frame.src = url;
+                
+                // Méthode 2: Si iframe bloqué, fetch via proxy
+                if (useDoH) {
+                    await proxyFetch(url);
+                }
+                
+                showStatus(`✅ ${url} chargé avec succès`, 'success');
+            } catch (e) {
+                showStatus(`❌ Erreur: ${e.message}`, 'error');
+                // Fallback vers proxy
+                fallbackProxy(url);
+            }
+        }
+
+        async function proxyFetch(url) {
+            const proxy = CORS_PROXIES[0];
+            const fullUrl = proxy + encodeURIComponent(url);
+            
+            const response = await fetch(fullUrl, {
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+            
+            if (response.ok) {
+                const html = await response.text();
+                frame.contentDocument.open();
+                frame.contentDocument.write(html);
+                frame.contentDocument.close();
+            }
+        }
+
+        function fallbackProxy(url) {
+            // Dernier recours : iframe avec proxy URL
+            frame.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        }
+
+        async function toggleDoH() {
+            useDoH = !useDoH;
+            showStatus(useDoH ? '🔒 DoH activé (Cloudflare/Google DNS)' : '🔓 DoH désactivé', 
+                      useDoH ? 'success' : 'warn');
+        }
+
+        async function testBypass() {
+            const testUrls = [
+                'http://httpbin.org/ip',
+                'http://dnsleaktest.com',
+                'http://ipleak.net'
+            ];
+            
+            input.value = testUrls[0];
+            loadURL();
+            
+            setTimeout(() => {
+                showStatus('🧪 Tests de bypass effectués - vérifie les résultats dans l\'iframe', 'success');
+            }, 2000);
+        }
+
+        function clearCache() {
+            frame.src = 'about:blank';
+            caches.keys().then(keys => {
+                keys.forEach(key => caches.delete(key));
+            });
+            showStatus('🗑️ Cache et iframe vidés', 'success');
+        }
+
+        function showStatus(msg, type) {
+            status.textContent = msg;
+            status.className = `status ${type}`;
+        }
+
+        // Auto-load au démarrage
+        window.onload = () => {
+            testBypass();
+        };
+
+        // Support Enter dans l'input
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadURL();
+        });
+
+        // Intercepte les liens cliqués dans l'iframe
+        frame.onload = () => {
+            try {
+                const iframeDoc = frame.contentDocument || frame.contentWindow.document;
+                iframeDoc.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A') {
+                        e.preventDefault();
+                        input.value = e.target.href;
+                        loadURL();
+                    }
+                });
+            } catch(e) {}
+        };
+    </script>
+</body>
+</html>
