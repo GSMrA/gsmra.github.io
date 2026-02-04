@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Panneau de Contrôle (Simulation)</title>
+  <style>
+    :root{
+      --color-bg-primary:#0a0e1a;
+      --color-bg-secondary:#141824;
+      --color-bg-tertiary:#1a1f2e;
+      --color-text-primary:#e0e6ed;
+      --color-text-secondary:#a0a8b5;
+      --color-danger:#ff3838;
+      --color-warning:#ffa500;
+      --color-success:#00ff00;
+      --color-info:#00d4ff;
+      --color-glow-red:rgba(255,56,56,.5);
+      --color-glow-green:rgba(0,255,0,.5);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Courier New',monospace;
+      background:linear-gradient(135deg,var(--color-bg-primary) 0%,var(--color-bg-secondary) 100%);
+      color:var(--color-text-primary);
+      overflow:hidden;
+      height:100vh;
+    }
+    #app-container{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      grid-template-rows: 60px 1fr 80px;
+      height:100vh;
+      gap:10px;
+      padding:10px;
+    }
+    #header{
+      grid-column:1/-1;
+      background:var(--color-bg-tertiary);
+      border:2px solid var(--color-danger);
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 20px;
+      box-shadow:0 0 20px var(--color-glow-red);
+    }
+    #header h1{
+      font-size:20px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      color:var(--color-danger);
+      text-shadow:0 0 10px var(--color-glow-red);
+    }
+    #clock{font-size:18px;color:var(--color-info);font-weight:bold}
+
+    #control-panel{
+      background:var(--color-bg-tertiary);
+      border:2px solid var(--color-warning);
+      border-radius:8px;
+      padding:18px;
+      overflow:auto;
+      box-shadow:0 0 15px rgba(255,165,0,.25);
+    }
+    .control-section{
+      margin-bottom:18px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--color-bg-secondary);
+    }
+    .control-section:last-child{border-bottom:none}
+    .section-title{
+      font-size:13px;
+      color:var(--color-warning);
+      text-transform:uppercase;
+      margin-bottom:10px;
+      letter-spacing:2px;
+    }
+    .input-group{margin-bottom:10px}
+    .input-group label{
+      display:block;
+      font-size:11px;
+      color:var(--color-text-secondary);
+      margin-bottom:5px;
+      text-transform:uppercase;
+    }
+    .input-group input,.input-group select{
+      width:100%;
+      padding:10px;
+      background:var(--color-bg-primary);
+      border:1px solid var(--color-text-secondary);
+      border-radius:4px;
+      color:var(--color-text-primary);
+      font-family:inherit;
+      font-size:13px;
+      outline:none;
+    }
+
+    .target-selector{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .target-btn{
+      background:var(--color-bg-secondary);
+      border:1px solid var(--color-text-secondary);
+      color:var(--color-text-primary);
+      padding:10px;
+      border-radius:4px;
+      cursor:pointer;
+      transition:all .2s;
+      font-size:12px;
+      font-family:inherit;
+    }
+    .target-btn:hover{border-color:var(--color-info);transform:translateY(-1px)}
+    .target-btn.selected{
+      background:var(--color-danger);
+      border-color:var(--color-danger);
+      box-shadow:0 0 10px var(--color-glow-red);
+    }
+
+    .launch-button{
+      width:100%;
+      padding:16px;
+      font-size:16px;
+      font-weight:bold;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      background:linear-gradient(135deg,#ff0000 0%,#cc0000 100%);
+      color:white;
+      border:3px solid var(--color-danger);
+      border-radius:8px;
+      cursor:pointer;
+      transition:all .2s;
+      box-shadow:0 0 22px var(--color-glow-red);
+      font-family:inherit;
+      margin-top:8px;
+    }
+    .launch-button:hover:not(:disabled){transform:scale(1.02);box-shadow:0 0 35px var(--color-glow-red)}
+    .launch-button:disabled{background:#555;border-color:#777;cursor:not-allowed;box-shadow:none}
+
+    .mini-row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .btn{
+      width:100%;
+      padding:10px;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      background:var(--color-bg-secondary);
+      color:var(--color-text-primary);
+      border:1px solid var(--color-text-secondary);
+      border-radius:6px;
+      cursor:pointer;
+      transition:.15s;
+      font-family:inherit;
+    }
+    .btn:hover{border-color:var(--color-info)}
+    .btn.primary{border-color:var(--color-info)}
+    .btn.good{border-color:var(--color-success)}
+    .btn.warn{border-color:var(--color-warning)}
+    .btn.bad{border-color:var(--color-danger)}
+
+    .power-slider{
+      width:100%;
+      height:8px;
+      border-radius:4px;
+      background:var(--color-bg-primary);
+      outline:none;
+      -webkit-appearance:none;
+    }
+    .power-slider::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:18px;height:18px;border-radius:50%;
+      background:var(--color-danger);
+      cursor:pointer;
+      box-shadow:0 0 10px var(--color-glow-red);
+    }
+    .power-value{
+      text-align:center;
+      font-size:18px;
+      color:var(--color-danger);
+      font-weight:bold;
+      margin-top:8px;
+    }
+
+    #globe-container{
+      background:var(--color-bg-secondary);
+      border:2px solid var(--color-info);
+      border-radius:8px;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 0 20px rgba(0,212,255,.18);
+    }
+    #canvas-3d{width:100%;height:100%;display:block}
+
+    #status-bar{
+      grid-column:1/-1;
+      background:var(--color-bg-tertiary);
+      border:2px solid var(--color-success);
+      border-radius:8px;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 0 15px var(--color-glow-green);
+      gap:10px;
+    }
+    .status-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .status-indicator{
+      width:12px;height:12px;border-radius:50%;
+      background:var(--color-success);
+      box-shadow:0 0 10px var(--color-glow-green);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .status-text{font-size:12px;color:var(--color-text-secondary)}
+    .missile-count{font-size:18px;font-weight:bold;color:var(--color-warning)}
+
+    /* scoreboard */
+    #scoreboard{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+      table-layout:fixed;
+    }
+    #scoreboard th,#scoreboard td{
+      border:1px solid rgba(160,168,181,.25);
+      padding:6px;
+      vertical-align:top;
+      word-wrap:break-word;
+    }
+    #scoreboard th{
+      color:var(--color-info);
+      background:rgba(0,212,255,.06);
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    .tag{
+      display:inline-block;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid rgba(160,168,181,.35);
+      color:var(--color-text-secondary);
+      font-size:10px;
+      margin-right:4px;
+      margin-top:2px;
+    }
+    .tag.alliance{border-color:rgba(0,212,255,.4);color:var(--color-info)}
+    .tag.peace{border-color:rgba(0,255,0,.35);color:var(--color-success)}
+    .tag.dead{border-color:rgba(255,56,56,.45);color:var(--color-danger)}
+    .hint{
+      color:var(--color-text-secondary);
+      font-size:11px;
+      line-height:1.35;
+    }
+
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--color-bg-primary)}
+    ::-webkit-scrollbar-thumb{background:var(--color-text-secondary);border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--color-info)}
+  </style>
+</head>
+<body>
+  <div id="app-container">
+    <header id="header">
+      <h1>⚠ Simulation stratégique (fictive) ⚠</h1>
+      <div id="clock">00:00:00</div>
+    </header>
+
+    <aside id="control-panel">
+      <div class="control-section">
+        <h3 class="section-title">Mode</h3>
+        <div class="input-group">
+          <label>Type</label>
+          <select id="sim-mode">
+            <option value="ai_observe">IA (Observer)</option>
+            <option value="ai_france">IA + Jouer France</option>
+            <option value="sandbox">Sandbox (manuel)</option>
+          </select>
+        </div>
+        <div class="mini-row">
+          <button class="btn good" id="btn-start">Démarrer</button>
+          <button class="btn bad" id="btn-stop">Stop</button>
+        </div>
+        <div style="margin-top:10px" class="hint">
+          Astuce: si tu veux que les missiles/trajectoires tombent exactement sur le bon point, évite de faire tourner la Terre elle-même; tourne la caméra (OrbitControls).
+        </div>
+      </div>
+
+      <div class="control-section" id="sandbox-block">
+        <h3 class="section-title">Sandbox (manuel)</h3>
+        <div class="target-selector">
+          <button class="target-btn" data-target="paris">Paris</button>
+          <button class="target-btn" data-target="london">Londres</button>
+          <button class="target-btn" data-target="moscow">Moscou</button>
+          <button class="target-btn" data-target="beijing">Pékin</button>
+          <button class="target-btn" data-target="tokyo">Tokyo</button>
+          <button class="target-btn" data-target="newyork">New York</button>
+          <button class="target-btn" data-target="sydney">Sydney</button>
+          <button class="target-btn" data-target="rio">Rio</button>
+        </div>
+
+        <div class="input-group">
+          <label>Puissance (arbitraire)</label>
+          <input type="range" class="power-slider" id="power-slider" min="1" max="100" value="65" />
+          <div class="power-value"><span id="power-value">65</span></div>
+        </div>
+
+        <div class="mini-row">
+          <div class="input-group">
+            <label>Latitude</label>
+            <input type="number" id="manual-lat" placeholder="Ex: 48.8566" step="0.0001" />
+          </div>
+          <div class="input-group">
+            <label>Longitude</label>
+            <input type="number" id="manual-lon" placeholder="Ex: 2.3522" step="0.0001" />
+          </div>
+        </div>
+
+        <button class="launch-button" id="launch-btn">Lancer (sandbox)</button>
+      </div>
+
+      <div class="control-section" id="ai-block">
+        <h3 class="section-title">Actions (France)</h3>
+
+        <div class="input-group">
+          <label>Cible (pays)</label>
+          <select id="country-target"></select>
+        </div>
+
+        <div class="mini-row">
+          <button class="btn primary" id="btn-fr-attack">Attaquer</button>
+          <button class="btn warn" id="btn-fr-build">Usine</button>
+        </div>
+        <div class="mini-row" style="margin-top:8px">
+          <button class="btn good" id="btn-fr-alliance">Alliance</button>
+          <button class="btn good" id="btn-fr-peace">Paix (60s)</button>
+        </div>
+        <div class="mini-row" style="margin-top:8px">
+          <button class="btn" id="btn-fr-conquer">Conquérir ruines</button>
+          <button class="btn" id="btn-clear">Reset monde</button>
+        </div>
+
+        <div style="margin-top:10px" class="hint">
+          France a un budget, des missiles et des usines; l’IA pilote les autres pays. Les scores indiquent km² détruits et pourcentage de destruction.
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3 class="section-title">Scores</h3>
+        <div style="overflow:auto;max-height:38vh">
+          <table id="scoreboard">
+            <thead>
+              <tr>
+                <th>Pays</th>
+                <th>$</th>
+                <th>M</th>
+                <th>Usines</th>
+                <th>km² détruits</th>
+                <th>% détruit</th>
+                <th>Diplomatie</th>
+              </tr>
+            </thead>
+            <tbody id="scorebody"></tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
+
+    <main id="globe-container">
+      <canvas id="canvas-3d"></canvas>
+    </main>
+
+    <footer id="status-bar">
+      <div class="status-item">
+        <div class="status-indicator" id="sys-dot"></div>
+        <span class="status-text" id="sys-text">SYSTÈME PRÊT</span>
+      </div>
+      <div class="status-item">
+        <span class="status-text">MISSILES (visuels):</span>
+        <span class="missile-count" id="missile-counter">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-text">IMPACTS (visuels):</span>
+        <span class="missile-count" id="impact-counter">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-text">TEMPS SIM:</span>
+        <span class="missile-count" id="sim-time">0</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    /**********************
+     * Données sandbox
+     **********************/
+    const targets = {
+      paris:   { lat: 48.8566, lon: 2.3522, name: 'Paris' },
+      london:  { lat: 51.5074, lon: -0.1278, name: 'Londres' },
+      moscow:  { lat: 55.7558, lon: 37.6173, name: 'Moscou' },
+      beijing: { lat: 39.9042, lon: 116.4074, name: 'Pékin' },
+      tokyo:   { lat: 35.6762, lon: 139.6503, name: 'Tokyo' },
+      newyork: { lat: 40.7128, lon: -74.0060, name: 'New York' },
+      sydney:  { lat: -33.8688, lon: 151.2093, name: 'Sydney' },
+      rio:     { lat: -22.9068, lon: -43.1729, name: 'Rio de Janeiro' }
+    };
+    let selectedTarget = null;
+
+    /**********************
+     * État global visuel
+     **********************/
+    let missiles = [];
+    let impacts = [];
+    let missileCounter = 0;
+    let impactCounter = 0;
+
+    /**********************
+     * Three.js setup
+     **********************/
+    const canvas = document.getElementById('canvas-3d');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    camera.position.set(0, 0, 3.2);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.enablePan = false;
+    controls.minDistance = 1.6;
+    controls.maxDistance = 6.0;
+    controls.rotateSpeed = 0.55;
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    // lights
+    scene.add(new THREE.AmbientLight(0x404040, 0.6));
+    const key = new THREE.DirectionalLight(0xffffff, 1.0);
+    key.position.set(2, 2, 3);
+    scene.add(key);
+    const rim = new THREE.PointLight(0x66ccff, 0.35, 20);
+    rim.position.set(-4, 1, -2);
+    scene.add(rim);
+
+    // world group
+    const world = new THREE.Group();
+    scene.add(world);
+
+    const textureLoader = new THREE.TextureLoader();
+    const earthGeometry = new THREE.SphereGeometry(1, 160, 160);
+
+    const earthMaterial = new THREE.MeshPhongMaterial({
+      map: textureLoader.load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/2_no_clouds_4k.jpg'),
+      bumpMap: textureLoader.load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/elev_bump_4k.jpg'),
+      bumpScale: 0.005,
+      specularMap: textureLoader.load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/water_4k.png'),
+      specular: new THREE.Color(0x333333),
+      shininess: 7
+    });
+
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    world.add(earth);
+
+    const clouds = new THREE.Mesh(
+      new THREE.SphereGeometry(1.012, 96, 96),
+      new THREE.MeshPhongMaterial({
+        map: textureLoader.load('https://raw.githubusercontent.com/turban/webgl-earth/master/images/fair_clouds_4k.png'),
+        transparent: true,
+        opacity: 0.42,
+        depthWrite: false
+      })
+    );
+    world.add(clouds);
+
+    // stars background (simple)
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 1600;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++){
+      const r = 40 + Math.random() * 120;
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      starPos[i*3+0] = r * Math.sin(ph) * Math.cos(th);
+      starPos[i*3+1] = r * Math.cos(ph);
+      starPos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x88aaff, size: 0.15, sizeAttenuation: true, transparent: true, opacity: 0.35 }));
+    scene.add(stars);
+
+    function resize(){
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    /**********************
+     * Utils lat/lon
+     **********************/
+    function latLonToVector3(lat, lon, radius = 1){
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
+      const x = -(radius * Math.sin(phi) * Math.cos(theta));
+      const z =  (radius * Math.sin(phi) * Math.sin(theta));
+      const y =  (radius * Math.cos(phi));
+      return new THREE.Vector3(x, y, z);
+    }
+
+    /**********************
+     * Textures procédurales
+     **********************/
+    function makeRadialTexture({ inner = 'rgba(255,255,255,1)', outer = 'rgba(255,255,255,0)', size = 128 }){
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(size/2, size/2, 2, size/2, size/2, size/2);
+      g.addColorStop(0, inner);
+      g.addColorStop(1, outer);
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,size,size);
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.needsUpdate = true;
+      return tex;
+    }
+    function makeNoiseAlphaTexture(size = 256){
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const img = ctx.createImageData(size,size);
+      for (let i=0;i<img.data.length;i+=4){
+        const v = Math.floor(Math.random()*255);
+        img.data[i+0]=v;
+        img.data[i+1]=v;
+        img.data[i+2]=v;
+        img.data[i+3]=v;
+      }
+      ctx.putImageData(img,0,0);
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2,2);
+      tex.needsUpdate = true;
+      return tex;
+    }
+
+    const spriteFire = makeRadialTexture({
+      inner:'rgba(255,200,120,1)',
+      outer:'rgba(255,60,0,0)',
+      size:128
+    });
+
+    const spriteSmoke = makeRadialTexture({
+      inner:'rgba(120,120,120,0.75)',
+      outer:'rgba(40,40,40,0)',
+      size:128
+    });
+
+    const scorchNoise = makeNoiseAlphaTexture(256);
+
+    /**********************
+     * Cratère: déformation + FX
+     **********************/
+    const craterFX = []; // {group, lavaMat, fireSys, smokeSys, startTime, duration}
+
+    // Lava shader (procédural, sans images externes)
+    function makeLavaMaterial(){
+      return new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          uTime: { value: 0 },
+          uIntensity: { value: 1.0 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main(){
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          uniform float uIntensity;
+
+          float hash(vec2 p){
+            return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+          }
+          float noise(vec2 p){
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            float a = hash(i);
+            float b = hash(i + vec2(1.0,0.0));
+            float c = hash(i + vec2(0.0,1.0));
+            float d = hash(i + vec2(1.0,1.0));
+            vec2 u = f*f*(3.0-2.0*f);
+            return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
+          }
+
+          void main(){
+            vec2 uv = vUv * 6.0;
+            float t = uTime * 0.6;
+            float n = 0.0;
+            n += noise(uv + vec2(0.0, t));
+            n += 0.5 * noise(uv*2.0 + vec2(t*0.7, -t*0.4));
+            n += 0.25 * noise(uv*4.0 + vec2(-t*0.2, t*0.9));
+            n /= (1.0 + 0.5 + 0.25);
+
+            // veines
+            float veins = smoothstep(0.62, 0.93, n);
+            float core = smoothstep(0.0, 0.7, 1.0 - length(vUv - 0.5) * 1.6);
+
+            vec3 col = vec3(0.2, 0.0, 0.0);
+            col = mix(col, vec3(0.85, 0.18, 0.02), core);
+            col = mix(col, vec3(1.0, 0.75, 0.15), veins * core);
+
+            float a = (0.25 + 0.85 * core) * (0.35 + 0.65 * veins);
+            a *= uIntensity;
+            gl_FragColor = vec4(col, a);
+          }
+        `
+      });
+    }
+
+    function alignToNormal(mesh, normal){
+      // Oriente le disque pour qu'il "colle" à la surface
+      const q = new THREE.Quaternion();
+      q.setFromUnitVectors(new THREE.Vector3(0,0,1), normal.clone().normalize());
+      mesh.quaternion.copy(q);
+    }
+
+    function deformCrater(impactPos, power){
+      const posAttr = earth.geometry.attributes.position;
+      const v = new THREE.Vector3();
+
+      const p = Math.max(1, Math.min(100, power));
+      const craterRadius = 0.045 + (p/100) * 0.26;  // plus grand
+      const craterDepth  = 0.020 + (p/100) * 0.14;  // plus profond
+
+      // zone rim (bourrelet)
+      const rimInner = craterRadius * 0.95;
+      const rimOuter = craterRadius * 1.45;
+      const rimHeight = craterDepth * 0.45;
+
+      // irrégularité
+      const noiseSeed = Math.random() * 999;
+
+      for (let i = 0; i < posAttr.count; i++){
+        v.fromBufferAttribute(posAttr, i);
+
+        // distance en "surface" approx (sur la sphère)
+        const d = v.distanceTo(impactPos);
+
+        if (d < craterRadius){
+          const x = 1.0 - (d / craterRadius);
+          const bowl = -craterDepth * (x*x); // cuvette
+          const irregular = (Math.sin((v.x+noiseSeed)*20.0) + Math.sin((v.y-noiseSeed)*24.0) + Math.sin((v.z+noiseSeed)*18.0)) / 3.0;
+          const jitter = 1.0 + 0.18 * irregular * x;
+          const delta = bowl * jitter;
+
+          const dir = v.clone().normalize();
+          v.addScaledVector(dir, delta);
+          posAttr.setXYZ(i, v.x, v.y, v.z);
+        } else if (d >= rimInner && d <= rimOuter){
+          const t = (d - rimInner) / (rimOuter - rimInner);
+          const bump = Math.sin((1.0 - t) * Math.PI) * rimHeight; // rim en cloche
+          const irregular = (Math.sin((v.x-noiseSeed)*18.0) + Math.sin((v.z+noiseSeed)*21.0)) / 2.0;
+          const jitter = 1.0 + 0.20 * irregular;
+          const delta = bump * jitter;
+
+          const dir = v.clone().normalize();
+          v.addScaledVector(dir, delta);
+          posAttr.setXYZ(i, v.x, v.y, v.z);
+        }
+      }
+      posAttr.needsUpdate = true;
+      earth.geometry.computeVertexNormals();
+    }
+
+    class ParticlePlume{
+      constructor({ origin, normal, count, speedMin, speedMax, spread, lifeMin, lifeMax, material }){
+        this.origin = origin.clone();
+        this.normal = normal.clone().normalize();
+        this.count = count;
+
+        this.geom = new THREE.BufferGeometry();
+        this.pos = new Float32Array(count * 3);
+        this.vel = new Float32Array(count * 3);
+        this.life = new Float32Array(count);
+        this.lifeMax = new Float32Array(count);
+
+        this.points = new THREE.Points(this.geom, material);
+        this.geom.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
+        this.resetAll(speedMin, speedMax, spread, lifeMin, lifeMax);
+      }
+      resetAll(speedMin, speedMax, spread, lifeMin, lifeMax){
+        for (let i=0;i<this.count;i++){
+          this.resetOne(i, speedMin, speedMax, spread, lifeMin, lifeMax);
+        }
+        this.geom.attributes.position.needsUpdate = true;
+      }
+      resetOne(i, speedMin, speedMax, spread, lifeMin, lifeMax){
+        const base = i*3;
+        // départ: un peu au-dessus de la surface
+        this.pos[base+0] = this.origin.x;
+        this.pos[base+1] = this.origin.y;
+        this.pos[base+2] = this.origin.z;
+
+        // direction: normal + bruit
+        const rand = new THREE.Vector3(
+          (Math.random()*2-1),
+          (Math.random()*2-1),
+          (Math.random()*2-1)
+        ).normalize();
+
+        const dir = this.normal.clone().addScaledVector(rand, spread).normalize();
+        const s = speedMin + Math.random()*(speedMax-speedMin);
+
+        this.vel[base+0] = dir.x * s;
+        this.vel[base+1] = dir.y * s;
+        this.vel[base+2] = dir.z * s;
+
+        this.life[i] = 0;
+        this.lifeMax[i] = lifeMin + Math.random()*(lifeMax-lifeMin);
+      }
+      update(dt, damping, gravity){
+        const g = gravity || 0;
+        for (let i=0;i<this.count;i++){
+          const base = i*3;
+          this.life[i] += dt;
+
+          if (this.life[i] >= this.lifeMax[i]){
+            // respawn (plume continue mais diminue via durée globale)
+            // on respawn sans toucher aux matériaux
+            this.life[i] = 0;
+            this.pos[base+0] = this.origin.x;
+            this.pos[base+1] = this.origin.y;
+            this.pos[base+2] = this.origin.z;
+            continue;
+          }
+
+          // vel damping
+          this.vel[base+0] *= damping;
+          this.vel[base+1] *= damping;
+          this.vel[base+2] *= damping;
+
+          // gravity along -normal (fumée retombe légèrement)
+          this.vel[base+0] += -this.normal.x * g * dt;
+          this.vel[base+1] += -this.normal.y * g * dt;
+          this.vel[base+2] += -this.normal.z * g * dt;
+
+          this.pos[base+0] += this.vel[base+0] * dt;
+          this.pos[base+1] += this.vel[base+1] * dt;
+          this.pos[base+2] += this.vel[base+2] * dt;
+        }
+        this.geom.attributes.position.needsUpdate = true;
+      }
+    }
+
+    function createCraterFX(impactPos, power){
+      const p = Math.max(1, Math.min(100, power));
+      const normal = impactPos.clone().normalize();
+      const group = new THREE.Group();
+      group.position.copy(impactPos);
+
+      // Scorch disc (brûlure)
+      const scorchRadius = 0.05 + (p/100)*0.30;
+      const scorch = new THREE.Mesh(
+        new THREE.CircleGeometry(scorchRadius, 48),
+        new THREE.MeshBasicMaterial({
+          color: 0x120b0b,
+          transparent: true,
+          opacity: 0.42,
+          map: scorchNoise,
+          alphaMap: scorchNoise,
+          blending: THREE.MultiplyBlending,
+          depthWrite: false
+        })
+      );
+      alignToNormal(scorch, normal);
+      scorch.position.copy(normal.clone().multiplyScalar(0.002));
+      group.add(scorch);
+
+      // Lava disc (centre)
+      const lavaRadius = 0.02 + (p/100)*0.16;
+      const lavaMat = makeLavaMaterial();
+      lavaMat.uniforms.uIntensity.value = 0.65 + (p/100)*0.85;
+
+      const lava = new THREE.Mesh(
+        new THREE.CircleGeometry(lavaRadius, 64),
+        lavaMat
+      );
+      alignToNormal(lava, normal);
+      lava.position.copy(normal.clone().multiplyScalar(0.003));
+      group.add(lava);
+
+      // Ember glow ring (halo)
+      const glow = new THREE.Mesh(
+        new THREE.RingGeometry(lavaRadius*0.9, lavaRadius*1.9, 64),
+        new THREE.MeshBasicMaterial({
+          color: 0xff3b00,
+          transparent:true,
+          opacity:0.30,
+          blending:THREE.AdditiveBlending,
+          depthWrite:false
+        })
+      );
+      alignToNormal(glow, normal);
+      glow.position.copy(normal.clone().multiplyScalar(0.004));
+      group.add(glow);
+
+      // Fire particles
+      const fireMat = new THREE.PointsMaterial({
+        map: spriteFire,
+        transparent: true,
+        opacity: 0.95,
+        size: 0.06 + (p/100)*0.10,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      const fireSys = new ParticlePlume({
+        origin: normal.clone().multiplyScalar(1.01),
+        normal,
+        count: 260,
+        speedMin: 0.06,
+        speedMax: 0.18 + (p/100)*0.18,
+        spread: 0.55,
+        lifeMin: 0.25,
+        lifeMax: 0.95,
+        material: fireMat
+      });
+      group.add(fireSys.points);
+
+      // Smoke particles
+      const smokeMat = new THREE.PointsMaterial({
+        map: spriteSmoke,
+        transparent: true,
+        opacity: 0.6,
+        size: 0.10 + (p/100)*0.18,
+        depthWrite: false,
+        blending: THREE.NormalBlending
+      });
+      const smokeSys = new ParticlePlume({
+        origin: normal.clone().multiplyScalar(1.012),
+        normal,
+        count: 220,
+        speedMin: 0.03,
+        speedMax: 0.11 + (p/100)*0.10,
+        spread: 0.9,
+        lifeMin: 0.6,
+        lifeMax: 1.9,
+        material: smokeMat
+      });
+      group.add(smokeSys.points);
+
+      world.add(group);
+      craterFX.push({
+        group,
+        lavaMat,
+        fireSys,
+        smokeSys,
+        startTime: performance.now(),
+        duration: 28000 + (p/100)*22000 // feu/fumée persiste
+      });
+    }
+
+    /**********************
+     * Missiles + impacts
+     **********************/
+    function createMissile(startLat, startLon, endLat, endLon, power, color = 0xffff00){
+      const start = latLonToVector3(startLat, startLon, 1.01);
+      const end   = latLonToVector3(endLat, endLon, 1.01);
+
+      const distance = start.distanceTo(end);
+      const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+
+      // hauteur d'arc: augmente avec distance
+      const height = 1.35 + distance * 0.55;
+      mid.normalize().multiplyScalar(height);
+
+      const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+
+      // trail
+      const pts = curve.getPoints(70);
+      const trailGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      const trailMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65 });
+      const trail = new THREE.Line(trailGeo, trailMat);
+      world.add(trail);
+
+      // missile body
+      const missile = new THREE.Mesh(
+        new THREE.SphereGeometry(0.017, 10, 10),
+        new THREE.MeshBasicMaterial({ color })
+      );
+      world.add(missile);
+
+      const missileLight = new THREE.PointLight(color, 1.7, 0.65);
+      missile.add(missileLight);
+
+      missiles.push({
+        object: missile,
+        trail,
+        curve,
+        progress: 0,
+        speed: 0.20 / (180 + distance*120), // vitesse ajustée
+        target: end.clone(),
+        power,
+        color
+      });
+
+      missileCounter++;
+      document.getElementById('missile-counter').textContent = missileCounter;
+    }
+
+    function createExplosion(surfacePos, power, color = 0xff5a2b){
+      const p = Math.max(1, Math.min(100, power));
+
+      const radius = 0.03 + (p/100) * 0.13;
+      const explosion = new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 36, 36),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      explosion.position.copy(surfacePos);
+      world.add(explosion);
+
+      const light = new THREE.PointLight(0xffaa55, 8 + (p/100)*10, 2.6);
+      light.position.copy(surfacePos);
+      world.add(light);
+
+      // shock rings (3)
+      const ringMats = [
+        new THREE.MeshBasicMaterial({ color: 0xffbb66, transparent:true, opacity:0.55, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending }),
+        new THREE.MeshBasicMaterial({ color: 0xff8844, transparent:true, opacity:0.35, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending }),
+        new THREE.MeshBasicMaterial({ color: 0xff5533, transparent:true, opacity:0.25, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending })
+      ];
+      const rings = ringMats.map((m, idx) => {
+        const inner = radius * (0.7 + idx*0.35);
+        const outer = radius * (1.6 + idx*0.55);
+        const mesh = new THREE.Mesh(new THREE.RingGeometry(inner, outer, 64), m);
+        mesh.position.copy(surfacePos);
+        world.add(mesh);
+        return mesh;
+      });
+
+      // crater deformation + FX (lava/feu)
+      deformCrater(surfacePos.clone().normalize().multiplyScalar(1.0), p);
+      createCraterFX(surfacePos.clone().normalize().multiplyScalar(1.0), p);
+
+      impacts.push({
+        explosion,
+        light,
+        rings,
+        startTime: performance.now(),
+        duration: 5200,
+        baseRadius: radius
+      });
+
+      impactCounter++;
+      document.getElementById('impact-counter').textContent = impactCounter;
+    }
+
+    /**********************
+     * Mode IA (stratégie)
+     **********************/
+    // Valeurs purement "jeu" (pas des chiffres réels)
+    const COUNTRY = {
+      USA: { name:'USA',    color:0xff4d4d, capital:{lat:38.9072, lon:-77.0369}, territory:900, money:12000, factories:3, missiles:2 },
+      RUS: { name:'Russie', color:0xffa500, capital:{lat:55.7558, lon: 37.6173}, territory:1000, money:11000, factories:3, missiles:2 },
+      CHN: { name:'Chine',  color:0xfff200, capital:{lat:39.9042, lon:116.4074}, territory:950, money:10500, factories:3, missiles:2 },
+      FRA: { name:'France', color:0x2b6cff, capital:{lat:48.8566, lon: 2.3522}, territory:350, money:9000, factories:2, missiles:1 },
+      GBR: { name:'UK',     color:0x9f5cff, capital:{lat:51.5074, lon:-0.1278}, territory:260, money:8500, factories:2, missiles:1 },
+      IND: { name:'Inde',   color:0x00ffa8, capital:{lat:28.6139, lon: 77.2090}, territory:800, money:9000, factories:2, missiles:1 },
+      ISR: { name:'Israël', color:0x66ccff, capital:{lat:31.7683, lon: 35.2137}, territory:90,  money:6500, factories:1, missiles:1 },
+      PAK: { name:'Pakistan', color:0x00ff00, capital:{lat:33.6844, lon: 73.0479}, territory:220, money:6800, factories:1, missiles:1 }
+    };
+
+    let countries = {};
+    function resetCountries(){
+      countries = {};
+      Object.keys(COUNTRY).forEach(code => {
+        const base = COUNTRY[code];
+        countries[code] = {
+          code,
+          name: base.name,
+          color: base.color,
+          capital: { ...base.capital },
+          territoryKm2: base.territory * 1000,      // "jeu"
+          destroyedKm2: 0,
+          money: base.money,
+          factories: base.factories,
+          missiles: base.missiles,
+          missileProg: 0,
+          alive: true,
+          alliances: new Set(),
+          peace: new Map(), // otherCode -> expiresSimTime
+          lastActionAt: 0
+        };
+      });
+
+      // alliances initiales légères (pour rendre la sim moins chaotique)
+      makePeace('FRA','GBR', 80);
+      makePeace('USA','GBR', 120);
+      updateCountryTargetSelect();
+    }
+
+    const ECON = {
+      incomePerFactoryPerSec: 45,
+      missilePerFactoryPerSec: 0.012,
+      buildFactoryCost: 2600,
+      conquerCost: 4200,
+      peaceCost: 900,
+      allianceCost: 1400
+    };
+
+    let simRunning = false;
+    let simTime = 0; // secondes "jeu"
+    let lastTick = performance.now();
+
+    function pairKey(a,b){ return a < b ? a+'_'+b : b+'_'+a; }
+
+    function makeAlliance(a,b){
+      if (!countries[a] || !countries[b]) return;
+      countries[a].alliances.add(b);
+      countries[b].alliances.add(a);
+      countries[a].peace.delete(b);
+      countries[b].peace.delete(a);
+    }
+    function makePeace(a,b, durationSec){
+      if (!countries[a] || !countries[b]) return;
+      const exp = simTime + durationSec;
+      countries[a].peace.set(b, exp);
+      countries[b].peace.set(a, exp);
+    }
+    function isPeace(a,b){
+      const A = countries[a], B = countries[b];
+      if (!A || !B) return false;
+      const expA = A.peace.get(b);
+      const expB = B.peace.get(a);
+      return (expA && expA > simTime) || (expB && expB > simTime);
+    }
+    function areAllied(a,b){
+      const A = countries[a], B = countries[b];
+      if (!A || !B) return false;
+      return A.alliances.has(b) && B.alliances.has(a);
+    }
+
+    function aliveCodes(){
+      return Object.keys(countries).filter(c => countries[c].alive);
+    }
+
+    function applyDamage(targetCode, power){
+      const T = countries[targetCode];
+      if (!T || !T.alive) return;
+
+      // surface "détruite" en km² (jeu)
+      const p = Math.max(1, Math.min(100, power));
+      const destroyed = Math.round(1200 + (p*p) * 6.5); // assez sensible à la puissance
+      T.destroyedKm2 = Math.min(T.territoryKm2, T.destroyedKm2 + destroyed);
+
+      if (T.destroyedKm2 >= T.territoryKm2){
+        T.alive = false;
+      }
+    }
+
+    function aiChooseTarget(attackerCode){
+      const A = countries[attackerCode];
+      const candidates = aliveCodes().filter(code => code !== attackerCode && !areAllied(attackerCode, code) && !isPeace(attackerCode, code));
+      if (!candidates.length) return null;
+
+      // pondération: viser plus souvent les pays forts + ennemis récents
+      candidates.sort((x,y) => {
+        const X = countries[x], Y = countries[y];
+        const sx = (X.missiles + X.factories*1.2) - (X.destroyedKm2 / X.territoryKm2) * 3;
+        const sy = (Y.missiles + Y.factories*1.2) - (Y.destroyedKm2 / Y.territoryKm2) * 3;
+        return sy - sx;
+      });
+
+      // 70% sur top 3, sinon random
+      const top = candidates.slice(0, Math.min(3, candidates.length));
+      if (Math.random() < 0.7) return top[Math.floor(Math.random()*top.length)];
+      return candidates[Math.floor(Math.random()*candidates.length)];
+    }
+
+    function aiTickCountry(code){
+      const C = countries[code];
+      if (!C.alive) return;
+
+      // économie
+      C.money += C.factories * ECON.incomePerFactoryPerSec;
+      C.missileProg += C.factories * ECON.missilePerFactoryPerSec;
+      if (C.missileProg >= 1){
+        const add = Math.floor(C.missileProg);
+        C.missiles += add;
+        C.missileProg -= add;
+      }
+
+      // nettoyage paix expirée
+      for (const [other, exp] of C.peace.entries()){
+        if (exp <= simTime) C.peace.delete(other);
+      }
+
+      // actions IA toutes ~3-7s
+      if (simTime - C.lastActionAt < 3 + Math.random()*4) return;
+      C.lastActionAt = simTime;
+
+      const alive = aliveCodes();
+      if (alive.length <= 1) return;
+
+      // casse alliance si l'autre est mort
+      for (const ally of Array.from(C.alliances)){
+        if (!countries[ally] || !countries[ally].alive){
+          C.alliances.delete(ally);
+        }
+      }
+
+      // heuristiques simples
+      const fracDestroyed = C.destroyedKm2 / C.territoryKm2;
+      const threatened = fracDestroyed > 0.35;
+
+      // 1) tenter paix si menacé
+      if (threatened && C.money > ECON.peaceCost && Math.random() < 0.35){
+        const other = aiChooseTarget(code); // même filtre "ennemis" pour proposer paix à un adversaire
+        if (other){
+          C.money -= ECON.peaceCost;
+          makePeace(code, other, 70 + Math.floor(Math.random()*80));
+          return;
+        }
+      }
+
+      // 2) alliance opportuniste
+      if (C.money > ECON.allianceCost && Math.random() < 0.18){
+        const options = alive.filter(o => o !== code && !areAllied(code,o));
+        if (options.length){
+          const o = options[Math.floor(Math.random()*options.length)];
+          // évite alliance si déjà en paix courte
+          if (!isPeace(code,o)){
+            C.money -= ECON.allianceCost;
+            makeAlliance(code,o);
+            return;
+          }
+        }
+      }
+
+      // 3) construire usine si économie ok
+      const maxFactories = Math.max(1, Math.floor((C.territoryKm2 - C.destroyedKm2) / 90000)) + 1;
+      if (C.factories < maxFactories && C.money >= ECON.buildFactoryCost && Math.random() < 0.45){
+        C.money -= ECON.buildFactoryCost;
+        C.factories += 1;
+        return;
+      }
+
+      // 4) conquérir des ruines (acheter du "potentiel")
+      if (C.money >= ECON.conquerCost && Math.random() < 0.22){
+        const victims = alive.filter(o => o !== code && countries[o].destroyedKm2 > 1500);
+        if (victims.length){
+          const v = victims[Math.floor(Math.random()*victims.length)];
+          // mécanique simplifiée: on "prend" une part de ruines de v => diminue son territoire utile
+          const chunk = Math.min(9000, Math.floor(countries[v].destroyedKm2 * 0.18));
+          if (chunk > 0){
+            C.money -= ECON.conquerCost;
+            countries[v].destroyedKm2 = Math.max(0, countries[v].destroyedKm2 - chunk);
+            C.territoryKm2 += Math.floor(chunk * 0.35); // gain partiel (jeu)
+            return;
+          }
+        }
+      }
+
+      // 5) attaquer si missiles
+      if (C.missiles > 0 && Math.random() < 0.55){
+        const target = aiChooseTarget(code);
+        if (!target) return;
+
+        C.missiles -= 1;
+
+        const power = 35 + Math.floor(Math.random() * 66); // 35..100
+        const A = C.capital, T = countries[target].capital;
+
+        createMissile(A.lat, A.lon, T.lat, T.lon, power, C.color);
+
+        // On applique les dégâts côté "jeu" au moment de l'impact visuel (callback),
+        // mais ici on doit lier l'attaque à un missile.
+        // => on tag le dernier missile avec cible pays
+        missiles[missiles.length - 1].aiTarget = target;
+        missiles[missiles.length - 1].aiPower = power;
+        missiles[missiles.length - 1].aiAttacker = code;
+      }
+    }
+
+    function simTick(){
+      if (!simRunning) return;
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastTick) / 1000); // dt rendu
+      lastTick = now;
+
+      // tick logique IA 1 fois/seconde (accum)
+      simAccum += dt;
+      while (simAccum >= 1.0){
+        simAccum -= 1.0;
+        simTime += 1;
+        document.getElementById('sim-time').textContent = String(simTime);
+
+        // tick toutes les nations
+        for (const code of Object.keys(countries)){
+          aiTickCountry(code);
+        }
+        updateScoreboard();
+
+        // condition victoire
+        const alive = aliveCodes();
+        if (alive.length <= 1){
+          simRunning = false;
+          setSystemText(alive.length === 1 ? ('FIN: ' + countries[alive[0]].name + ' survit') : 'FIN: plus aucun survivant', false);
+        }
+      }
+    }
+    let simAccum = 0;
+
+    /**********************
+     * UI / scoreboard
+     **********************/
+    const simModeSelect = document.getElementById('sim-mode');
+    const sandboxBlock = document.getElementById('sandbox-block');
+    const aiBlock = document.getElementById('ai-block');
+
+    function setSystemText(txt, ok){
+      document.getElementById('sys-text').textContent = txt;
+      document.getElementById('sys-dot').style.background = ok ? 'var(--color-success)' : 'var(--color-danger)';
+    }
+
+    function updateBlocks(){
+      const mode = simModeSelect.value;
+      const sandbox = (mode === 'sandbox');
+      sandboxBlock.style.display = sandbox ? 'block' : 'none';
+      aiBlock.style.display = sandbox ? 'none' : 'block';
+    }
+    simModeSelect.addEventListener('change', () => {
+      updateBlocks();
+      updateCountryTargetSelect();
+    });
+    updateBlocks();
+
+    function updateCountryTargetSelect(){
+      const sel = document.getElementById('country-target');
+      sel.innerHTML = '';
+
+      Object.keys(countries).forEach(code => {
+        if (code === 'FRA') return;
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = countries[code].name + (countries[code].alive ? '' : ' (Éliminé)');
+        sel.appendChild(opt);
+      });
+    }
+
+    function formatDiplomacy(code){
+      const C = countries[code];
+      const parts = [];
+
+      for (const a of C.alliances){
+        if (countries[a] && countries[a].alive){
+          parts.push('<span class="tag alliance">🤝 ' + countries[a].code + '</span>');
+        }
+      }
+      for (const [p, exp] of C.peace.entries()){
+        if (countries[p] && countries[p].alive && exp > simTime){
+          parts.push('<span class="tag peace">🕊 ' + countries[p].code + ' ' + (exp - simTime) + 's</span>');
+        }
+      }
+      if (!C.alive) parts.push('<span class="tag dead">ÉLIMINÉ</span>');
+      return parts.join(' ');
+    }
+
+    function updateScoreboard(){
+      const tbody = document.getElementById('scorebody');
+      const rows = [];
+
+      const list = Object.keys(countries).map(code => countries[code]);
+      list.sort((a,b) => {
+        // vivants d'abord, puis % détruit croissant
+        if (a.alive !== b.alive) return a.alive ? -1 : 1;
+        const pa = a.destroyedKm2 / a.territoryKm2;
+        const pb = b.destroyedKm2 / b.territoryKm2;
+        return pa - pb;
+      });
+
+      for (const C of list){
+        const pct = Math.min(100, Math.round((C.destroyedKm2 / C.territoryKm2) * 100));
+        rows.push(`
+          <tr>
+            <td style="color:#fff">
+              <span class="tag" style="border-color:rgba(255,255,255,.2);color:#fff">${C.code}</span>
+              ${C.name}
+            </td>
+            <td>${Math.floor(C.money)}</td>
+            <td>${C.missiles}</td>
+            <td>${C.factories}</td>
+            <td>${Math.floor(C.destroyedKm2)}</td>
+            <td>${pct}%</td>
+            <td>${formatDiplomacy(C.code)}</td>
+          </tr>
+        `);
+      }
+      tbody.innerHTML = rows.join('');
+
+      updateCountryTargetSelect();
+    }
+
+    /**********************
+     * Boutons
+     **********************/
+    document.getElementById('btn-start').addEventListener('click', () => {
+      if (simModeSelect.value === 'sandbox'){
+        simRunning = false;
+        setSystemText('Sandbox actif (IA off)', true);
+        return;
+      }
+      simRunning = true;
+      lastTick = performance.now();
+      setSystemText('Simulation IA en cours', true);
+    });
+
+    document.getElementById('btn-stop').addEventListener('click', () => {
+      simRunning = false;
+      setSystemText('Simulation stoppée', false);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      // reset visuels
+      missiles.forEach(m => { world.remove(m.object); world.remove(m.trail); });
+      impacts.forEach(i => {
+        world.remove(i.explosion);
+        world.remove(i.light);
+        i.rings.forEach(r => world.remove(r));
+      });
+      craterFX.forEach(fx => world.remove(fx.group));
+      missiles = [];
+      impacts = [];
+      craterFX.length = 0;
+      missileCounter = 0;
+      impactCounter = 0;
+      document.getElementById('missile-counter').textContent = missileCounter;
+      document.getElementById('impact-counter').textContent = impactCounter;
+
+      // reset terre (géométrie)
+      earth.geometry.dispose();
+      earth.geometry = new THREE.SphereGeometry(1, 160, 160);
+
+      // reset pays
+      simTime = 0;
+      simAccum = 0;
+      resetCountries();
+      updateScoreboard();
+      setSystemText('Reset effectué', true);
+    });
+
+    // France actions
+    function requireFrancePlayable(){
+      const mode = simModeSelect.value;
+      return mode === 'ai_france';
+    }
+
+    document.getElementById('btn-fr-build').addEventListener('click', () => {
+      if (!requireFrancePlayable()) return;
+      const F = countries.FRA;
+      if (!F.alive) return;
+
+      if (F.money < ECON.buildFactoryCost) return;
+      F.money -= ECON.buildFactoryCost;
+      F.factories += 1;
+      updateScoreboard();
+    });
+
+    document.getElementById('btn-fr-alliance').addEventListener('click', () => {
+      if (!requireFrancePlayable()) return;
+      const F = countries.FRA;
+      if (!F.alive) return;
+
+      const t = document.getElementById('country-target').value;
+      if (!countries[t] || !countries[t].alive) return;
+      if (F.money < ECON.allianceCost) return;
+
+      F.money -= ECON.allianceCost;
+      makeAlliance('FRA', t);
+      updateScoreboard();
+    });
+
+    document.getElementById('btn-fr-peace').addEventListener('click', () => {
+      if (!requireFrancePlayable()) return;
+      const F = countries.FRA;
+      if (!F.alive) return;
+
+      const t = document.getElementById('country-target').value;
+      if (!countries[t] || !countries[t].alive) return;
+      if (F.money < ECON.peaceCost) return;
+
+      F.money -= ECON.peaceCost;
+      makePeace('FRA', t, 60);
+      updateScoreboard();
+    });
+
+    document.getElementById('btn-fr-conquer').addEventListener('click', () => {
+      if (!requireFrancePlayable()) return;
+      const F = countries.FRA;
+      if (!F.alive) return;
+      if (F.money < ECON.conquerCost) return;
+
+      const t = document.getElementById('country-target').value;
+      const T = countries[t];
+      if (!T || !T.alive) return;
+
+      const chunk = Math.min(12000, Math.floor(T.destroyedKm2 * 0.25));
+      if (chunk <= 0) return;
+
+      F.money -= ECON.conquerCost;
+      T.destroyedKm2 = Math.max(0, T.destroyedKm2 - chunk);
+      F.territoryKm2 += Math.floor(chunk * 0.45);
+      updateScoreboard();
+    });
+
+    document.getElementById('btn-fr-attack').addEventListener('click', () => {
+      if (!requireFrancePlayable()) return;
+      const F = countries.FRA;
+      if (!F.alive) return;
+      if (F.missiles <= 0) return;
+
+      const t = document.getElementById('country-target').value;
+      const T = countries[t];
+      if (!T || !T.alive) return;
+      if (areAllied('FRA', t) || isPeace('FRA', t)) return;
+
+      F.missiles -= 1;
+      const power = 45 + Math.floor(Math.random() * 56);
+      createMissile(F.capital.lat, F.capital.lon, T.capital.lat, T.capital.lon, power, F.color);
+      missiles[missiles.length - 1].aiTarget = t;
+      missiles[missiles.length - 1].aiPower = power;
+      missiles[missiles.length - 1].aiAttacker = 'FRA';
+      updateScoreboard();
+    });
+
+    // Sandbox UI
+    document.querySelectorAll('.target-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTarget = btn.dataset.target;
+      });
+    });
+
+    const powerSlider = document.getElementById('power-slider');
+    const powerValue = document.getElementById('power-value');
+    powerSlider.addEventListener('input', () => powerValue.textContent = powerSlider.value);
+
+    document.getElementById('launch-btn').addEventListener('click', () => {
+      if (simModeSelect.value !== 'sandbox') return;
+
+      const manualLat = parseFloat(document.getElementById('manual-lat').value);
+      const manualLon = parseFloat(document.getElementById('manual-lon').value);
+      const power = parseInt(powerSlider.value, 10);
+
+      let targetLat, targetLon;
+      if (!isNaN(manualLat) && !isNaN(manualLon)){
+        targetLat = manualLat;
+        targetLon = manualLon;
+      } else if (selectedTarget){
+        targetLat = targets[selectedTarget].lat;
+        targetLon = targets[selectedTarget].lon;
+      } else {
+        alert('Sélectionne une cible ou entre des coordonnées.');
+        return;
+      }
+
+      // sites de tir "jeu"
+      const launchSites = [
+        { lat: 37.0902, lon: -95.7129 },
+        { lat: 55.7558, lon: 37.6173 },
+        { lat: 39.9042, lon: 116.4074 },
+        { lat: 28.6139, lon: 77.2090 }
+      ];
+      const L = launchSites[Math.floor(Math.random() * launchSites.length)];
+      createMissile(L.lat, L.lon, targetLat, targetLon, power, 0xffff00);
+    });
+
+    /**********************
+     * Horloge + init
+     **********************/
+    function updateClock(){
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    resetCountries();
+    updateScoreboard();
+
+    /**********************
+     * Animate
+     **********************/
+    let prev = performance.now();
+
+    function animate(){
+      requestAnimationFrame(animate);
+
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - prev)/1000);
+      prev = now;
+
+      controls.update();
+      stars.rotation.y += dt * 0.004;
+
+      // nuages tournent doucement (Terre reste fixe => impacts stables)
+      clouds.rotation.y += dt * 0.03;
+
+      // sim tick
+      simTick();
+
+      // missiles update (IMPORTANT: monde ne tourne pas => trajectoire/impact cohérents)
+      for (let i = missiles.length - 1; i >= 0; i--){
+        const m = missiles[i];
+        m.progress += m.speed * (dt * 60);
+
+        if (m.progress <= 1){
+          const pos = m.curve.getPoint(m.progress);
+          m.object.position.copy(pos);
+          // légère pulsation
+          m.object.scale.setScalar(1 + Math.sin(now*0.02)*0.08);
+          // trail fade léger
+          if (m.trail && m.trail.material) m.trail.material.opacity = 0.25 + 0.4*(1 - m.progress);
+        } else {
+          // impact
+          world.remove(m.object);
+          world.remove(m.trail);
+
+          const surface = m.target.clone().normalize().multiplyScalar(1.002);
+          createExplosion(surface, m.power, 0xff6a2d);
+
+          // dégâts IA au moment exact de l'impact visuel
+          if (m.aiTarget){
+            applyDamage(m.aiTarget, m.aiPower || m.power);
+            updateScoreboard();
+          }
+
+          missiles.splice(i, 1);
+        }
+      }
+
+      // impacts update (billboard rings vers caméra)
+      for (let i = impacts.length - 1; i >= 0; i--){
+        const imp = impacts[i];
+        const t = (now - imp.startTime) / imp.duration;
+
+        if (t < 1){
+          const scale = 1 + t * (3.6);
+          imp.explosion.scale.setScalar(scale);
+          imp.explosion.material.opacity = 0.9 * (1 - t);
+
+          imp.light.intensity = (10 * (1 - t)) + 2.0 * Math.sin(now*0.02) * (1 - t);
+
+          imp.rings.forEach((r, idx) => {
+            r.lookAt(camera.position);
+            const s = 1 + t * (5.0 + idx*1.2);
+            r.scale.setScalar(s);
+            r.material.opacity = (0.55 - idx*0.12) * (1 - t);
+          });
+        } else {
+          world.remove(imp.explosion);
+          world.remove(imp.light);
+          imp.rings.forEach(r => world.remove(r));
+          impacts.splice(i, 1);
+        }
+      }
+
+      // crater FX update
+      for (let i = craterFX.length - 1; i >= 0; i--){
+        const fx = craterFX[i];
+        const age = now - fx.startTime;
+
+        fx.lavaMat.uniforms.uTime.value = now / 1000;
+
+        // déclin progressif feu/fumée
+        const k = Math.max(0, 1 - age / fx.duration);
+        fx.fireSys.points.material.opacity = 0.95 * Math.min(1, k*1.2);
+        fx.smokeSys.points.material.opacity = 0.60 * Math.min(1, k*1.1);
+
+        fx.fireSys.update(dt, 0.985, 0.0);
+        fx.smokeSys.update(dt, 0.992, 0.08);
+
+        if (age > fx.duration){
+          world.remove(fx.group);
+          craterFX.splice(i, 1);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
