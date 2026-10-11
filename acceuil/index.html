@@ -1,11 +1,3 @@
----
-title: "Titre de ta page"
-layout: default
-category: "education"
-# ou plusieurs :
-# categories: ["education", "perso"]
----
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -28,7 +20,7 @@ category: "education"
   <!-- Vérification du serveur Flask -->
   <script>
     // Vérifier si le serveur Flask est actif
-    fetch('https://devmra.pythonanywhere.com/alive')
+    fetch('/alive')
       .then(response => response.text())
       .then(data => {
         if (data.trim() !== 'ALIVE') {
@@ -224,7 +216,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <img src="GEEKSOFT.png" class="logo" alt="GeekSoft">
     <div class="top-title">GeekSoft - Accueil</div>
     <div class="top-links">
-      <a href="https://www.geeksoft.online/contact">Contact</a>
+      <a href="/nsi">Projets NSI</a>
+      <a href="/contact">Contact</a>
       <a href="/devis">Devis</a>
     </div>
   </header>

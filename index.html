@@ -1,15 +1,3 @@
----
-layout: default
-category: "education"
-# ou plusieurs :
-# categories: ["education", "perso"]
----
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -121,7 +109,7 @@ category: "education"
   </div>
   <script>
     // Async check server
-    fetch("https://devmra.pythonanywhere.com/alive")
+    fetch("/alive")
       .then(res => res.text())
       .then(txt => {
         if(txt.trim() === "ALIVE") {

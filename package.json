@@ -1,0 +1,16 @@
+{
+  "name": "geeksoft",
+  "version": "1.0.0",
+  "description": "GeekSoft Discord bot development platform, client dev tools, and interactive web apps showcase.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Static app ready'"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

@@ -173,7 +173,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       Le devis est <strong>100% gratuit</strong> et ne vous engage à rien.
     </div>
 
-    <a class="btn" href="https://www.geeksoft.online/devis/demande">
+    <a class="btn" href="/devis/demande">
       ➜ Faire une demande de devis
     </a>
   </div>
@@ -182,7 +182,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- Vérification du serveur Flask -->
   <script>
     // Vérifier si le serveur Flask est actif
-    fetch('https://devmra.pythonanywhere.com/alive')
+    fetch('/alive')
       .then(response => response.text())
       .then(data => {
         if (data.trim() !== 'ALIVE') {

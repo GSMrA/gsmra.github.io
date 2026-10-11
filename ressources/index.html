@@ -342,7 +342,7 @@
                 formData.append('id', id);
                 formData.append('password', password);
                 
-                const response = await fetch('https://devmra.pythonanywhere.com/check_admin', {
+                const response = await fetch('/check_admin', {
                     method: 'POST',
                     body: formData
                 });

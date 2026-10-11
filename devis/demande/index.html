@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Demande de devis - GeekSoft</title>
-  <link rel="icon" type="image/png" href="https://geeksoft.online/devis/GEEKSOFT.png">
+  <link rel="icon" type="image/png" href="/devis/GEEKSOFT.png">
   <style>
     :root{
       --bg: #0f0f10;
@@ -258,11 +258,11 @@
 </head>
 <body>
   <header class="topbar">
-    <img src="https://geeksoft.online/devis/GEEKSOFT.png" class="logo" alt="GeekSoft">
+    <img src="/devis/GEEKSOFT.png" class="logo" alt="GeekSoft">
     <div class="top-title">GeekSoft - Demande de devis</div>
     <div class="top-links">
-      <a href="https://geeksoft.online/">Accueil</a>
-      <a href="https://geeksoft.online/devis">Devis</a>
+      <a href="/">Accueil</a>
+      <a href="/devis">Devis</a>
     </div>
   </header>
   <div class="stage-wrap" role="main" aria-label="Formulaire de demande de devis">
@@ -337,8 +337,8 @@
     <button id="confirm-close">OK</button>
   </div>
   <script>
-    const ALIVE_URL = 'https://devmra.pythonanywhere.com/alive';
-    const SUBMIT_URL = 'https://DEVMrA.pythonanywhere.com/newdevis';
+    const ALIVE_URL = '/alive';
+    const SUBMIT_URL = '/newdevis';
     const track = document.getElementById('track');
     const btnNext = document.getElementById('btn-next');
     const btnBack = document.getElementById('btn-back');
@@ -484,7 +484,7 @@
       setTimeout(() => {
         popup.style.display = 'none';
         popup.classList.remove('show');
-        window.location.href = "https://www.geeksoft.online/acceuil";
+        window.location.href = "/acceuil";
       }, 420);
     };
     slideTo(0);

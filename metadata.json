@@ -1,0 +1,8 @@
+{
+  "name": "GeekSoft",
+  "description": "GeekSoft Discord bot development platform, client dev tools, and interactive web apps showcase.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
